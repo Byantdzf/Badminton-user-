@@ -1,0 +1,395 @@
+<template>
+  <view class="navbar borrow">
+    <view class="page__bd">
+      <view class="weui-tab">
+        <view class="weui-tab__content" >
+          <view class="weui-search-bar" style="position: fixed; left: 0; top: 0;width: 100%;z-index: 99999">
+            <view class="weui-search-bar__form">
+              <view class="weui-search-bar__box">
+                <icon class="weui-icon-search_in-box" type="search" size="14"></icon>
+                <input type="text" class="weui-search-bar__input" placeholder="搜索" confirm-type="search" value="{{inputVal}}" focus="{{inputShowed}}" @confirm="inputTyping" />
+                <view class="weui-icon-clear" wx:if="{{inputVal.length > 0}}" bindtap="clearInput">
+                  <icon type="clear" size="14"></icon>
+                </view>
+              </view>
+              <label class="weui-search-bar__label" hidden="{{inputShowed}}" bindtap="showInput">
+                <icon class="weui-icon-search" type="search" size="14"></icon>
+                <view class="weui-search-bar__text">搜索</view>
+              </label>
+            </view>
+            <view class="weui-search-bar__cancel-btn" hidden="{{!inputShowed}}" bindtap="hideInput">取消</view>
+          </view>
+          <view class="weui-cells__title" style="height: 64rpx;"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="weui-panel weui-panel_access">
+    <view class="weui-navbar" >
+      <view wx:for="{{tabs}}" wx:key="*this" id="{{index}}" class="weui-navbar__item {{activeIndex == index ? 'weui-bar__item_on' : ''}}" @tap="tabClick({{item}})">
+        <view class="weui-navbar__title" >{{item}}</view>
+      </view>
+      <view class="weui-navbar__slider" style="width:{{sliderWidth}}px; left: {{sliderLeft}}px; transform: translateX({{sliderOffset}}px); -webkit-transform: translateX({{sliderOffset}}px);"></view>
+      <view  class="library_num {{activeIndex == 1 ? 'library_member' : ''}} {{activeIndex == 2 ? 'library_admin' : ''}}">{{library_num}}</view>
+    </view>
+    <view style="width: 100%;height: 100rpx"></view>
+    <!--<view class="weui-panel__bd">-->
+      <!--<view  wx:for="{{members}}" wx:key="*this" class="weui-media-box weui-media-box_appmsg" hover-class="weui-cell_active">-->
+
+      <!--</view>-->
+    <!--</view>-->
+  </view>
+  <view class="font_32 bookTitle">推荐文章</view>
+  <view class="booklist">
+    <block wx:if="{{list.length}}">
+      <view wx:for="{{list}}" class="book" wx:key="{{item._id}}" @tap="gotoapp({{item.post.link}})">
+        <view class="font_28 flo_l bold ellipsis_2" style="width: 72%">{{item.post.title}}</view>
+        <view class="flo_r">
+          <image class="book-avatar" src="{{item.post.cover}}" background-size="cover"/>
+        </view>
+        <view class="clearfloat"></view>
+      </view>
+    </block>
+    <block wx:else>
+      <view  class="book" >
+        <view class="font_28" style="margin-top: 22rpx">
+          暂无搜索文章
+        </view>
+        <view class="clearfloat"></view>
+      </view>
+    </block>
+  </view>
+  <block wx:if="{{loading}}">
+    <view class="weui-loadmore">
+      <view class="weui-loading"></view>
+      <view class="weui-loadmore__tips">正在加载</view>
+    </view>
+  </block>
+  <block wx:if="{{noMore}}">
+    <view class="weui-loadmore weui-loadmore_line weui-loadmore_dot">
+      <view class="weui-loadmore__tips weui-loadmore__tips_in-line weui-loadmore__tips_in-dot"></view>
+    </view>
+  </block>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import {service} from '../../../config.js'
+  import http from '../../../mixins/http'
+  import base from '../../../mixins/base'
+  import user from '../../../mixins/user'
+  import ShareMessage from '../../../mixins/ShareMessage'
+
+  export default class search extends wepy.page {
+    mixins = [base, http, user, ShareMessage]
+    config = {
+      navigationBarTitleText: '阅读列表',
+      onReachBottomDistance: 380
+    }
+    data = {
+      // 后置显示按钮
+      loaded: false,
+      mylibs: [],
+      tabs: ['推荐', '单身会', '预备婚恋', '个人成长'],
+      list: [
+        {
+          'name': 'Angelababy',
+          'image': 'http://img4.imgtn.bdimg.com/it/u=2519013472,2812894432&fm=27&gp=0.jpg',
+          'title': '《长恨歌》|爱情中，比陪伴更重要的是这件事',
+          'six': 0,
+          'mod_textUrl': 'https://mp.ufutx.net/s?__biz=MzA4MzA2MTMzMA==&mid=2652598666&idx=1&sn=fbc02350c7ca64d881b4c23e4b596dfb'
+        }
+      ],
+      activeIndex: 0,
+      sliderOffset: 0,
+      sliderLeft: 0,
+      sliderWidth: 180,
+      screenWidth: 360,
+      user: {},
+      page: 1,
+      title: '推荐',
+      noMore: false,
+      loading: false,
+      inputShowed: false,
+      new_notice_count: '',
+      inputVal: ''
+    }
+
+    computed = {}
+
+    onShareAppMessage(res) {
+      return this.$parent.onShareAppMessage(this.config.navigationBarTitleText)
+    }
+
+    async onLoad(e) {
+      let _this = this
+      _this.tabIndex()
+      this.list.forEach((item, index, arr) => {
+        arr[index].URL = encodeURIComponent(arr[index].mod_textUrl)
+      })
+
+      class Example {
+        static Callme() {
+          console.log('Static method')
+        }
+      }
+
+      Example.Callme()
+      // --------
+      class Person {
+        constructor(name, age) {
+          this.name = name
+          this.age = age
+        }
+
+        getName() {
+          return this.name
+        }
+      }
+      var p = new Person('luoqiang', 26)
+      console.log(p)
+    }
+
+    onShow() {
+      this.page = 1
+      this.getLibraries()
+      // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
+    }
+
+    tabIndex() {
+      let _this = this
+      wx.getSystemInfo({
+        success: function (rst) {
+          _this.screenWidth = rst.screenWidth
+        }
+      })
+      this.sliderWidth = _this.screenWidth / this.tabs.length
+      this.sliderLeft = 0
+      this.sliderOffset = _this.screenWidth / this.tabs.length * this.activeIndex
+    }
+
+    onPullDownRefresh() {
+      this.page = 1
+      this.getLibraries()
+    }
+
+    onReachBottom() {
+      setTimeout(() => {
+        this.getLibraries()
+      }, 200)
+    }
+
+    getLibraries(keyword) {
+      let _this = this
+      _this.loading = true
+      let url = service.articles
+      if (keyword) {
+        url = service.articles + '?keyword=' + keyword
+      }
+      _this.$get({
+        url: url,
+        data: {
+          page: _this.page,
+          title: _this.title
+        }
+      }, {
+        success: ({code, data}) => {
+          _this.noMore = false
+          if (data.data.length == 0 && data.data.last_page == 1) {
+            _this.noMore = true
+            _this.loading = false
+            _this.list = []
+            return
+          }
+          if (data.current_page > data.last_page) {
+            _this.noMore = true
+            _this.loading = false
+            return
+          }
+          data = data.data
+          if (this.isArray(data) && data.length === 0) {
+            _this.noMore = true
+            _this.loading = false
+            _this.list = []
+            return
+          }
+          if (_this.list.length === 0 || _this.page === 1) {
+            _this.list = data
+            _this.loading = false
+          } else {
+            data.map(function (item, index) {
+              _this.list.push(item)
+              setTimeout(() => {
+                _this.loading = false
+              }, 500)
+            })
+          }
+          _this.noMore = true
+          _this.page += 1
+
+          //          _this.list = data.data
+        },
+        fail: ({code, data}) => {
+        },
+        complete: () => {
+          _this.loaded = false
+        }
+      })
+    }
+
+    methods = {
+      showInput() {
+        this.inputShowed = true
+      },
+      hideInput() {
+        this.inputVal = ''
+        this.inputShowed = false
+      },
+      clearInput() {
+        this.inputVal = ''
+      },
+      inputTyping(e) {
+        this.inputVal = e.detail.value
+        console.log(this.inputVal)
+        this.page = 1
+        this.getLibraries(this.inputVal)
+      },
+      tabClick(item, e) {
+        this.sliderOffset = e.currentTarget.offsetLeft
+        this.activeIndex = e.currentTarget.id
+        this.page = 1
+        console.log(this.activeIndex)
+        this.title = item
+        this.$apply()
+        this.getLibraries()
+      },
+
+      goto(url) {
+        wx.navigateTo({url: url})
+      },
+      gotoapp(item) {
+        let data = {
+          url: item
+        }
+        this.$get({url: service.article, data}, {
+          success: ({code, data}) => {
+            console.log(encodeURIComponent(data))
+            wx.navigateTo({url: '/pages/books/bookDetail?url=' + encodeURIComponent(data)})
+          },
+          fail: ({code, data}) => {
+          },
+          complete: () => {
+            this.loaded = false
+          }
+        })
+      }
+    }
+  }
+
+</script>
+
+<style lang="less">
+  @import "../../../styles/weui/base/fn.wxss";
+  @import "../../../styles/custom/fn.less";
+  page{
+    background: #F7F7F7;
+  }
+  .borrow{
+    .page__bd{
+      height: 100%;
+    }
+    .page__bd{
+      padding-bottom: 0;
+    }
+    .weui-tab__content{
+      padding-top: 0px;
+      text-align: center;
+    }
+    text-align: center;
+    background: #fff;
+    .library-title{
+      .h2();
+      text-align: left;
+      color: #666;
+      padding: 20rpx 40rpx 10rpx;
+    }
+    .library-wrapper{
+      padding: 20rpx 0;
+    }
+    .library-item{
+      position: relative;
+      &:before {
+        .setLeftLine(@weuiCellBorderColor);
+      }
+      &:first-child {
+        &:before {
+          display: none;
+        }
+      }
+    }
+    .item-title{
+      .h3();
+      line-height: 1;
+    }
+    .mini-btn{
+      //  margin: 1em auto;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+    .list{
+      padding: 22rpx;
+      /*background: red;*/
+      box-shadow: 1rpx 1rpx 12rpx #d3d3d3;
+    }
+    .imagebox{
+      width: 33%;
+    }
+    .borrowlist{
+      width: 86%;
+      /*box-shadow: 1rpx 1rpx 18rpx #d3d3d3;*/
+      /*margin-top: 18rpx;*/
+      border-bottom: 1rpx solid #d3d3d3;
+      border-radius: 6rpx;
+      margin-left: 4%;
+      padding: 22rpx;
+      /*position: relative*/
+    }
+    .weui-cell__ft {
+      margin-top: 10%;
+    }
+  }
+  .weui-navbar__slider {
+    background-color: #FB6957;
+  }
+  .weui-navbar__item.weui-bar__item_on {
+    color:#FB6957;
+  }
+  .weui-panel {
+    margin-top: 0px;
+  }
+  .booklist{
+    margin: 0 22rpx;
+    background: white;
+    padding: 6rpx 32rpx;
+  }
+  .bookTitle{
+    border-bottom: 1rpx solid #dedede;
+    margin: 22rpx;
+    margin-bottom: 4rpx;
+    background: white;
+    padding: 14rpx 32rpx;
+  }
+  .book-avatar{
+    width: 100rpx;
+    height: 100rpx;
+    border-radius: 50%;
+    border: 2rpx solid #d3d3d3;
+  }
+  .book{
+    padding: 22rpx;
+    background: white;
+    border-bottom: 1rpx solid #dedede;
+  }
+
+</style>

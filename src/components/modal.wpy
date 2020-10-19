@@ -1,0 +1,203 @@
+<template>
+  <view class="commodity_screen" bindtap="hideModal" wx:if="{{showModalStatus}}"></view>
+  <!--弹出框  -->
+  <view animation="{{animationData}}" class="commodity_attr_box" style="border-top-right-radius: {{border}}rpx;border-top-left-radius: {{border}}rpx;" wx:if="{{showModalStatus}}">
+    <slot name="wrapper"></slot>
+    <view class="clearfloat"></view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import base from '../mixins/base'
+  import {service} from '../config.js'
+  import http from '../mixins/http'
+
+  export default class modal extends wepy.component {
+    mixins = [base, http]
+    props = {
+      user: {
+        type: Object,
+        default: {}
+      },
+      border: {
+        type: Number,
+        default: 22
+      }
+    }
+    components = {
+    }
+    data = {
+      showModalStatus: false,
+      showChangeState: false,
+      animationData: {},
+      StateText: ''
+    }
+    watch = {
+    }
+
+    onLoad() {
+      console.log(this.border)
+    }
+    methods = {
+      ChangeState() {
+        if (this.showChangeState) {
+          this.showChangeState = false
+        } else {
+          this.showChangeState = true
+        }
+        this.$apply()
+        console.log(this.showChangeState)
+      },
+      StateActive(index) {
+        let data = {
+          type: this.StateList[index].type
+        }
+        this.$put({url: `${service.host}/change/users//type`, data}, {
+          success: ({code, data}) => {
+            this.$get({url: service.user}, {
+              success: ({code, data}) => {
+                this.user = data
+                this.$apply()
+                wx.setStorageSync('type', data.type)
+              }
+            })
+            for (let idx in this.StateList) {
+              if (idx == index) {
+                this.StateList[idx].active = true
+              } else {
+                this.StateList[idx].active = false
+              }
+              this.$apply()
+            }
+            console.log('更改成功')
+          }
+        })
+      },
+      // 显示对话框
+      showModal() {
+        // 显示遮罩层
+        var animation = wx.createAnimation({
+          duration: 200,
+          timingFunction: 'linear',
+          delay: 0
+        })
+        this.animation = animation
+        animation.translateY(300).step()
+        this.animationData = animation.export()
+        this.showModalStatus = true
+        this.$apply()
+        setTimeout(function () {
+          animation.translateY(0).step()
+          this.animationData = animation.export()
+          this.$apply()
+        }.bind(this), 200)
+      },
+      // 隐藏对话框
+      hideModal() {
+        // 隐藏遮罩层
+        var animation = wx.createAnimation({
+          duration: 200,
+          timingFunction: 'linear',
+          delay: 0
+        })
+        this.animation = animation
+        animation.translateY(300).step()
+        this.animationData = animation.export()
+        setTimeout(function () {
+          animation.translateY(0).step()
+          this.animationData = animation.export()
+          this.showModalStatus = false
+          this.$apply()
+        }.bind(this), 200)
+      },
+      gotofriends(item) {
+        let url = ''
+        if (item.type == 'single') {
+          url = '/pages/home/information?id=' + item.id
+        } else {
+          url = '/pages/home/introducer?id=' + item.id
+        }
+        wx.navigateTo({url: url})
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      }
+    }
+  }
+</script>
+
+<style type="less" scoped>
+@import "../styles/custom/fn.less";
+/*使屏幕变暗  */
+.commodity_screen {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #000;
+  opacity: 0.2;
+  overflow: hidden;
+  z-index: 1000;
+  color: #fff;
+}
+/*对话框 */
+.commodity_attr_box {
+  /*height: 300rpx;*/
+  /*padding-bottom: 4%;*/
+  width: 100%;
+  overflow: hidden;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 2000;
+  background: #fff;
+  /*padding-top: 20rpx;*/
+}
+.share-image{
+  width: 76rpx;
+  height: 76rpx;
+}
+.message{
+  position: absolute;
+  right: 112rpx;
+  top: 4rpx;
+}
+.message_red{
+  background: red;
+  width: 16rpx;
+  height: 16rpx;
+  position: absolute;
+  right: -8rpx;
+  border-radius: 50%;
+}
+.userinfo-info {
+  float: left;
+  line-height: 1;
+  padding: 8rpx 0;
+  margin-left: 3 * 8rpx;
+  position: relative;
+}
+  ._bc-title{
+    border-bottom: 3rpx solid #f3f3f3;
+    margin: 0 32rpx;
+    padding: 12rpx 22rpx;
+    .image{
+      width: 32rpx;
+      height: 32rpx;
+      /*display: flex;// flex布局*/
+      /*justify-content: center;// 使子项目水平居中*/
+      /*align-items: center;// 使子项目垂直居中*/
+      margin-top: 12rpx;
+    }
+  }
+  .logout{
+    padding: 16rpx 42rpx;
+    background: #e6e5ea;
+    margin: auto;
+    display: inline-block;
+    margin-top: 32rpx;
+    border-radius: 8rpx;
+  }
+</style>

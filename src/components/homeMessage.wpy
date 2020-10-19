@@ -1,0 +1,92 @@
+<template>
+<view style="position: relative;background: #f9f9f9;" class="text-right">
+  <view class="" style="position: absolute;left: 24rpx;top: 6rpx;">
+    <image src="http://images.ufutx.com/201901/17/c566db9871d727ed7671c1f8e4b1e231.png" mode="aspectFix"
+           style="width: 42rpx;height: 42rpx;"></image>
+  </view>
+  <swiper class="swiper_container"  vertical="true" autoplay="true" circular="true" interval="2000">
+    <block wx:for="{{msgList}}" wx:key="index">
+      <view @tap="BtnFun({{item}})">
+        <swiper-item>
+          <view class="swiper_item text-left">{{item.title}}</view>
+        </swiper-item>
+      </view>
+    </block>
+  </swiper>
+  <view class="clearfloat"></view>
+</view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  //  import { service } from '../config.js'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+
+  export default class Message extends wepy.component {
+    mixins = [base, http]
+    props = {
+      msgList: {
+        type: Array,
+        default: []
+      },
+      title: {
+        type: String,
+        default: null
+      },
+      type: {
+        type: String,
+        default: 'list'
+      }
+    }
+
+    data = {
+      msgList: []
+    }
+
+    computed = {
+    }
+    gotoApp(item) {
+      console.log(encodeURIComponent(item))
+      wx.navigateTo({url: '/pages/books/bookDetail?url=' + encodeURIComponent(item)})
+    }
+    methods = {
+      // 事件
+      BtnFun(item) {
+        console.log(item)
+        if (item.type == 'MP') {
+          if (item.path.includes('tabBar')) {
+            this.$gotoTab(item.path)
+          } else {
+            this.$goto(item.path)
+          }
+        } else {
+          this.gotoApp(item.path)
+        }
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      }
+    }
+  }
+</script>
+
+<style type="less">
+  @import "../styles/custom/fn.less";
+  .swiper_container {
+    height: 56rpx;
+    width: 90%;
+    float: right;
+
+  }
+
+  .swiper_item {
+    font-size: 25rpx;
+    overflow: hidden;
+    line-height: 56rpx;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: 2px;
+  }
+
+</style>

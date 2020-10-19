@@ -1,0 +1,120 @@
+<template>
+  <view class="weui-tab__content bc_BoxTab" >
+    <view class="weui-search-bar"  style="background-color: {{BColor}} !important;">
+      <view class="weui-search-bar__form">
+        <view class="weui-search-bar__box">
+          <!--<image src="http://images.ufutx.com/201905/28/828547386e36c11a03b10e41fae92374.png" class="weui-icon-search_in-box" mode="widthFix" style="width: 28rpx;"></image>-->
+          <icon class="weui-icon-search_in-box" type="search" size="14"></icon>
+          <input type="text" class="weui-search-bar__input searchInput" placeholder="{{title}}" confirm-type="search" value="{{inputVal}}" focus="{{inputShowed}}" @confirm="inputTyping" />
+          <view class="weui-icon-clear" wx:if="{{inputVal.length > 0}}" bindtap="clearInput">
+            <icon type="clear" size="14"></icon>
+          </view>
+        </view>
+        <label class="weui-search-bar__label" hidden="{{inputShowed}}" bindtap="showInput">
+          <!--<image src="http://images.ufutx.com/201905/28/828547386e36c11a03b10e41fae92374.png" class="weui-icon-search" mode="widthFix" style="width: 28rpx;"></image>-->
+          <icon class="weui-icon-search" type="search" size="14"></icon>
+          <view class="weui-search-bar__text">{{title}}</view>
+        </label>
+      </view>
+      <view class="weui-search-bar__cancel-btn font_32 white" hidden="{{!inputShowed}}" bindtap="hideInput">取消</view>
+    </view>
+    <slot></slot>
+  </view>
+  <view style="height: {{bc_height}}"></view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+  import {getElement_WH} from '../utils/fn'
+
+  export default class tabSearch extends wepy.component {
+    mixins = [base, http]
+    props = {
+      list: {
+        type: Object,
+        default: []
+      },
+      clear: {
+        type: String,
+        default: false
+      },
+      disabled: {
+        type: String,
+        default: false
+      },
+      title: {
+        type: String,
+        default: '搜索'
+      },
+      BColor: {
+        type: String,
+        default: '#d92553'
+      }
+    }
+    data = {
+      inputShowed: false,
+      inputVal: '',
+      bc_height: ''
+    }
+    onLoad() {
+      getElement_WH('.bc_BoxTab').then((value) => {
+        this.bc_height = value.height + 'px'
+        this.$apply()
+      }).catch((error) => {
+        console.log(error)
+      })
+    }
+
+    methods = {
+      showInput() {
+        if (this.disabled) return
+        this.inputShowed = true
+      },
+      hideInput() {
+        this.inputVal = ''
+        this.inputShowed = false
+        this.$emit('search', this.inputVal)
+      },
+      clearInput() {
+        this.inputVal = ''
+        this.$emit('search', this.inputVal)
+      },
+      inputTyping(e) {
+        this.$showLoading('搜索中...')
+        this.inputVal = e.detail.value
+        this.$emit('search', this.inputVal)
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+  @import "../styles/custom/fn.less";
+  .weui-search-bar{border: none;}
+  .weui-search-bar__form, .weui-search-bar__label{
+    background: #ffffff !important;
+    color: @darkgray;
+    border-radius: 42rpx;
+  }
+  .weui-search-bar__text{
+    color: @gray;
+  }
+  .weui-search-bar__cancel-btn{
+    color: @darkgray;
+  }
+  .weui-search-bar__label{
+    text-align: left;
+    padding-left: 20rpx;
+  }
+  .weui-tab__content{
+    width: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 9999;
+  }
+</style>

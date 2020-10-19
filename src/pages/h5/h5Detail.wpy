@@ -1,0 +1,184 @@
+<template>
+  <view class="page-user">
+    <!--<NavBar title="详情"></NavBar>-->
+    <web-view src="{{url}}"></web-view>
+    <!--<web-view src="https://mp.ufutx.net/s?__biz=MjM5NTE3MjE0MA==&mid=2651989453&idx=3&sn=43e5116c30e9c07ceb14e9daf0d23dbd&chksm=bd1a1f8e8a6d96987df43ead636df4cf8a18b42997edbabc2c4ceb9db7d5fcbd4af9f5c14ab9&scene=27#wechat_redirect"></web-view>-->
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import http from '../../mixins/http'
+import base from '../../mixins/base'
+import user from '../../mixins/user'
+// import ShareMessage from '../../mixins/ShareMessage'
+// import NavBar from '../../components/NavBar'
+import {service} from '../../config.js'
+
+export default class bookdetail extends wepy.page {
+  mixins = [base, http, user]
+  config = {
+    navigationBarTitleText: '福恋',
+    enablePullDownRefresh: false
+  }
+  data = {
+    libraries: {},
+    user: {},
+    nickName: '加载中...',
+    from_openid: '',
+    url: ''
+  }
+
+  computed = {
+    nickName() {
+      return (user && user.wechat && user.wechat.nickname) ? user.wechat.nickname : '未授权用户'
+    }
+  }
+
+  onShow() {
+    // 初始化页面数据
+    // this.initPageData()
+    // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
+  }
+
+  onShareAppMessage(res) {
+    let that = this
+    let url = '/pages/books/bookDetail?url=' + encodeURIComponent(that.url) + '&from_openid=' + that.from_openid
+    return {
+      title: '福恋',
+      path: url,
+      imageUrl: '',
+      success: function (res) {
+        wx.showToast({
+          title: '转发成功',
+          icon: 'success',
+          duration: 1500
+        })
+        var shareTickets = res.shareTickets
+        if (shareTickets.length == 0) {
+          return false
+        }
+      },
+      fail: function (res) {
+        // 转发失败
+      }
+    }
+  }
+
+  onLoad(e) {
+    console.log(e)
+    this.url = decodeURIComponent(e.url)
+    console.log(this.url)
+    this.from_openid = wx.getStorageSync('openid')
+    this.$apply()
+    wx.showShareMenu({
+      withShareTicket: true
+    })
+  }
+
+  onPullDownRefresh() {
+    // this.initPageData()
+  }
+
+  // 初始化页面数据
+  initPageData() {
+    this.$get({url: service.user}, {
+      success: ({code, data}) => {
+        this.user = data.user
+        this.libraries = data.libraries
+        this.libraries.forEach((item) => {
+          if (item.type == 'SHARE') {
+            item.url = '/pages/library/shareLibrary?id=' + item.id
+          } else {
+            item.url = '/pages/library/library?id=' + item.id
+          }
+        })
+        wx.setStorageSync('openid', data.user.wechat.openid)
+        wx.setStorageSync('is_new', data.user.is_news)
+        if (data.user.is_news) {
+          wepy.showTabBarRedDot({
+            index: 4
+          })
+        } else {
+          wepy.hideTabBarRedDot({
+            index: 4
+          })
+        }
+      }
+    })
+  }
+
+  methods = {
+    goto(url) {
+      wx.navigateTo({url: url})
+    }
+  }
+
+  components = {}
+}
+</script>
+
+<style lang="less">
+@import "../../styles/custom/fn.less";
+@import "../../styles/custom/reset.less";
+
+page {
+  background: #f9f9f9;
+}
+
+.weui-cells {
+  position: inherit;
+  box-shadow: 1rpx 1rpx 12rpx #dedede;
+}
+
+.page-user {
+  @userinfoHeight: 100rpx;
+  @userinfoSpace: 8rpx;
+
+  .userinfo {
+    padding: 20rpx 0;
+  }
+
+  .page__bd_spacing {
+    padding: 22rpx;
+  }
+
+  .userinfo-avatar {
+    float: left;
+    width: @userinfoHeight;
+    height: @userinfoHeight;
+    border-radius: 50%;
+  }
+
+  // space + space
+  .userinfo-info {
+    float: left;
+    line-height: 1;
+    padding: @userinfoSpace 0;
+    margin-left: 3 * @userinfoSpace;
+  }
+
+  .userinfo-nickname {
+    color: @uiColorGreen;
+    font-size: (@userinfoHeight - 4 * @userinfoSpace) * (16 / 30);
+    margin-bottom: 2 * @userinfoSpace;
+  }
+
+  .userinfo-status {
+    color: #999;
+    font-size: (@userinfoHeight - 4 * @userinfoSpace) * (14 / 30);
+
+  }
+
+  .lead {
+    width: 16rpx;
+    height: 16rpx;
+    background: red;
+    margin-top: -24rpx;
+    border-radius: 50%;
+    position: absolute;
+    right: 16rpx;
+    top: 40rpx;
+  }
+}
+</style>

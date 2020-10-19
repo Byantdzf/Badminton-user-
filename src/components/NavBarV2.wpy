@@ -1,0 +1,292 @@
+<template>
+  <view class="NavBar-holder" style="height:{{totalTopHeight}}px"></view>
+  <view class="NavBar" style="background: {{rgba}}">
+    <view class="NavBar-statusBar" style="height:{{statusBarHeight}}px;"></view>
+    <view class="NavBar-titlebar" style="height:{{titleBarHeight}}px">
+      <view class="NavBar-content" >
+        <view class="NavBar-left NavBar-left-more"  @tap="backSearch">
+          <!--<image bindtap="handleBack" class="NavBar-BackIcon" mode="aspectFit"  src="https://images.ufutx.com/201908/20/6350303af03615789f87970e2006f242.png"></image>-->
+          <image class="NavBar-HomeIcon backToHome" mode="aspectFit"  src="https://images.ufutx.com/202007/24/bf1f48e2cbdd283977872b2cb5929478.png"></image>
+        </view>
+<!--        <view class="NavBar-content-title" style="color:{{title_c}}">{{title}}</view>-->
+        <image class="NavBar-content-title" src="https://images.ufutx.com/202002/20/72554ffb176f9c3e449205ea82f774f3.png" mode="aspectFit"></image>
+      </view>
+      <view class="capsule-holder"></view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class NavBar extends wepy.component {
+    props = {
+      bag: {
+        type: String,
+        default: '#eeeeee'
+      },
+      title: {
+        type: String,
+        default: ''
+      },
+      title_c: {
+        type: String,
+        default: ''
+      },
+      rgba: {
+        type: String,
+        default: ''
+      }
+    }
+    data = {
+      firstPage: true,
+      windowHeight: 812,
+      totalTopHeight: 68,
+      statusBarHeight: 20,
+      token: wx.getStorageSync('token'),
+      titleBarHeight: 48
+    }
+    components = {}
+
+    onLoad() {
+      try {
+        var systemInfo = wx.getSystemInfoSync()
+        this.computeNavigateBarHeight(systemInfo)
+      } catch (e) {
+        // 获取系统信息失败
+        this.setData({
+          windowHeight: 812,
+          totalTopHeight: 68,
+          statusBarHeight: 20,
+          titleBarHeight: 48
+        })
+      }
+      console.log(this.getCurrentPageNum())
+    }
+
+    computeNavigateBarHeight(systemInfo) {
+      let totalTopHeight = 68
+      if (/iPhone X|MI 8|PAAM00|COR-AL00/.test(systemInfo.model)) {
+        totalTopHeight = 88
+      } else if (/iPhone/.test(systemInfo.model)) {
+        totalTopHeight = 64
+      }
+      let windowHeight = systemInfo.windowHeight, statusBarHeight = systemInfo.statusBarHeight
+      this.windowHeight = windowHeight
+      this.totalTopHeight = totalTopHeight
+      this.statusBarHeight = statusBarHeight
+      this.titleBarHeight = totalTopHeight - statusBarHeight
+      this.$apply()
+    }
+    watch = {
+      totalTopHeight() {
+        this.$emit('totalTopHeight', this.totalTopHeight)
+        console.log(this.totalTopHeight)
+      }
+    }
+    getCurrentLastPageUrl() { // 获取上个页面路由
+      const pages = getCurrentPages()
+      const currentPage = pages[pages.length - 2]
+      const url = `/${currentPage.route}`
+      return url
+    }
+    getCurrentPageNum() { // 获取栈路由
+      const pages = getCurrentPages()
+      const currentPageNum = pages.length
+      return currentPageNum
+    }
+    methods = {
+      // 返回
+      handleBack() {
+        console.log('返回')
+        if (this.getCurrentPageNum() > 8) {
+          return wx.navigateBack({
+            delta: 5
+          })
+        }
+        wx.navigateBack({
+          delta: 1
+        })
+      },
+      // 到首页
+      backHome() {
+        console.log('首页')
+        wx.switchTab({url: '/pages/tabBar/home'})
+      },
+        // 到搜索
+      backSearch() {
+        wx.navigateTo({url: '/pages/map/index'})
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      },
+      back() {
+        wx.navigateBack({
+          delta: 1
+        })
+      },
+      gotoUser(type) {
+        let url = ''
+        if (type == 'single') {
+          url = '/pages/users/unmarri'
+        } else {
+          url = '/pages/users/intro'
+        }
+        wx.navigateTo({url: url})
+      }
+    }
+  }
+</script>
+
+<style type="less">
+  @import "../styles/custom/fn.less";
+  .NavBar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    /*background: #008dd6;*/
+    z-index: 10000;
+  }
+
+  .NavBar-statusBar {
+    width: 100%;
+  }
+
+  .NavBar-titlebar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .capsule-holder {
+    width: 100px;
+    height: 100%;
+  }
+
+  .NavBar-SearchBar {
+    flex: 1;
+    padding: 0 16px;
+    overflow: hidden;
+  }
+
+  .NavBar-content {
+    display: flex;
+    flex: 1;
+    margin: 0 0 0 10px;
+    overflow: hidden;
+  }
+
+  .NavBar-left {
+    width: 56px;
+    height: 34px;
+    /*border-radius: 32px;*/
+    /*text-align: center;*/
+  }
+
+  .NavBar-content-title {
+    font-size: 17px;
+    /*font-weight: 600;*/
+    flex: 1;
+    text-align: center;
+    line-height: 32px;
+    height: 32px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .backToHome {
+    height: 32px;
+  }
+
+  .NavBar-HomeIcon {
+    width: 32px;
+    height: 32px;
+    margin-top: 5px;
+  }
+
+  .NavBar-left-area {
+    width: 87px;
+  }
+
+  .NavBar-left-more {
+    width: 50px;
+    height: 30px;
+    display: flex;
+    /*background: #eeeeee;*/
+    /*opacity: 0.9;*/
+  }
+
+  .NavBar-left-more .backToHome {
+    /*flex: 1;*/
+  }
+
+  .NavBar-BackIcon {
+    flex: 1;
+    width: 17px;
+    height: 19px;
+    padding: 1px 0;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border-right: solid 1px #d2d2d2;
+  }
+  .NavBar-left {
+    width: 55px;
+    height: 32px;
+    /*border-radius: 32px;*/
+    /*border: solid 1px #f6f6f6;*/
+    text-align: left;
+  }
+
+  .NavBar-content-title {
+    font-size: 32rpx;
+    /*font-weight: 600;*/
+    flex: 1;
+    text-align: center;
+    line-height: 32px;
+    height: 32px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .backToHome {
+    height: 32px;
+  }
+
+  .NavBar-HomeIcon {
+    width: 38px;
+    height: 28px;
+    margin-top: 5px;
+  }
+
+  .NavBar-left-area {
+    width: 87px;
+  }
+
+  .NavBar-left-more {
+    width: 87px;
+    height: 30px;
+    display: flex;
+    /*background: #eeeeee;*/
+    /*opacity: 0.7;*/
+  }
+
+  .NavBar-left-more .backToHome {
+    /*flex: 1;*/
+    /*padding: 8rpx;*/
+    /*border-radius: 32px;*/
+    /*border: solid 1px #f6f6f6;*/
+  }
+
+  .NavBar-BackIcon {
+    flex: 1;
+    width: 17px;
+    height: 19px;
+    padding: 1px 0;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border-right: solid 1px #d2d2d2;
+  }
+</style>

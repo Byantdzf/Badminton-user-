@@ -1,0 +1,163 @@
+<template>
+  <!--<view class="commodity_screen" bindtap="hideModal" wx:if="{{showModalStatus}}"></view>-->
+  <!--&lt;!&ndash;弹出框  &ndash;&gt;-->
+  <!--<view animation="{{animationData}}" class="commodity_attr_box" wx:if="{{showModalStatus}}">-->
+    <!--<slot name="wrapper"></slot>-->
+    <!--<view class="clearfloat"></view>-->
+  <!--</view>-->
+  <view class="DropBox">
+    <view class="commodity_screen" bindtap="hideModal" wx:if="{{showMenu}}"></view>
+    <view class="listBox">
+      <block wx:for="{{list}}" wx:key="index">
+        <view class="itemList inline-block text-center {{item.active&&showMenu?'color-theme':''}}" style="width: {{100/list.length}}%" @tap="activeFn({{index}})">
+          {{item.activeTitle || item.title}}
+          <image src="{{item.activeIcon}}" wx:if="{{item.active&&showMenu}}" mode="widthFix" class="icon"></image>
+          <image src="{{item.icon}}" wx:else mode="widthFix" class="icon"></image>
+        </view>
+      </block>
+      <view wx:if="{{showMenu}}">
+        <block wx:if="{{list[activeIndex].type == 'list'}}" wx:key="{{index}}">
+          <block wx:for="{{list[activeIndex].title_sub}}">
+            <view class="title_subStyle {{activeTitle == item?'color-theme':''}}" @tap="searchFn({{item}})">
+              {{item}}
+            </view>
+          </block>
+        </block>
+        <block wx:else>
+          <view class="tabBox">
+            <block wx:for="{{list[activeIndex].title_sub}}" wx:key="{{index}}">
+              <view class="tabStyle inline-block {{activeTitle == item?'bg_theme no-border white':''}} font_24 text-center" @tap="searchFn({{item}})">
+                {{item}}
+              </view>
+            </block>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import base from '../mixins/base'
+  // import {service} from '../config.js'
+  import http from '../mixins/http'
+
+  export default class modal extends wepy.component {
+    mixins = [base, http]
+    props = {
+      list: {
+        type: Array,
+        default: []
+      }
+    }
+    components = {
+    }
+    data = {
+      activeIndex: 0,
+      showMenu: false,
+      activeTitle: ''
+    }
+    watch = {
+    }
+
+    onLoad() {
+      console.log(this.list)
+    }
+    methods = {
+      activeFn(index) {
+        for (let item of this.list) {
+          item.active = false
+        }
+        this.activeIndex = index
+        this.list[index].active = true
+        this.showMenu = !this.showMenu
+        this.$apply()
+        console.log(this.list)
+      },
+      searchFn(title) {
+        this.showMenu = false
+        this.activeTitle = title
+        this.list[this.activeIndex].activeTitle = title
+        this.$apply()
+        let {key} = this.list[this.activeIndex]
+        this.$emit('MenuValue', key, title)
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      }
+    }
+  }
+</script>
+
+<style type="less" scoped>
+@import "../styles/custom/fn.less";
+/*使屏幕变暗  */
+.commodity_screen {
+  width: 100%;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #000;
+  opacity: 0.2;
+  z-index: 10;
+}
+/*对话框 */
+.commodity_attr_box {
+  width: 100%;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10001;
+  background: #fff;
+}
+  .DropBox{
+    width: 100%;
+    border-bottom: 2rpx solid #F5F5F5;
+    .listBox{
+      /*box-shadow: 0 4rpx 12rpx #f6f6f6;*/
+      z-index: 99999;
+      background: white;
+      position: relative;
+    }
+    .itemList{
+      padding: 16rpx 0;
+    }
+    .icon{
+      width: 32rpx;
+      height: 32rpx;
+      vertical-align: middle;
+      margin-bottom: 4rpx;
+    }
+    .Menu {
+      width: 100%;
+      overflow: hidden;
+      position: fixed;
+      left: 0;
+      z-index: -1;
+      background: #fff;
+    }
+    .title_subStyle{
+      padding: 20rpx 42rpx;
+      border-top: 1rpx solid #f6f6f6;
+      z-index: 9999;
+    }
+    .tabBox{
+      border-top: 1rpx solid #f6f6f6;
+      padding: 32rpx;
+      .tabStyle{
+        min-width: 80rpx;
+        margin-right: 22rpx;
+        padding: 0 12rpx;
+        height: 42rpx;
+        line-height: 42rpx;
+        border: 1rpx solid #d0d0d0;
+        border-radius: 8rpx;
+        margin-bottom: 18rpx;
+        margin-top: 4rpx;
+      }
+    }
+  }
+</style>

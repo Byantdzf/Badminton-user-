@@ -1,0 +1,130 @@
+<template>
+  <!--<swiper class="swiper" style="height:{{style_height}};" autoplay="{{autoplay}}"-->
+   <!--indicator-color="{{indicatorColor}}"-->
+   <!--indicator-active-color="{{indicatorActiveColor}}" indicator-dots="true" indicator-color="#b0afb0" indicator-active-color="#d82653">-->
+    <!--<block wx:for="{{list}}" wx:key="index">-->
+      <!--<swiper-item>-->
+        <!--<navigator wx:if="{{item.url}}" url="{{item.url}}">-->
+          <!--<image src="{{item.photo}}" class="swiper-image" style="height:{{style_height}};"  mode="aspectFill"/>-->
+        <!--</navigator>-->
+        <!--<view wx:else style="height:{{style_height}} position: relative">-->
+          <!--<image src="{{item.photo}}"  class="swiper-image" style="height:{{style_height}};" mode="widthFix"  @tap="gotofriends({{item}})"/>-->
+          <!--&lt;!&ndash;<view class="dost white text-center font_32">{{item.name}}/{{item.address}}人/{{item.age}}岁/{{item.stature}}cm</view>&ndash;&gt;-->
+        <!--</view>-->
+      <!--</swiper-item>-->
+    <!--</block>-->
+  <!--</swiper>-->
+  <swiper class="swiper" style="height:{{style_height}};" autoplay="{{autoplay}}"
+          indicator-color="{{indicatorColor}}"
+          indicator-active-color="{{indicatorActiveColor}}" indicator-dots="true" indicator-color="#b0afb0" indicator-active-color="#d82653">
+    <block wx:for="{{list}}" wx:key="index">
+      <swiper-item>
+        <navigator wx:if="{{item.url}}" url="{{item.url}}">
+          <image src="{{item.pic}}" class="swiper-image" style="height:{{style_height}};"  mode="aspectFill"/>
+        </navigator>
+        <view wx:else style="height:{{style_height}} position: relative">
+          <image src="{{item.pic}}"  class="swiper-image" style="height:{{style_height}};" mode="aspectFill"  @tap="BtnFun({{item}})"/>
+          <!--<view class="dost white text-center font_32">{{item.name}}/{{item.address}}人/{{item.age}}岁/{{item.stature}}cm</view>-->
+        </view>
+      </swiper-item>
+    </block>
+  </swiper>
+</template>
+<script>
+  import wepy from 'wepy'
+  import base from '../mixins/base.js'
+
+  export default class SearchBar extends wepy.component {
+    mixins = [base]
+    props = {
+      list: {
+        type: Object,
+        default: []
+      },
+      height: {
+        type: [String, Number],
+        default: '242rpx'
+      },
+      dots: {
+        type: Boolean,
+        default: true
+      }
+    }
+
+    data = {
+      autoplay: true,
+      indicatorColor: 'rgba(255, 255, 255, 0.6)',
+      indicatorActiveColor: 'rgba(255, 255, 255, 1)'
+    }
+
+    computed = {
+      indicatorDots() {
+        return Boolean(this.list.length > 1 && this.dots)
+      },
+      style_height() {
+        const h = this.height
+        return this.isNumber(+h) ? `${h}rpx` : this.isMatchHeight(h) ? h : '240rpx'
+      }
+    }
+    gotoApp(item) {
+      console.log(encodeURIComponent(item))
+      wx.navigateTo({url: '/pages/books/bookDetail?url=' + encodeURIComponent(item)})
+    }
+
+    methods = {
+      BtnFun(item) {
+        if (!wx.getStorageSync('token')) {
+          this.$emit('modalValue', 'ModalLogin')
+          return
+        }
+        console.log(item)
+        if (item.type == 'MP') {
+          if (item.path.includes('tabBar')) {
+            this.$gotoTab(item.path)
+          } else {
+            console.log(item.path)
+            this.$goto(item.path)
+          }
+        } else {
+          this.gotoApp(item.path)
+        }
+      },
+      gotofriends (item) {
+        let url = ''
+        if (item.type == 'single') {
+          url = '/pages/home/information?id=' + item.user_id
+        } else {
+          url = '/pages/home/introducer?id=' + item.user_id
+        }
+        wx.navigateTo({url: url})
+      }
+    }
+
+    isMatchHeight(str) {
+      return this.isString(str) ? /\d+(r?px|em)$/.test(str) : false
+    }
+  }
+</script>
+
+<style type="less">
+swiper,
+.swiper{
+  width: 100%;
+}
+
+.swiper-image{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  transform: translate(-50%, -50%);
+}
+.dost{
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0,0,0,0.4);
+  padding: 8rpx;
+}
+</style>

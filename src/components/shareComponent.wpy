@@ -1,0 +1,224 @@
+<template>
+  <view class="cu-modal {{hide?'':'show'}}">
+    <view class="cu-dialog">
+      <view class="cu-bar bg-white justify-end">
+        <view class="content">提示</view>
+        <view class="action" bindtap="hideModel">
+          <text class="cuIcon-close text-red"></text>
+        </view>
+      </view>
+      <view class="padding-xl text-center">
+        <view style="width: 50%" class="text-center inline-block" @tap.stop="hideModel">
+          <button class="btn text-center font_28" open-type="share" style="line-height: 1.6;padding: 6rpx">
+            <image class="share-image" mode="aspectFit" src="https://images.ufutx.com/202004/08/c45f2301a69cb4cd4f4dce552d5aa928.png"></image>
+            <view class="font_24 color-333">发送给朋友</view>
+          </button>
+        </view>
+        <view style="width: 50%" class="text-center inline-block color-666">
+          <button class="btn text-center font_28"  style="line-height: 1.6;padding: 6rpx" @tap="showPic">
+            <image class="share-image" mode="aspectFit" src="https://images.ufutx.com/202004/08/812d83cd8f15bda4ec0b65191a021ad6.png"></image>
+            <view class="font_24 color-333">分享到朋友圈</view>
+          </button>
+        </view>
+        <view class="clearfloat"></view>
+      </view>
+    </view>
+  </view>
+  <view class="cu-modal {{modalName=='Image'?'show':''}}">
+      <view class="cu-dialog">
+        <view class="cu-bar bg-white justify-end">
+          <view class="content">分享海报</view>
+          <view class="action" bindtap="listenerCancel">
+            <text class="cuIcon-close text-red"></text>
+          </view>
+        </view>
+        <view class="padding-xl">
+          <image style="position: relative;left: -3%;top:0%;" mode="aspectFit"
+                 src="{{shareImage}}"
+                 class="shaerImage"></image>
+        </view>
+        <view class="cu-bar bg-white justify-end">
+          <view class="action">
+            <button class="cu-btn line-green text-green" bindtap="listenerCancel">取消</button>
+            <button class="cu-btn bg-green margin-left" bindtap="saveImage('save')">保存</button>
+          </view>
+        </view>
+      </view>
+  </view>
+  <view class="cu-modal {{modalName=='DialogModal'?'show':''}}">
+    <view class="cu-dialog">
+      <view class="cu-bar bg-white justify-end">
+        <view class="content">温馨提示</view>
+        <view class="action" bindtap="hideOpenSet">
+          <text class="cuIcon-close text-red"></text>
+        </view>
+      </view>
+      <view class="padding-xl">
+        需要你授权才能保存到相册哦！
+      </view>
+      <view class="cu-bar bg-white justify-end">
+        <view class="action">
+          <button class="cu-btn line-green text-green" @tap="hideOpenSet">取消</button>
+          <button class="cu-btn bg-green margin-left" open-type="openSetting" @opensetting="openSetting_image">打开设置</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class shareComponent extends wepy.component {
+    props = {
+      shareImage: {
+        type: String,
+        default: null
+      },
+      hide: {
+        type: Boolean
+      },
+      library_id: {
+        type: Number,
+        default: 0
+      }
+    }
+    data = {
+      hide: true,
+      showImage: true,
+      showOpenSet: true,
+      formID: [],
+      modalName: ''
+    }
+    onLoad() {
+      console.log(this.shareImage)
+    }
+    computed = {
+    }
+
+    methods = {
+      hideModel() {
+        this.hide = true
+        this.$emit('hideShare', this.hide)
+        this.$apply()
+      },
+      showPic() {
+        if (this.shareImage) {
+          this.showImage = false
+          this.hide = true
+          this.modalName = 'Image'
+          this.$apply()
+        } else {
+          wx.showModal({
+            title: '提示',
+            content: '海报生成失败，请重试！'
+          })
+        }
+      },
+      listenerCancel () {
+        this.modalName = ''
+        this.hide = true
+        this.$emit('hideShare', this.hide)
+        this.$apply()
+      },
+      hideOpenSet () {
+        this.modalName = ''
+        this.hide = true
+        this.$emit('hideShare', this.hide)
+        this.$apply()
+      },
+      // 授权访问image
+      openSetting_image (e) {
+        let that = this
+        wx.showLoading({
+          title: '保存中...',
+          mask: true
+        })
+        if (e.detail.authSetting['scope.writePhotosAlbum']) {
+          that.modalName = ''
+          that.hide = true
+          that.$emit('hideShare', this.hide)
+          that.$apply()
+          wepy.downloadFile({
+            url: that.shareImage,
+            success: (res) => {
+              wepy.saveImageToPhotosAlbum({
+                filePath: res.tempFilePath,
+                success: (res) => {
+                  wx.hideLoading()
+                  wx.showModal({
+                    title: '保存成功',
+                    content: '赶紧分享给你的朋友吧！'
+                  })
+                },
+                fail: () => {
+                  wx.hideLoading()
+                  console.log('取消了')
+                }
+              })
+            },
+            fail: () => {
+              console.log('fail')
+            }
+          })
+        }
+      },
+      saveImage (type) {
+        let that = this
+        wx.showLoading({
+          title: '保存中...',
+          mask: true
+        })
+        wepy.downloadFile({
+          url: that.shareImage,
+          success: (res) => {
+            wepy.saveImageToPhotosAlbum({
+              filePath: res.tempFilePath,
+              success: (res) => {
+                that.modalName = ''
+                that.hide = true
+                that.$emit('hideShare', this.hide)
+                that.$apply()
+                wx.hideLoading()
+                wx.showModal({
+                  title: '已保存在相册了！',
+                  content: '赶紧分享给你的朋友吧！'
+                })
+              },
+              fail: () => {
+                wx.hideLoading()
+                wx.getSetting({
+                  success (res) {
+                    if (!res.authSetting['scope.writePhotosAlbum']) {
+                      that.modalName = 'DialogModal'
+                      that.$apply()
+                    }
+                  }
+                })
+              }
+            })
+          },
+          fail: () => {
+            console.log('fail')
+          }
+        })
+      }
+    }
+  }
+</script>
+
+<style type="less" scoped>
+
+  @import "../styles/weui/base/fn.wxss";
+  @import "../styles/custom/fn.less";
+  .share-image{
+    width: 92rpx;
+    height: 92rpx;
+    box-shadow: 4rpx 6rpx 18rpx #e0e0e0;
+    border-radius: 16rpx;
+  }
+  .shaerImage{
+    width: 600rpx;
+    height: 800rpx;
+  }
+</style>

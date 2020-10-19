@@ -1,0 +1,63 @@
+<template>
+
+</template>
+
+<script>
+
+  import wepy from 'wepy'
+  import {service} from '../config.js'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+//  import ShareMessage from '../mixins/ShareMessage'
+  export default class uploadImage extends wepy.component {
+    mixins = [base, http]
+    props = {
+      pic: {
+        type: String,
+        default: '',
+        twoWay: true
+      }
+    };
+    onLoad () {
+    }
+    uploadFile(filePaths) {
+      wx.uploadFile({
+        url: service.image_upload,
+        filePath: filePaths,
+        method: 'POST',
+        name: 'fileData',
+        header: {
+          'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+          'content-type': 'multipart/form-data',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        success: (res) => {
+          this.$emit('UpLoadImage', JSON.parse(res.data).data)
+        },
+        fail: (res) => {
+        },
+        complete: () => {
+        }
+      })
+    }
+
+    methods = {
+      chooseimage() {
+        let vm = this
+        wx.chooseImage({
+          count: 1,
+          // sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sizeType: ['compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+          success: (res) => {
+            vm.uploadFile(res.tempFilePaths[0])
+          }
+        })
+      }
+    }
+  }
+</script>
+
+<style type="less">
+
+</style>

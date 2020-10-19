@@ -1,0 +1,73 @@
+<template>
+  <view class="scrollBox text-center {{showBackTopBtn?'show':'hide'}}"  wx:if="{{showBackTopBtn}}"  catchtap="BackTop">
+    <image src='http://images.ufutx.com/201903/06/35ead1df56f8a2c7bc69778f58d0fde3.png'  mode="aspectFit"  style="width: 48rpx;height: 68rpx;margin-top: 8rpx;"></image>
+    <!--<view style="margin-top: -22rpx;font-size: 22rpx;">置顶</view>-->
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class pageScroll extends wepy.component {
+    data = {
+      showBackTopBtn: false // 显示置顶
+    }
+    methods = {
+      BackTop() {
+        this.showBackTopBtn = false
+        wx.pageScrollTo({
+          scrollTop: 0,
+
+          duration: 400
+        })
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      }
+    }
+    events = {
+      'showBackTopBtn': (param) => {
+        this.showBackTopBtn = param
+        this.$apply()
+      }
+    }
+  }
+</script>
+
+<style type="less">
+@import "../styles/custom/fn.less";
+.scrollBox{
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: white;
+  border: 4rpx solid #eeeeee;
+  box-shadow: 1rpx 1rpx 18rpx #cbcbcb;
+  position: fixed;
+  bottom: 12%;
+  right: 8%;
+  z-index: 9999;
+}
+.show{
+  animation: opacity 800ms ease-in;
+  animation-fill-mode: forwards;
+}
+@keyframes opacity{
+  0%{opacity: 0}
+  100%{
+    opacity: 1;
+  }
+}
+.hide{
+  animation: opacity2 800ms ease-in;
+  animation-fill-mode: forwards;
+}
+@keyframes opacity2{
+  0%{opacity:1}
+  50%{opacity:.8;}
+  100%{
+    opacity:0;
+    display: none;
+  }
+}
+</style>

@@ -1,0 +1,486 @@
+<template>
+  <view>
+    <view class="">
+      <view class="user_back">
+        <view class="userinfo clearfix">
+          <view  @tap.stop="chooseimage" class="text-center" @longpress="longPress">
+            <image class="userinfo-avatar ff" src="{{Image}}" mode="aspectFill" />
+          </view>
+          <!--<view class="mainVip text-center"  @tap="goto('/pages/users/upgradeVIP')">-->
+            <!--<block wx:if="{{user.rank_id > 0}}">-->
+              <!--<view class="text-center vipBox">-->
+                <!--<image src="http://images.ufutx.com/201902/21/fea657836c8c203e75c0bb1316a4a827.png"-->
+                       <!--mode="aspectFill" class="icon"></image>-->
+                <!--<span class="font_20">超级会员</span>-->
+              <!--</view>-->
+            <!--</block>-->
+            <!--<block wx:else>-->
+              <!--<view class="text-center vipBox">-->
+                <!--<image src="http://images.ufutx.com/201902/21/20416feb7d39e92b8fd56b27468f21f3.png"-->
+                       <!--mode="aspectFill" class="icon"></image>-->
+                <!--<span class="font_20">普通会员</span>-->
+              <!--</view>-->
+            <!--</block>-->
+          <!--</view>-->
+          <view class="userinfo-info text-center" >
+            <view wx:if="{{user.nickname}}" class="font_28 white">
+              <span class="bold">{{ user.nickname }}</span>
+              <span class="text-shadow text-white font_24">「介绍人」</span>
+            </view>
+            <span wx:else  class="font_30 bold white" @tap.stop="gotoTab">点击登录</span>
+          </view>
+          <!--<view class="editInfo" @tap.stop="goto('/pages/marriedPage/basicData')">-->
+            <!--<view class="font_26 white flo_l">-->
+              <!--编辑资料-->
+            <!--</view>-->
+            <!--<image src="https://images.ufutx.com/202004/20/358000854fe0ad24249b85f64640f9a4.png" mode="aspectFill" class="icon flo_r"></image>-->
+          <!--</view>-->
+          <image src="../images/gif/wave.gif" mode="scaleToFill" class="gif-wave"></image>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import message from './message'
+  import base from '../mixins/base'
+  import {service} from '../config.js'
+  import http from '../mixins/http'
+  import uploadImage from '../components/uploadImage'
+  import modal from '../components/modal'
+  import modalUp from '../components/modal-up'
+  export default class userTitleV2 extends wepy.component {
+    mixins = [base, http]
+    props = {
+      user: {
+        type: Object,
+        default: {}
+      }
+    }
+    components = {
+      message, modal, uploadImage, modalUp
+    }
+    data = {
+      user: {
+        name: '获取中...'
+      },
+      deadline: '',
+      showModalStatus: false,
+      showChangeState: false,
+      animationData: {},
+      pic: [],
+      Image: 'http://images.ufutx.com/201902/25/542cc218e40cbc8a8e3a9ce23d7f4789.gif',
+      files: '',
+      ShowUpload: false,
+      border: 0,
+      BookImage: '',
+      showUpLoad: false,
+      stopMusic: false,
+      innerAudioContext: null,
+      token: wx.getStorageSync('token'),
+      StateList: [
+        {title: '单身', active: true, type: 'single'},
+        {title: '恋爱', active: false, type: 'loveing'},
+        {title: '已婚', active: false, type: 'marriage'}
+      ],
+      StateText: ''
+    }
+    watch = {
+      user() {
+        console.log(this.user.type)
+        for (let item of this.StateList) {
+          if (item.type == this.user.type) {
+            item.active = true
+            this.StateText = item.title
+          } else {
+            item.active = false
+          }
+        }
+        this.user.deadline = this.user.deadline ? this.user.deadline.split(' ')[0] : ''
+        console.log(this.user.deadline)
+        this.Image = this.user.avatar
+        if (this.user.deadline != null) {
+          this.deadline = this.user.deadline
+        } else {
+          this.deadline = ''
+        }
+        this.$apply()
+      },
+      pic() {
+        console.log(this.pic)
+      }
+    }
+
+    onLoad() {
+      console.log(this.user)
+    }
+
+    upDataAvatar() {
+      let data = {
+        photo: this.Image
+      }
+      this.$put({url: `${service.user}/photo`, data}, {
+        success: ({code, data}) => {
+          this.$Toast_success('更换成功')
+        },
+        fail: ({code, data}) => {
+        },
+        complete: () => {
+          wx.hideLoading()
+        }
+      })
+    }
+
+    methods = {
+      gotoPage(url) {
+        this.$emit('modalValue', '')
+        this.$goto(url)
+      },
+      gotoTab() {
+        this.$emit('modalValue', '')
+        this.$goto('/pages/userInfo/typeSelect?from_openid=' + wx.getStorageSync('from_openid'))
+      },
+      previewImage(item, list) {
+        this.$previewImage(item, list)
+      },
+      hide() {
+        this.stopMusic = !this.stopMusic
+        this.$apply()
+        this.onPauseMusic()
+      },
+      chooseimage() {
+        // this.onPauseMusic()
+        this.$goto(`/pages/users/ImageCropper?src=${this.Image}`)
+        // this.$invoke('uploadImage', 'chooseimage')
+      },
+      quitMusic() { // 停止音乐
+        this.stopMusic = !this.stopMusic
+        this.$apply()
+        if (!this.stopMusic) {
+          this.onPlayMusic()
+        } else {
+          this.onPauseMusic()
+        }
+      },
+      userMessage() { // 打开浮层 播放音乐
+        this.$goto(`/pages/users/ImageCropper?src=${photo}`)
+      },
+      openData() { // 打开资料
+        let vm = this
+        vm.$put({
+          url: `${service.host}/change/hidden/profile`,
+          data: {type: 'NONE'}
+        }, {
+          success: ({code, res}) => {
+            vm.$showToast('已打开')
+            vm.$get({url: service.user}, {
+              success: ({code, data}) => {
+                vm.user = data
+                vm.$apply()
+              }
+            })
+          }
+        })
+      },
+      gotoH5(item) {
+        console.log(encodeURIComponent(item))
+        wx.navigateTo({url: '/pages/books/bookDetail?url=' + encodeURIComponent(item)})
+      },
+      ChangeState() {
+        if (this.showChangeState) {
+          this.showChangeState = false
+        } else {
+          this.showChangeState = true
+        }
+        this.$apply()
+        console.log(this.showChangeState)
+      },
+      hiddenChange() { // 隐身处理
+        this.$put({url: `${service.host}/users/hidden`}, {
+          success: ({code, data}) => {
+            this.$showToast('设置成功')
+          }
+        })
+      },
+      StateActive(index) {
+        let data = {
+          type: this.StateList[index].type
+        }
+        this.$put({url: `${service.host}/change/users/type`, data}, {
+          success: ({code, data}) => {
+            this.$get({url: service.user}, {
+              success: ({code, data}) => {
+                this.user = data
+                this.$apply()
+                wx.setStorageSync('type', data.type)
+              }
+            })
+            for (let idx in this.StateList) {
+              if (idx == index) {
+                this.StateList[idx].active = true
+              } else {
+                this.StateList[idx].active = false
+              }
+              this.$apply()
+            }
+            console.log('更改成功')
+          }
+        })
+      },
+      // 注销账号
+      logout() {
+        let that = this
+        wx.showModal({ // 使用模态框提示用户进行操作
+          title: '警告',
+          content: '本操作将会注销您的账户，可能会导致您错过精心为您配对的另一半，是否继续？',
+          cancelText: '确定',
+          confirmText: '取消',
+          success: function (res) {
+            if (res.confirm) {
+              console.log('用户点击取消')
+            } else if (res.cancel) {
+              that.$delete({url: `${service.host}/admin/users/${that.user.id}`}, {
+                success: ({code, data}) => {
+                  wx.clearStorageSync()
+                  wx.showModal({ // 使用模态框提示用户进行操作
+                    title: 'Sorry!',
+                    content: '很抱歉！我们的产品没有留住你，希望我们能够再次见面！！！',
+                    showCancel: false,
+                    confirmText: '确定',
+                    success: function (res) {
+                      if (res.confirm) {
+                        that.$goto('/pages/tabBar/welcome')
+                      }
+                    }
+                  })
+                }
+              })
+            }
+          }
+        })
+      },
+      // 显示对话框
+      showModal() {
+        // 显示遮罩层
+        var animation = wx.createAnimation({
+          duration: 200,
+          timingFunction: 'linear',
+          delay: 0
+        })
+        this.animation = animation
+        animation.translateY(300).step()
+        this.animationData = animation.export()
+        this.showModalStatus = true
+        this.$apply()
+        setTimeout(function () {
+          animation.translateY(0).step()
+          this.animationData = animation.export()
+          this.$apply()
+        }.bind(this), 200)
+      },
+      gotofriends(item) {
+//        this.showModalStatus = false
+//        this.$apply()
+        let url = ''
+        if (item.type == 'single') {
+          url = '/pages/home/information?id=' + item.id
+        } else {
+          url = '/pages/home/introducer?id=' + item.id
+        }
+        wx.navigateTo({url: url})
+      },
+      hideModal () {
+        this.modalName = ''
+        this.$apply()
+      },
+      goto(url) {
+        if (!this.token) {
+          this.$emit('modalValue', 'ModalLogin')
+          return
+        }
+        wx.navigateTo({url: url})
+      },
+      gotoUser(type) {
+        this.onPauseMusic()
+        let url = ''
+        if (type == 'single') {
+          url = '/pages/users/unmarriV2'
+        } else {
+          url = '/pages/users/intro'
+        }
+        wx.navigateTo({url: url})
+      }
+    }
+    events = {
+      'UpLoadImage': (value) => {
+        let vm = this
+        vm.Image = value
+        vm.$apply()
+        vm.upDataAvatar()
+      }
+    }
+  }
+</script>
+
+<style type="less" scoped>
+  @import "../styles/custom/fn.less";
+  .user_back{
+    height: 60vw;
+    background-image: url("https://images.ufutx.com/202003/31/ff9ab14c0938a2cc711dd8a273ab895d.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding-top: 20vw;
+    position: relative;
+  }
+  .userinfo{
+    padding: 20rpx 0;
+    .gif-wave {
+      width: 100%;
+      position: absolute;
+      bottom: -2rpx;
+      left: 0;
+      z-index: 999;
+      mix-blend-mode: screen;
+      height: 100rpx;
+    }
+    .editInfo{
+      position: absolute;
+      right: 12rpx;
+      top: 24vw;
+      padding: 4rpx 12rpx;
+      font-weight: 600;
+      overflow: hidden;
+      .icon{
+        width: 24rpx;
+        height: 42rpx;
+      }
+    }
+    .userinfo-avatar {
+      width: 140rpx;
+      height: 140rpx;
+      border-radius: 50%;
+      box-shadow: 0 0 20rpx #dbdbdb;
+      border: 4rpx solid #ffffff;
+    }
+    .mainVip{
+      position: relative;
+      margin-top: -32rpx;
+      .icon{
+        width: 26rpx;
+        height: 26rpx;
+        vertical-align: middle;
+        margin-right: 4rpx;
+      }
+      .vipBox{
+        height: 34rpx;
+        line-height: 34rpx;
+        background: #fcf0ef;
+        display: inline-block;
+        padding: 0 10rpx;
+        border-radius: 10rpx;
+      }
+      span{
+        color: #fb8109;
+        margin-bottom: -2rpx;
+      }
+    }
+  }
+  .doudun{
+    animation: tada 1800ms ease infinite;
+  }
+  .vip-image{
+    width: 42rpx;
+    height: 42rpx;
+    position: absolute;
+    left: 92rpx;bottom: 30rpx;
+    animation: zy 2.5s .15s linear infinite;
+  }
+
+  @keyframes tada {
+    0% {
+      transform: scale(1);
+    }
+    10%, 20% {
+      transform: scale(0.9) rotate(-12deg)
+    }
+    30%, 50%, 70%, 90% {
+      transform: scale(1.1) rotate(12deg)
+    }
+    40%, 60%, 80% {
+      transform: scale(1.1) rotate(-12deg)
+    }
+    100% {
+      transform: scale(1) rotate(0)
+    }
+  }
+  @keyframes zy{
+    10%{transform: rotate(15deg);}
+    20%{transform: rotate(-10deg);}
+    30%{transform: rotate(5deg);}
+    40%{transform: rotate(-5deg);}
+    50%,100%{transform: rotate(0deg);}
+  }
+  .active{
+    background: #D92553 !important;
+    color: white;
+  }
+  /*使屏幕变暗  */
+  .commodity_screen {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #000;
+    opacity: 0.2;
+    overflow: hidden;
+    z-index: 1000;
+    color: #fff;
+    filter: blur(38px);
+  }
+  /*对话框 */
+  .commodity_attr_box {
+    /*height: 300rpx;*/
+    padding-bottom: 4%;
+    width: 100%;
+    overflow: hidden;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 2000;
+    background: #fff;
+    padding-top: 20rpx;
+    border-top-right-radius: 22rpx;
+    border-top-left-radius: 22rpx;
+  }
+  .share-image{
+    width: 76rpx;
+    height: 76rpx;
+  }
+  .userinfo-info {
+    line-height: 1;
+    position: relative;
+    margin-top: 26rpx;
+    z-index: 9999;
+    .icon{
+      width: 32rpx;
+      height: 32rpx;
+      margin-bottom: -7rpx;
+    }
+  }
+  ._bc-title{
+    border-bottom: 3rpx solid #f3f3f3;
+    margin: 0 32rpx;
+    padding: 22rpx 22rpx;
+    .image{
+      width: 32rpx;
+      height: 32rpx;
+      /*display: flex;// flex布局*/
+      /*justify-content: center;// 使子项目水平居中*/
+      /*align-items: center;// 使子项目垂直居中*/
+      margin-top: 12rpx;
+    }
+  }
+</style>

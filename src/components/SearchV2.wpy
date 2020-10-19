@@ -1,0 +1,89 @@
+<template>
+  <view class="navbar borrow">
+    <view class="page__bd">
+      <view class="weui-tab" >
+        <view class="weui-tab__content" >
+          <view class="weui-search-bar"  style="background-color: {{BColor}} !important;border: none;">
+            <view class="weui-search-bar__form" style="border-radius: 42rpx;">
+              <view class="weui-search-bar__box">
+                <icon class="weui-icon-search_in-box" type="search" size="14"></icon>
+                <input type="text" class="weui-search-bar__input" placeholder="{{title}}" confirm-type="search" value="{{inputVal}}" focus="{{inputShowed}}" @confirm="inputTyping" />
+                <view class="weui-icon-clear" wx:if="{{inputVal.length > 0}}" bindtap="clearInput">
+                  <icon type="clear" size="14"></icon>
+                </view>
+              </view>
+              <label class="weui-search-bar__label" style="border-radius: 42rpx;" hidden="{{inputShowed}}" bindtap="showInput">
+                <icon class="weui-icon-search" type="search" size="14"></icon>
+                <view class="weui-search-bar__text" style="color: #868686">{{title}}</view>
+              </label>
+            </view>
+            <view class="weui-search-bar__cancel-btn font_32 white" hidden="{{!inputShowed}}" bindtap="hideInput">取消</view>
+          </view>
+          <!--<view class="weui-cells__title" style="height: 64rpx;"></view>-->
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+//  import { service } from '../config.js'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+
+  export default class List extends wepy.component {
+    mixins = [base, http]
+    props = {
+      list: {
+        type: Object,
+        default: []
+      },
+      clear: {
+        type: String,
+        default: false
+      },
+      title: {
+        type: String,
+        default: '搜索'
+      },
+      BColor: {
+        type: String,
+        default: false
+      }
+    }
+    data = {
+      inputShowed: false,
+      inputVal: ''
+    }
+//    computed = {
+//    }
+    methods = {
+      showInput() {
+        this.inputShowed = true
+      },
+      hideInput() {
+        this.inputVal = ''
+        this.inputShowed = false
+        this.$emit('search', this.inputVal)
+      },
+      clearInput() {
+        this.inputVal = ''
+        this.$emit('search', this.inputVal)
+      },
+      inputTyping(e) {
+        this.inputVal = e.detail.value
+        this.$emit('search', this.inputVal)
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      }
+    }
+  }
+</script>
+
+<style type="less">
+@import "../styles/custom/fn.less";
+.weui-tab{
+}
+</style>

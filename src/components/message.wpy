@@ -1,0 +1,110 @@
+<template>
+  <view class='scroll_view_border' wx:if="{{hide === 'false'}}" @tap="goto('/pages/users/upgradeVIP')">
+    <view class="srcoll_view font_28" bindtap="textclick">
+      <span style="color: #74caff;">你的VIP将于</span>{{time}}
+      <span style="color: #74caff;">到期</span>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  //  import { service } from '../config.js'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+
+  export default class Message extends wepy.component {
+    mixins = [base, http]
+    props = {
+      list: {
+        type: Object,
+        default: []
+      },
+      time: {
+        type: String,
+        default: ''
+      },
+      type: {
+        type: String,
+        default: 'list'
+      }
+    }
+    watch = {
+      time() {
+        console.log(this.time)
+        if (this.time == '') {
+          this.hide = 'true'
+          this.$apply()
+          return
+        }
+        this.time = this.addDate(this.time, 0)
+        var curTime = new Date()
+        var beginDate = curTime.toLocaleString('chinese', {hour12: false})
+        var endDate = this.time
+        var aDate = new Date(beginDate)
+        var bDate = new Date(endDate) // 包含时间的日期字符串
+        var aDay = 24 * 60 * 60 * 1000
+        var diffDay = (bDate - aDate) / aDay
+        console.log(diffDay) // 2.5，自然计算的结果
+        if (diffDay < 7) {
+          this.hide = 'false'
+          this.$apply()
+        } else {
+          this.hide = 'true'
+          this.$apply()
+        }
+//        console.log(Math.floor(diffDay)); // 2，根据个人情况向下取整，整数天
+//        console.log(Math.ceil(diffDay));
+      }
+    }
+    data = {
+      time: '',
+      hide: 'true'
+    }
+
+    computed = {}
+
+    addDate(date, days) {
+      var d = new Date(date)
+      d.setDate(d.getDate() + days)
+      var m = d.getMonth() + 1
+      console.log(d.getFullYear() + '-' + m + '-' + d.getDate(), '3')
+      return d.getFullYear() + '-' + m + '-' + d.getDate()
+    }
+
+    methods = {
+      goto(url) {
+        wx.navigateTo({url: url})
+      }
+    }
+  }
+</script>
+
+<style type="less">
+@import "../styles/custom/fn.less";
+.srcoll_view{
+  position: absolute;
+  top:0rpx;
+  height: 68rpx;
+  font-size: 30rpx;
+  white-space: nowrap;
+  line-height: 68rpx;
+  color: #ff1917;
+  color: #ffcd2c;
+  font-weight: bold;
+  animation:myfirst 12s linear infinite;
+}
+@keyframes myfirst
+{
+  0%   {margin-left:750rpx;}
+  100% {margin-left:-750rpx;}
+}
+.scroll_view_border{
+  position: relative;
+  width: 100%;
+  background:-webkit-gradient(linear, 0 0, 0 bottom, from(#049BFF), to(rgba(255, 255, 255, 0.87)));
+  background: #FBF4DB;
+  height: 68rpx;
+  overflow: hidden;
+}
+</style>

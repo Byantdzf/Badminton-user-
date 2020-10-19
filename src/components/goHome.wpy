@@ -1,0 +1,71 @@
+<template>
+
+    <movable-area style="width: 100vw;height: 100vh">
+      <navigator url="/pages/tabBar/home" open-type="switchTab" hover-class="other-navigator-hover">
+      <movable-view direction="all" out-of-bounds  friction="0.1" x="620rpx" y="880rpx" class="font_32 text-left flo_l D-box">
+        <image src="/images/tabbar/home.png" mode="aspectFit" class="flo_l"  style="width: 68rpx;height: 68rpx;"></image>
+        <view class="clearfloat"></view>
+      </movable-view>
+      </navigator>
+    </movable-area>
+  <!--<view class="font_32 text-left flo_l D-box">-->
+  <!--</view>-->
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class userTitle extends wepy.component {
+    props = {
+
+    }
+    data = {
+    }
+    onLoad() {
+    }
+    methods = {
+      gotofriends(item) {
+        let url = ''
+        if (item.type == 'single') {
+          url = '/pages/home/information?id=' + item.id
+        } else {
+          url = '/pages/home/introducer?id=' + item.id
+        }
+        wx.navigateTo({url: url})
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      },
+      gotoUser(type) {
+        let url = ''
+        if (type == 'single') {
+          url = '/pages/users/unmarri'
+        } else {
+          url = '/pages/users/intro'
+        }
+        wx.navigateTo({url: url})
+      }
+    }
+  }
+</script>
+
+<style type="less">
+@import "../styles/custom/fn.less";
+
+.weui-search-bar__cancel-btn {
+  color: @weuiColorPrimary;
+  }
+  .D-box{
+    width: 72rpx;
+    height: 72rpx;
+    margin:12rpx 32rpx 6rpx 32rpx;
+    border-radius: 50%;
+    border: 8rpx solid #f4f4f4;
+    padding: 16rpx;
+    box-shadow: 1rpx 1rpx 12rpx #d4d4d4;
+    position: fixed;right: 32rpx;
+    background: white;bottom: 18%
+  }
+</style>

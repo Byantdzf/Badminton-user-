@@ -1,0 +1,80 @@
+<template>
+  <view class="weui-navbar ff">
+    <view wx:for="{{tabs}}" wx:key="index" id="{{index}}" class="weui-navbar__item {{activeIndex == index ? 'weui-bar__item_on' : ''}}" @tap="tabClick">
+      <view class="weui-navbar__title bold" >{{item}}</view>
+    </view>
+    <view class="weui-navbar__slider" style="width:{{sliderWidth}}px; left: {{sliderLeft}}px; transform: translateX({{sliderOffset}}px); -webkit-transform: translateX({{sliderOffset}}px);"></view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import base from '../mixins/base'
+
+  export default class navBarTop extends wepy.component {
+    mixins = [base]
+    props = {
+      tabs: {
+        type: Array,
+        default: []
+      }
+    }
+    data = {
+      activeIndex: 0,
+      sliderOffset: 0,
+      sliderLeft: 0,
+      sliderWidth: 180,
+      screenWidth: 360
+    }
+    components = {}
+
+    onLoad() {
+      this.tabIndex()
+    }
+    tabIndex() {
+      let _this = this
+      wx.getSystemInfo({
+        success: function (rst) {
+          _this.screenWidth = rst.screenWidth
+          _this.sliderWidth = _this.screenWidth / _this.tabs.length
+          _this.sliderLeft = 0
+          _this.sliderOffset = _this.screenWidth / _this.tabs.length * _this.activeIndex
+        }
+      })
+    }
+
+    methods = {
+      tabClick(e) {
+        this.sliderOffset = e.currentTarget.offsetLeft
+        this.activeIndex = e.currentTarget.id
+        this.$emit('tabClick', this.activeIndex)
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+  @import "../styles/custom/fn.less";
+  .weui-search-bar{
+    border: none;
+  }
+  .weui-cell__ft {
+    margin-top: 10%;
+  }
+  .weui-navbar{
+    position: relative;
+    text-align: center;
+    border: none;
+    box-shadow: 0rpx 8rpx 12rpx #f1f1f1;
+    .weui-navbar__slider{
+      background: @theme;
+    }
+    .weui-navbar__item{
+      padding: 12rpx 0 28rpx 0;
+      color: @darkgray;
+    }
+    .weui-bar__item_on{
+      color: @theme;
+    }
+  }
+</style>

@@ -1,0 +1,245 @@
+<template>
+  <view class="_bc-search font_28 text-center">
+    <view class="section flo_l">
+      <!--<picker mode="region" bindchange="bindRegionChange" value="{{region}}" custom-item="{{customItem}}">-->
+        <!--<view class="picker text-center">-->
+          <!--<view style="width: 130rpx;display: inline-block;margin-bottom: -12rpx;" class="ellipsis_1">{{region[1]}}</view>-->
+          <!--<image src="http://images.ufutx.com/201812/06/a437e90d825954942355f6b0daefff94.png"  mode="aspectFit"></image>-->
+        <!--</view>-->
+      <!--</picker>-->
+      <picker mode="multiSelector" @change="bindMultiPickerChange" @columnchange="bindMultiPickerColumnChange" value="{{multiIndex}}" range="{{objectMultiArray}}">
+        <view style="width: 130rpx;display: inline-block;margin-bottom: -12rpx;" class="ellipsis_1">{{region[1]}}</view>
+        <image src="http://images.ufutx.com/201812/06/a437e90d825954942355f6b0daefff94.png"  mode="aspectFit"></image>
+      </picker>
+    </view>
+
+
+    <view class="section flo_l" style="width: 28%;">
+      <picker bindchange="bindPickerChange" value="{{TypeIndex}}" range="{{TypeArray}}" range-key="title">
+        <view class="picker">
+          {{TypeArray[TypeIndex].title}}
+          <image src="http://images.ufutx.com/201812/06/a437e90d825954942355f6b0daefff94.png" mode="aspectFit"></image>
+        </view>
+      </picker>
+    </view>
+    <view class="section flo_l" style="width: 21%;">
+      <picker bindchange="bindAgeChange" value="{{AgeIndex}}" range="{{AgeArray}}" >
+        <view class="picker">
+          {{AgeArray[AgeIndex]}}
+          <image src="http://images.ufutx.com/201812/06/a437e90d825954942355f6b0daefff94.png" mode="aspectFit"></image>
+        </view>
+      </picker>
+    </view>
+    <view class="section flo_l" style="width: 20%;border-right: none" @tap="choose">
+      <!--<picker bindchange="bindAgeChange" value="{{AgeIndex}}" range="{{AgeArray}}" >-->
+        <view class="picker">
+          <span>筛选</span>
+          <image src="http://images.ufutx.com/201812/06/a437e90d825954942355f6b0daefff94.png" mode="aspectFit"></image>
+        </view>
+      <!--</picker>-->
+    </view>
+    <view class="clearfloat"></view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  import base from '../mixins/base.js'
+  import http from '../mixins/http'
+  import {service} from '../config.js'
+
+  export default class search extends wepy.component {
+    components = {}
+    mixins = [base, http]
+    props = {
+      list: {
+        type: Object,
+        default: []
+      },
+      height: {
+        type: [String, Number],
+        default: '240rpx'
+      },
+      dots: {
+        type: Boolean,
+        default: true
+      },
+      title: {
+        type: String,
+        default: ''
+      },
+      type: {
+        type: String,
+        default: ''
+      }
+    }
+
+    onLoad() {
+      if (wx.getStorageSync('address')) {
+        this.address = wx.getStorageSync('address')
+        this.parameter.province = this.region[0] = this.address.province
+        this.parameter.city = this.region[1] = this.address.city
+      } else {
+        this.parameter.province = this.region[0]
+        this.parameter.city = this.region[1]
+      }
+      if (this.type != '') {
+        this.parameter.type = this.type
+      }
+      this.TypeArray.map((item, index) => {
+        if (item.title == this.title) {
+          this.TypeIndex = index
+          this.$apply()
+        }
+      })
+      this.$apply()
+      console.log(this.TypeIndex)
+      this.GetAddress()
+    }
+
+    data = {
+      region: ['广东省', '深圳市'],
+      customItem: '',
+      TypeArray: [
+        {title: '不限', type: '不限'},
+        {title: '良人', type: 'single_man'},
+        {title: '佳偶', type: 'single_woman'},
+        {title: '红娘', type: 'maker'},
+        {title: '介绍人', type: 'marriage'}
+      ],
+      TypeIndex: 0,
+      AgeArray: ['不限', '50后', '60后', '70后', '80后', '90后', '00后'],
+      AgeIndex: 0,
+      address: {},
+      objectMultiArray: [[], [], []],
+      multiIndex: [0, 0, 0],
+      provinces: [],
+      nationId: 0,
+      provinceId: 0,
+      cityId: 0,
+      parameter: {
+        age: '不限',
+        location_latitude: wx.getStorageSync('myLat'),
+        location_longitude: wx.getStorageSync('myLong'),
+        type: '不限',
+        province: '',
+        city: ''
+      }
+    }
+
+    computed = {
+      indicatorDots() {
+        return Boolean(this.list.length > 1 && this.dots)
+      },
+      style_height() {
+        const h = this.height
+        return this.isNumber(+h) ? `${h}rpx` : this.isMatchHeight(h) ? h : '240rpx'
+      }
+    }
+    GetAddress() {  // getaddress
+      this.$apply()
+      this.$get({url: `${service.host}/addresses`}, {
+        success: ({code, data}) => {
+          this.provinces = data
+          for (let item of this.provinces) {
+            this.objectMultiArray[0].push(item.name)
+          }
+          for (let item of this.provinces[this.provinceId].son) {
+            this.objectMultiArray[1].push(item.name)
+          }
+          for (let item of this.provinces[this.cityId].son[0].son) {
+            this.objectMultiArray[2].push(item.name)
+          }
+          this.$apply()
+          console.log(this.provinces)
+          console.log(this.objectMultiArray)
+        },
+        fail: ({code, data}) => { },
+        complete: () => { }
+      })
+    }
+    methods = {
+      bindMultiPickerChange(e) { // 地址确定
+        this.multiIndex = e.detail.value
+        this.region[0] = this.parameter.province = this.provinces[this.multiIndex[0]].son[this.multiIndex[1]].name
+        this.region[1] = this.parameter.city = this.provinces[this.multiIndex[0]].son[this.multiIndex[1]].son[this.multiIndex[2]].name
+        this.$emit('search', this.parameter)
+        console.log(this.multiIndex)
+        this.$apply()
+      },
+      bindMultiPickerColumnChange(e) { // 省
+        let that = this,
+          province = [],
+          city = []
+        switch (e.detail.column) {
+          case 0:
+            that.nationId = e.detail.value
+            for (let item of this.provinces[this.nationId].son) {
+              province.push(item.name)
+            }
+            for (let item of this.provinces[this.nationId].son[0].son) {
+              city.push(item.name)
+            }
+            this.objectMultiArray[1] = province
+            this.objectMultiArray[2] = city
+            this.$apply()
+            break
+          case 1:
+            this.provinceId = e.detail.value
+            console.log(this.provinces[e.detail.value])
+            for (let item of this.provinces[this.nationId].son[this.provinceId].son) {
+              city.push(item.name)
+            }
+            this.objectMultiArray[2] = city
+            this.$apply()
+            break
+        }
+      },
+      choose() {
+        this.$showToast('功能开发中，敬请期待...')
+      },
+      bindRegionChange(e) {
+        console.log('picker发送选择改变，携带值为', e.detail.value)
+        this.region = e.detail.value
+        this.parameter.province = this.region[0]
+        this.parameter.city = this.region[1]
+        this.$emit('search', this.parameter)
+        this.$apply()
+      },
+      bindPickerChange(e) {
+        console.log('picker发送选择改变，携带值为', e.detail.value)
+        this.TypeIndex = e.detail.value
+        this.parameter.type = this.TypeArray[this.TypeIndex].type
+        this.$emit('search', this.parameter)
+        this.$apply()
+      },
+      bindAgeChange(e) {
+        console.log('picker发送选择改变，携带值为', e.detail.value)
+        this.AgeIndex = e.detail.value
+        this.parameter.age = this.AgeArray[this.AgeIndex]
+        this.$emit('search', this.parameter)
+        this.$apply()
+      }
+    }
+  }
+</script>
+
+<style type="less">
+  .weui-cells__title{
+    margin-bottom: 0;
+  }
+  ._bc-search{
+    border-bottom: 1rpx solid #f6f6f6;
+    border-top: 1rpx solid #f6f6f6;
+    /*background: red;*/
+    .section{
+      width: 30%;
+      padding: 16rpx 0;
+      border-right: 1rpx solid #e6e6e6;
+      image{
+        width: 32rpx;
+        height: 32rpx;
+        margin-bottom: -6rpx;
+      }
+    }
+  }
+</style>

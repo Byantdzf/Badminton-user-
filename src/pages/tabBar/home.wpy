@@ -1,0 +1,465 @@
+<template>
+  <view class="">
+    <template is="swiper" data="{{swiperList,cardCur,city}}"></template>
+    <template is="cycle" data="{{cycleList,tabBox}}"></template>
+    <template is="list" data="{{list}}"></template>
+  </view>
+  <template name="swiper">
+    <view class=" addressStyle">
+      <image src="https://images.ufutx.com/202010/19/6430391dbc48d09f21da1fd000ad1480.png" mode="widthFix"
+             class="iconStyle"></image>
+      <span class="font_30 bold">{{ city }}</span>
+    </view>
+    <swiper class="card-swiper" circular="true" autoplay="true" interval="5000" duration="500"
+            bindchange="cardSwiper">
+      <swiper-item wx:for="{{swiperList}}" wx:key="this" class="{{cardCur==index?'cur':''}}" >
+        <view class="swiper-item">
+          <image src="{{item.url}}" mode="aspectFill" @tap="gotoLink({{item.link}})"></image>
+        </view>
+      </swiper-item>
+    </swiper>
+    <view class="text-center dotsStyle">
+      <view class="dots {{cardCur==index?'active':''}}" wx:for="{{swiperList}}" wx:key="this"></view>
+    </view>
+  </template>
+  <template name="cycle">
+    <view class="cycleStyle">
+      <view class="font_30 inline-block tabStyle {{tabBox == '1'? 'tabBox bold font_32':''}}" @tap="tabFn('1')">网课</view>
+      <view class="font_30 inline-block {{tabBox == '2'? 'tabBox bold font_32':''}}" @tap="tabFn('2')">团课</view>
+      <view class="dayStyle">
+        <view><view class="datItem inline-block color-666 font_24 text-center {{item.active?'activeText bold':''}}" wx:for="{{cycleList}}" wx:key="this">{{item.dateTime}}</view></view>
+        <view class="text-center"><view class="datItem inline-block color-666 font_24  {{item.active?'activeBox bold radius shadow bg-white':''}}" wx:for="{{cycleList}}" wx:key="this">{{item.week}}</view></view>
+      </view>
+    </view>
+  </template>
+  <template name="list">
+    <view class="text-center color-theme arenaStyle">------  <span style="color: black">万达球馆</span> ------</view>
+    <view class="listBox">
+      <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this">
+        <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
+               class="image flo_l"></image>
+        <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
+        <view class="flo_r _distance font_28 ellipsis_1">100m</view>
+        <view class="flo_l  ellipsis_1 _address">
+          <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
+                 class="icon"></image>
+          <span class="font_24">深圳市 南山区 阳光科创</span>
+        </view>
+        <view class="flo_l font_24 ellipsis_1 _price">
+          <image src="https://images.ufutx.com/202010/19/138118c117bf8d24abeef9cf16968b96.png" mode="widthFix"
+                 class="icon"></image>
+          <span class="color-red font_26">78</span>
+        </view>
+        <view class="flo_l font_24 ellipsis_1 _member">
+          <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
+                 class="icon"></image>
+          <span class="color-red font_24"><span class="white">5 </span>/ 10</span>
+        </view>
+        <view class="flo_l font_24 ellipsis_1 _time">
+          <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"
+                 class="icon"></image>
+          <span class="white font_24">18:00 - 22:00</span>
+        </view>
+        <view class="_btn">已开始</view>
+      </view>
+
+    </view>
+  </template>
+</template>
+
+<script>
+import wepy from 'wepy'
+import {service} from '../../config.js'
+import http from '../../mixins/http'
+import base from '../../mixins/base'
+import user from '../../mixins/user'
+// import ShareMessage from '../../mixins/ShareMessage'
+
+let date = new Date()
+export default class home extends wepy.page {
+  mixins = [base, http, user]
+  config = {
+    navigationBarTitleText: '课程首页',
+    onReachBottomDistance: 10,
+    enablePullDownRefresh: false
+  }
+  components = {}
+  watch = {
+    list() {
+    }
+  }
+  data = {
+    cycleList: [], // 周期
+    list: [],
+    city: '深圳',
+    swiperList: [
+      {  // 轮播
+        id: 0,
+        link: 'https://baidu.com',
+        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg'
+      }, {
+        id: 1,
+        link: 'https://baidu.com',
+        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big84001.jpg'
+      }, {
+        id: 2,
+        link: 'https://baidu.com',
+        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big39000.jpg'
+      }],
+    searchTime: '',
+    chnNumChar: {
+      1: '一',
+      2: '二',
+      3: '三',
+      4: '四',
+      5: '五',
+      6: '六',
+      7: '七'
+    },
+    id: '',
+    cardCur: 0,
+    tabBox: 1,
+    active: true,
+    token: wx.getStorageSync('token'),
+    modalName: '',
+    throttle: true, // 节流
+    day: date,
+    actEndTime: '2020-4-19 18:50:00',
+    refresh: false // 是否刷新
+  }
+
+  computed = {}
+
+  async onLoad(e) {
+    this.getDate()
+  }
+
+  onShow() {
+    let vm = this
+    vm.cardCur = 0
+    vm.token = wx.getStorageSync('token')
+    vm.$apply()
+    if (wx.getStorageSync('touristsSex')) {
+      vm.touristsSex = wx.getStorageSync('touristsSex')
+      vm.$apply()
+      console.log(vm.touristsSex, 'touristsSex')
+    }
+    if (vm.token == '') {
+      wepy.login({
+        success: (res) => {
+          vm.$post({url: service.login, data: {code: res.code}}, {
+            success: ({code, data}) => {
+              if (data.token) {
+                wx.setStorageSync('token', data.token)
+                wx.setStorageSync('openid', data.openid)
+                let userInfo = {
+                  nickName: data.user.name,
+                  avatarUrl: data.user.avatar,
+                  type: data.user.type
+                }
+                wx.setStorageSync('userInfo', userInfo)
+                wx.setStorageSync('user_id', data.user.id)
+                wx.setStorageSync('type', data.user.type)
+              }
+              if (data.token) {
+                vm.page = 1
+                vm.$apply()
+                vm.upDate()
+              }
+            }
+          })
+          vm.getList()
+        },
+        fail: (res) => {
+          console.log('wepy.login.fail:', res)
+        }
+      })
+    } else {
+      vm.page = 1
+      vm.$apply()
+      vm.getList()
+      vm.upDate()
+    }
+    // vm.$parent.getTracker(vm.$root.$name, vm.config.navigationBarTitleText)
+  }
+
+  timeFormat(param) {
+    return param < 10 ? '0' + param : param
+  }
+
+  getList() {   // 获取用户数据
+    let vm = this,
+      url = `${service.host}/home/v3`,
+      data = {
+        sex: `${vm.touristsSex}`
+      }
+    vm.cardCur = 0
+    vm.list = []
+    vm.$apply()
+    vm.$showLoading('加载中')
+    vm.$get({
+      url: url, data
+    }, {
+      success: ({code, data}) => {
+        vm.list = data
+        vm.$apply()
+        wx.hideLoading()
+        console.log(vm.list)
+      }
+    })
+  }
+
+  dealTime(dayNum, dat) {
+    // 处理时间的方法
+    if (dayNum == '0') {
+      dayNum = 7
+    }
+    var uom = new Date(), dateStr = '', fday = ''
+    fday = dat.substring(6, 8)
+    uom.setYear(dat.substring(0, 4))
+    uom.setMonth(parseInt(dat.substring(4, 6)) - 1)
+    uom.setDate(fday)
+    if (uom.getDay() == 0) {
+      uom.setDate(uom.getDate() - (7 - dayNum))
+    } else {
+      uom.setDate(uom.getDate() - (uom.getDay() - dayNum))
+    }
+    var mon = (uom.getMonth() + 1) + ''
+    if (mon.length != 2) {
+      mon = '0' + mon
+    }
+    var day = uom.getDate() + ''
+    if (day.length != 2) {
+      day = '0' + day
+    }
+    dateStr = '' + uom.getFullYear() + mon + day
+    let dateObj = {
+      dateTime: `${mon}.${day}`,
+      week: `周${this.chnNumChar[dayNum]}`,
+      active: this.searchTime === dateStr ? true : false
+    }
+    console.log(dateObj)
+    this.cycleList.push(dateObj)
+    return dateStr
+  }
+
+  getDate() {
+    let date = {}
+    this.searchTime = new Date().toLocaleDateString().split('/').join('')
+    date.mon = '周一 - ' + (this.dealTime(1, this.searchTime))
+    date.tue = '周二 - ' + (this.dealTime(2, this.searchTime))
+    date.wed = '周三 - ' + (this.dealTime(3, this.searchTime))
+    date.thu = '周四 - ' + (this.dealTime(4, this.searchTime))
+    date.fri = '周五 - ' + (this.dealTime(5, this.searchTime))
+    date.sat = '周六 - ' + (this.dealTime(6, this.searchTime))
+    date.sun = '周日 - ' + (this.dealTime(0, this.searchTime))
+    console.log(date)
+  }
+
+  upDate() {
+    let vm = this
+    let url = `${service.host}/user/v3`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        vm.is_approved = data.is_approved
+        vm.is_profile = data.is_profile
+        vm.$apply()
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+        wx.hideLoading()
+      }
+    })
+  }
+
+  methods = {
+    tabFn(val) {
+      let vm = this
+      vm.$showLoading('加载中...')
+      setTimeout(() => {
+        vm.$hideLoading()
+      }, 800)
+      this.tabBox = val
+
+      this.$apply()
+    },
+    gotoLink(link) {
+      console.log(link)
+      this.$gotoH5(link)
+    },
+    hideModal() {
+      this.modalName = ''
+      this.$apply()
+    },
+    gotoDetail(id) {
+      if (!this.token) {
+        this.modalName = 'Modal'
+        this.$apply()
+        return
+      }
+      this.$goto(`/pages/home/information?id=${id}`)
+    },
+    cardSwiper(e) {
+      this.cardCur = e.detail.current
+      this.$apply()
+      console.log(this.cardCur, 'this.cardCur')
+    },
+    goto(url) {
+      this.modalName = ''
+      this.$apply()
+      console.log(url)
+      this.$goto(url)
+    }
+  }
+  events = {
+    'modalValue': (value) => { // 搜索返回值
+      this.modalName = value
+      this.$apply()
+    }
+  }
+}
+</script>
+
+<style lang="less">
+@import "../../styles/custom/fn.less";
+@import "../../styles/custom/reset.less";
+
+page {
+  background: #f9f2db;
+  .addressStyle{
+    margin: 22rpx 32rpx;
+    margin-bottom: -22rpx;
+    .iconStyle{
+      width: 22rpx;
+      height: auto;
+      margin: 0rpx 6rpx 6rpx 0;
+      vertical-align: middle;
+    }
+  }
+  .card-swiper{
+    height: 340rpx !important;
+  }
+  .dotsStyle{
+    margin-top: -62rpx;
+    .dots{
+      height: 12rpx;
+      width: 16rpx;
+      background: #cdc7b4;
+      display: inline-block;
+      border-radius: 50rpx;
+      margin-right: 12rpx;
+    }
+    .active{width: 30rpx;background: #fbc707;}
+  }
+  .cycleStyle{
+    padding: 12rpx 32rpx;
+    .tabStyle{
+      margin-right: 22rpx;
+    }
+    .tabBox{
+    }
+  }
+  .dayStyle{
+    .activeBox{background: black; color: #f8b51e !important;border-radius: 22rpx;}
+    .activeText{color: #f8b51e !important;}
+    .datItem{
+      width: 14.2%;
+    }
+  }
+  .arenaStyle{
+    margin-top: 12rpx;
+    letter-spacing: 2rpx;
+  }
+  .listBox{
+    margin: 12rpx 32rpx;
+    ._title{
+      color: black;
+      margin: 12rpx 14rpx;
+      width: 52%;
+    }
+    ._distance{
+      margin-right: 22rpx;
+      margin-top: 12rpx;
+      color: black;
+    }
+    ._address{
+      width: 62%;
+      overflow: hidden;
+      margin: -20rpx 14rpx 0 14rpx;
+      color: black;
+      .icon{
+        width: 20rpx;
+        height: 20rpx;
+        vertical-align: middle;
+        margin-bottom: 6rpx;
+        margin-right: 6rpx;
+      }
+    }
+    ._price{
+      width: 62%;
+      overflow: hidden;
+      margin: 2rpx 14rpx 0 14rpx;
+      color: black;
+      .icon{
+        width: 20rpx;
+        height: 20rpx;
+        vertical-align: middle;
+        margin-bottom: 6rpx;
+        margin-right: 4rpx;
+      }
+    }
+    ._member{
+      width: 62%;
+      overflow: hidden;
+      margin: -10rpx 14rpx 0 14rpx;
+      color: black;
+      .icon{
+        width: 20rpx;
+        height: 20rpx;
+        vertical-align: middle;
+        margin-bottom: 6rpx;
+        margin-right: 4rpx;
+      }
+    }
+    ._time{
+      width: 62%;
+      overflow: hidden;
+      margin: -8rpx 14rpx 0 14rpx;
+      color: black;
+      .icon{
+        width: 20rpx;
+        height: 20rpx;
+        vertical-align: middle;
+        margin-bottom: 6rpx;
+        margin-right: 4rpx;
+      }
+    }
+    ._btn{
+      position: absolute;
+      right: 32rpx;
+      bottom: 22rpx;
+      background: #fce1a2;
+      color: black;
+      padding: 2rpx 38rpx;
+      border-radius: 22rpx;
+    }
+    .listItem{
+      margin-top: 12rpx;
+      position: relative;
+      border-radius: 22rpx;
+      overflow: hidden;
+      height: 200rpx;
+      background: #f8b51e;
+      margin-bottom: 24rpx;
+      .image{
+        width: 200rpx;
+        height: 200rpx;
+        border-radius: 22rpx;
+      }
+    }
+  }
+}
+</style>

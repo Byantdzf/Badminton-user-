@@ -1,0 +1,211 @@
+<script>
+  import wepy from 'wepy'
+  import 'wepy-async-function'
+  import {service} from './config.js'
+  import UpdateManager from './mixins/UpdateManager'
+  var ga = require('./ga.js')
+  var GoogleAnalytics = ga.GoogleAnalytics
+  var HitBuilders = ga.HitBuilders
+  const socket = require('./utils/sockte')
+
+  export default class extends wepy.app {
+  //   lifecycle: {
+  //     // 定义要添加生命周期到 app 或者 page 或者 component
+  //     // 值类型为：String 或者 Array 或者 Function
+  //     // 值为需要添加的生命周期一个或者多个函数名，或者返回生命周期的函数数组的方法
+  //     app: 'onSomeTime', // 给 App 添加一个 `onSomeTime` 生命周期函数
+  //     page: ['onTime1', 'onTime2'], // 给 Page 添加两个生命周期函数
+  //     component: function (lifecycles) {  // 删除 Component 最后一个生命周期函数
+  //     lifecycles.pop();
+  //     retrun lifecycles;
+  //   }
+  // }
+    config = {
+      'requiredBackgroundModes': ['audio', 'location'],
+      pages: [
+        'pages/tabBar/welcome',
+        'pages/tabBar/home',
+        'pages/tabBar/activities',
+        'pages/tabBar/news',
+        'pages/tabBar/user'
+      ],
+      'permission': {   // 地理位置获取
+        'scope.userLocation': {
+          'desc': '你的位置信息将用于小程序位置接口的效果展示'
+        }
+      },
+      'subPackages': [  // 分包
+        {   //  外链接
+          'root': 'pages/h5',
+          'pages': [
+            'h5Detail'
+          ]
+        }
+      ],
+      window: {
+        navigationBarTitleText: '福恋',
+        navigationBarTextStyle: 'black',
+        navigationBarBackgroundColor: '#f8b51e',
+        backgroundColor: '#eaeaea',
+        backgroundTextStyle: 'light',
+        enablePullDownRefresh: true
+      },
+      tabBar: {
+        color: '#b4b4b4',
+        selectedColor: '#D92553',
+        backgroundColor: '#ffffff',
+        borderStyle: 'black',
+        list: [{
+          pagePath: 'pages/tabBar/home',
+          selectedIconPath: './images/tabbar/homeActive.png',
+          iconPath: './images/tabbar/home.png',
+          text: '首页'
+        }, {
+          pagePath: 'pages/tabBar/activities',
+          selectedIconPath: './images/tabbar/attentionActive.png',
+          iconPath: './images/tabbar/attention.png',
+          text: '球场'
+        }, {
+          pagePath: 'pages/tabBar/news',
+          selectedIconPath: './images/tabbar/messageActive.png',
+          iconPath: './images/tabbar/message.png',
+          text: '预约'
+        }, {
+          pagePath: 'pages/tabBar/user',
+          selectedIconPath: './images/tabbar/myActive.png',
+          iconPath: './images/tabbar/my.png',
+          text: '我的'
+        }]
+      },
+      networkTimeout: {
+        request: 10000,
+        downloadFile: 10000
+      },
+      debug: true,
+      'navigateToMiniProgramAppIdList': [ // 小程序跳转小程序的appid
+      ]
+    }
+
+    globalData = {
+      user: null,
+      cart: null,
+      tracker: null,
+      windowWidth: 0,
+      windowHeight: 0
+    }
+
+    constructor() {
+      super()
+      this.use('requestfix')
+    }
+
+    onLaunch(options) {
+      // if (options.query && options.query.from_openid) {
+      //   wx.setStorageSync('from_openid', options.query.from_openid)
+      // }
+      let vm = this
+      wx.getSystemInfo({ // 获取屏幕参数
+        success(res) {
+          vm.globalData.windowHeight = res.windowHeight
+          vm.globalData.windowWidth = res.windowWidth
+          vm.globalData.StatusBar = res.statusBarHeight
+          let capsule = wx.getMenuButtonBoundingClientRect()
+          if (capsule) {
+            vm.globalData.Custom = capsule
+            vm.globalData.CustomBar = capsule.bottom + capsule.top - res.statusBarHeight
+          } else {
+            vm.globalData.CustomBar = res.statusBarHeight + 50
+          }
+        }
+      })
+    }
+    onShow(options) {
+    }
+
+    // 手机震动
+    vibrateLong() {
+      wx.vibrateLong({
+        success: () => {
+          console.log('0000')
+        }
+      })
+    }
+
+    onShareAppMessage(title) {
+      return {
+        title: title,
+        success: function (res) { // 转发成功
+          console.log(res.errMsg)
+        },
+        fail: function (res) { // 转发失败
+          console.log(res.errMsg)
+        }
+      }
+    }
+
+    /* ============= 工具方法（app没法用mixins，就再写一遍了） ============= */
+    isObject(item) {
+      return typeof item === 'object' && !this.isArray(item)
+    }
+
+    isArray(item) {
+      return Object.prototype.toString.apply(item) === '[object Array]'
+    }
+
+    isUndefined(item) {
+      return typeof item === 'undefined'
+    }
+
+    // Google analytics
+    // getTracker(name, text) {getTracker
+    //   if (!this.globalData.tracker) {
+    //     // 初始化GoogleAnalytics Tracker
+    //     this.globalData.tracker = GoogleAnalytics.getInstance(this)
+    //       .setAppName('福恋')
+    //       .setAppVersion('v0.1')
+    //       .newTracker('UA-98664364-7')
+    //   }
+    //   var t = this.globalData.tracker
+    //   t.setScreenName(text)
+    //   t.send(new HitBuilders.ScreenViewBuilder().build())
+    //   t.send(new HitBuilders.ExceptionBuilder()
+    //     .setDescription(wx.getStorageSync('message'))
+    //     .setFatal(false).build())
+    //   t.set('&uid', '12345')
+    //   t.send(new HitBuilders.EventBuilder()
+    //     .setCategory('UX')
+    //     .setAction('User Sign In')
+    //     .build())
+    // }
+
+    /* ========================= 更新缓存信息 ======================== */
+
+    $updateGlobalData(name, obj) {
+      // 校验: globalData
+      if (!this.globalData) return
+      // 校验: 操作字段
+      if (typeof name !== 'string' || name === '') return {}
+      // 取已有信息
+      const info = this.globalData[name] || {}
+      // 更新缓存
+      if (obj && this.isObject(obj)) {
+        // Object合并第一层
+        this.globalData[name] = Object.assign({}, info, obj)
+      } else if (!this.isUndefined(obj)) {
+        // 其他非undefined数据直接覆盖
+        this.globalData[name] = obj
+      }
+      this.$apply && this.$apply()
+      console.info(`[${obj ? 'UPDATE' : 'GET'} GlobalData ${name}]:`, this.globalData[name])
+      return this.globalData[name]
+    }
+  }
+</script>
+
+<style lang="less">
+  @import "./styles/weui/index.less";
+  @import "./styles/custom/index.less";
+  @import "./styles/custom/theme.less";
+  @import './colorui/icon.wxss';
+  @import './colorui/main.wxss';
+</style>

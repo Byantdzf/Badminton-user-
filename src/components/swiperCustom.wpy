@@ -1,0 +1,148 @@
+<template>
+  <swiper class="swiper" style="height:{{style_height}};" autoplay="{{autoplay}}"
+   indicator-color="{{indicatorColor}}"
+          interval="3000"
+          circular="true"
+   indicator-active-color="{{indicatorActiveColor}}" bindchange='change' current='{{current}}'
+  >
+    <block wx:for="{{list}}" wx:key="index">
+      <swiper-item>
+        <!--<navigator wx:if="{{item.url}}" url="{{item.url}}">-->
+          <!--<image src="{{item.photo}}" class="swiper-image" style="height:{{style_height}};"  mode="widthFix"/>-->
+        <!--</navigator>-->
+        <!--<view wx:else style="height:{{style_height}} position: relative">-->
+        <view class="box {{index == current?'animationData': 'animationData2'}}">
+          <image src="{{item.photo}}"  class="image" mode="aspectFill"  @tap="gotofriends({{item}})"/>
+          <view class="dost white text-center font_32">{{item.name}}/{{item.address}}人/{{item.age}}岁/{{item.stature}}cm</view>
+        </view>
+        <!--</view>-->
+      </swiper-item>
+    </block>
+  </swiper>
+</template>
+<script>
+  import wepy from 'wepy'
+  import base from '../mixins/base.js'
+
+  export default class SearchBar extends wepy.component {
+    mixins = [base]
+    props = {
+      list: {
+        type: Object,
+        default: []
+      },
+      height: {
+        type: [String, Number],
+        default: '240rpx'
+      },
+      dots: {
+        type: Boolean,
+        default: true
+      }
+    }
+
+    data = {
+      autoplay: true,
+      current: 0,
+      indicatorColor: 'rgba(255, 255, 255, 0.6)',
+      indicatorActiveColor: 'rgba(255, 255, 255, 1)'
+    }
+
+    computed = {
+      indicatorDots() {
+        return Boolean(this.list.length > 1 && this.dots)
+      },
+      style_height() {
+        const h = this.height
+        return this.isNumber(+h) ? `${h}rpx` : this.isMatchHeight(h) ? h : '240rpx'
+      }
+    }
+
+    methods = {
+      change(e) {
+        this.current = e.detail.current
+        this.$apply()
+      },
+      gotofriends (item) {
+        let url = ''
+        if (item.type == 'single') {
+          url = '/pages/home/information?id=' + item.user_id
+        } else {
+          url = '/pages/home/introducer?id=' + item.user_id
+        }
+        wx.navigateTo({url: url})
+      }
+    }
+
+    isMatchHeight(str) {
+      return this.isString(str) ? /\d+(r?px|em)$/.test(str) : false
+    }
+  }
+</script>
+
+<style type="less" scoped>
+
+  swiper{
+    height: 22vh;
+    padding-bottom: 22px;
+  }
+  /*.content{*/
+  /*color: #333;*/
+  /*padding: 0rpx 22rpx;*/
+  /*}*/
+  swiper-item{
+    text-align: center;
+  }
+  swiper-item image{
+    width: 100%;
+    height: 360rpx;
+  }
+  .animationData{
+    animation:myMove2 800ms linear;
+    animation-fill-mode: forwards;
+  }
+.dost{
+  position: absolute;
+  bottom: 49%;
+  left: 0;
+  width: 100%;
+  background: rgba(0,0,0,0.4);
+  padding: 8rpx;
+}
+.box{
+  width: 92%;
+  /*height: 500rpx;*/
+  display: inline-block;
+  margin-top: 70px;
+  box-sizing: border-box;
+  position:relative;
+  overflow: hidden;
+  top:33%;
+  transform:translateY(-35%);
+  padding-bottom: 6rpx;
+  image{
+    box-shadow: 0 0 14px #f2f2f2;
+  }
+}
+@keyframes  myMove2{
+  from{
+    height: 600rpx;
+  }
+  to{
+    height: 700rpx;
+  }
+}
+.animationData2{
+  animation:myMove1 800ms linear;
+  animation-fill-mode: forwards;
+
+}
+@keyframes  myMove1{
+  from{
+    height: 700rpx;
+  }
+  to{
+    height: 600rpx;
+  }
+}
+</style>

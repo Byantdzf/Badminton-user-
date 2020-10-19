@@ -1,0 +1,38 @@
+<template>
+  <view class='cu-load load-modal' wx:if="{{loadModal}}">
+    <image src='../images/icon/success.png' class='png' mode='aspectFit' wx:if="{{title == '成功'}}"></image>
+    <image src='../images/icon/logo.png' class='png' mode='aspectFit' wx:else></image>
+    <view class='gray-text font_26 color-666'>{{title}}</view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class Loading extends wepy.component {
+    props = {
+      loadModal: {
+        type: Boolean,
+        default: false
+      },
+      title: {
+        type: String,
+        default: '加载中...'
+      }
+    }
+    data = {
+      hide: false
+    }
+    watch = {
+      loadModal() {
+        console.log(this.loadModal, 'loadModal')
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .png{
+    width: 100rpx !important;
+    height: 100rpx !important;
+  }
+</style>

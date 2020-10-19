@@ -1,0 +1,548 @@
+<template>
+  <!--<Loading :init.sync="init"></Loading>-->
+  <cuCustom bgColor="bg-news">
+    <!--<view slot="backText">返回</view>-->
+    <view slot="content" class="bold">消息</view>
+  </cuCustom>
+  <!--<view class="mainTab">-->
+    <!--<view class="itemTab text-center" @tap="tabClick('0')">-->
+      <!--<image src="https://images.ufutx.com/202002/25/e487769514ef754ca16fc70086a7a420.png" mode="aspectFit"></image>-->
+      <!--<view class="font_26">好友消息</view>-->
+      <!--<view class="active" wx:if="{{type == 0}}"></view>-->
+    <!--</view>-->
+    <!--<view class="itemTab text-center" @tap="tabClick('1')">-->
+      <!--<image src="https://images.ufutx.com/202002/25/8d99bbf686fced76a38192c448f089ae.png" mode="aspectFit"></image>-->
+      <!--<view class="font_26">系统消息</view>-->
+      <!--<view class="active" wx:if="{{type == 1}}"></view>-->
+    <!--</view>-->
+  <!--</view>-->
+  <view class="cu-list menu-avatar">
+    <view class="cu-item animation-slide-right"  style="animation-delay: 0.{{index}}s;" wx:for="{{listV2}}" wx:key="index" @tap="goto({{index}}, {{item.path}})">
+      <view class="cu-avatar round lg" style="background-image:url({{item.icon}});"></view>
+      <view class="content">
+        <view class="text-grey">
+          <text class="text-cut color-333">{{item.title}}</text>
+          <!--<view class="cu-tag round bg-orange sm">战士</view>-->
+        </view>
+        <view class="text-gray text-sm flex">
+          <text class="text-cut" style="height: 34rpx;">{{item.message.content || '暂无消息'}}</text>
+        </view>
+      </view>
+      <view class="action">
+        <view class="text-grey text-xs">{{item.message.last_time}}</view>
+        <view class="cu-tag round bg-red sm" wx:if="{{item.message.new_count || item.message.count}}">{{item.message.new_count || item.message.count}}</view>
+      </view>
+    </view>
+    <!--<view class="cu-item" wx:for="{{listV2}}" wx:key="{{index}}" wx:if="{{!noMore && list.length < 0}}">-->
+      <!--<view class="cu-avatar round lg" style="background: #F6F6F6"></view>-->
+      <!--<view class="content">-->
+        <!--<view class="text-grey " style="background: #F6F6F6;width: 26%;height: 32rpx;margin-top: -6rpx;"></view>-->
+        <!--<view class="text-gray text-sm flex" style="background: #F6F6F6;width: 88%;height: 32rpx;margin-top: 12rpx;">-->
+          <!--<text class="text-cut" style="height: 34rpx;"></text>-->
+        <!--</view>-->
+      <!--</view>-->
+    <!--</view>-->
+    <view class="_line"></view>
+    <view class="cu-item  {{modalName=='move-box-'+ index?'move-cur':''}}" bindtouchstart="ListTouchStart" bindtouchmove="ListTouchMove" bindtouchend="ListTouchEnd" data-target="move-box-{{index}}"  wx:for="{{list}}" wx:key="index" @tap="goto({{index}}, {{item.path}})">
+      <view class="cu-avatar round lg" style="background-image:url({{item.icon}});"></view>
+      <view class="content">
+        <view class="text-grey">
+          <text class="text-cut color-333">{{item.title}}</text>
+          <!--<view class="cu-tag round bg-orange sm">战士</view>-->
+        </view>
+        <view class="text-gray text-sm flex">
+          <text class="text-cut" style="height: 34rpx;">{{item.message.content}}</text>
+        </view>
+      </view>
+      <view class="action">
+        <view class="text-grey text-xs">{{item.message.last_time}}</view>
+        <view class="cu-tag round bg-red sm" wx:if="{{item.message.new_count}}">{{item.message.new_count}}</view>
+      </view>
+      <view class="move">
+        <view class="bg-red" @tap.stop="deleteFn({{item.message.magId}},{{index}})">删除 {{item.id}}</view>
+      </view>
+    </view>
+    <button class="btn service" hover-class="btn_active" open-type="contact" open-type="contact" bindcontact="handleContact">
+      <image src="https://images.ufutx.com/202004/08/404ba11c54ed1539e55c4b3e123a443a.png" mode="aspectFit"></image>
+    </button>
+  </view>
+    <block wx:if="{{loading}}">
+      <view class="weui-loadmore">
+        <view class="weui-loading"></view>
+        <view class="weui-loadmore__tips"  style="background: white">正在加载</view>
+      </view>
+    </block>
+    <block wx:if="{{noMore}}">
+      <view class="weui-loadmore weui-loadmore_line weui-loadmore_dot">
+        <view class="weui-loadmore__tips weui-loadmore__tips_in-line weui-loadmore__tips_in-dot" style="background: #f4f5f9"></view>
+      </view>
+    </block>
+  <view class="cu-modal {{modalName=='ModalLogin'?'show':''}}">
+    <view class="cu-dialog">
+      <view class="cu-bar bg-white justify-end">
+        <view class="content">提示</view>
+        <view class="action" bindtap="hideModal">
+          <text class="cuIcon-close text-red"></text>
+        </view>
+      </view>
+      <view class="padding-xl text-left">
+        你还没登录呢！请先
+        <button class="text-center btn-box white radius shadow inline-block font_26 bg_theme" style="margin-bottom: -12rpx;line-height: 46rpx;" @tap="gotoPage('/pages/userInfo/typeSelect')">登录</button>
+      </view>
+    </view>
+  </view>
+  <!--</view>-->
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import http from '../../mixins/http'
+  import base from '../../mixins/base'
+  import user from '../../mixins/user'
+  import Loading from '../../components/loading'
+  import {service} from '../../config.js'
+  import cuCustom from '../../components/cu-custom'
+
+  export default class news extends wepy.page {
+    mixins = [base, http, user]
+    config = {
+      navigationBarTitleText: '我的消息',
+      enablePullDownRefresh: true,
+      navigationBarBackgroundColor: '#f4f5f9',
+      navigationStyle: 'custom'
+    }
+    components = {
+      Loading,
+      cuCustom
+    }
+    data = {
+      init: false,
+      page: 1,
+      loading: false,
+      noMore: false,
+      type: 0,
+      list: [],
+      listV2: [
+        {
+          icon: 'https://images.ufutx.com/202004/23/a77e388f3d5597985c3bbcfff8be0be5.png',
+          title: '福恋小助手',
+          message: {},
+          path: `/pages/home/chitchat?id=1&name=福恋小助手&type=chat`
+        },
+        {
+          icon: 'https://images.ufutx.com/202004/08/009b9e2a3c5faea5323d770cd61260c5.png',
+          title: '来访记录',
+          message: {
+            content: '查看谁看过你了'
+          },
+          path: '/pages/users/visitor'
+        },
+        {
+          icon: 'https://images.ufutx.com/202004/08/09270773d76d4fa2f80d75c9f3c37dd7.png',
+          title: '系统通知',
+          message: {},
+          path: '/pages/users/myNews'
+        }
+      ],
+      typeList: [],
+      ListTouchStart: '',
+      ListTouchDirection: '',
+      token: wx.getStorageSync('token'),
+      modalName: ''
+    }
+    onShow() {
+      this.page = 1
+      this.list = []
+      this.token = wx.getStorageSync('token')
+      this.$apply()
+      if (this.token) {
+        this.initPageData()
+        this.getNewCount()
+      }
+      // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
+    }
+
+    onLoad(e) {
+    }
+    onShareAppMessage(res) {
+      let that = this
+      let openid = wx.getStorageSync('openid')
+      let url = `/pages/tabBar/welcome?from_openid=${openid}&share_user_id=${that.id}`
+      console.log(url)
+      return {
+        title: '向你推荐《福恋》',
+        path: url,
+        imageUrl: 'https://images.ufutx.com/202004/29/baac955e5878e0cb03c17eef0c92f473.jpeg',
+        success: function(res) {
+          wx.showToast({
+            title: '转发成功',
+            icon: 'success',
+            duration: 1500
+          })
+          var shareTickets = res.shareTickets
+          if (shareTickets.length == 0) {
+            return false
+          }
+        },
+        fail: function(res) {
+          // 转发失败
+        }
+      }
+    }
+
+    onPullDownRefresh() {
+      if (this.token) {
+        this.page = 1
+        this.list = []
+        this.initPageData()
+        this.$apply()
+      }
+    }
+
+    onReachBottom() {
+      if (this.token) {
+        this.initPageData()
+      }
+    }
+    getNewCount() {
+      this.$get({url: `${service.host}/new/message/count`}, {
+        success: ({code, data}) => {
+          let {new_count} = data
+          if (new_count > 0) {
+            wx.setTabBarBadge({
+              index: 2,
+              text: `${new_count}`
+            })
+          } else {
+            wx.removeTabBarBadge({
+              index: 2
+            })
+          }
+        }
+      })
+    }
+
+    // 初始化页面数据
+    initPageData() {
+      if (this.type == 1) {
+        this.getLibraries()
+        return
+      }
+      this.$get({url: `${service.host}/message/linkmen/v2`, data: {page: this.page, type: 'single'}}, {
+        success: ({code, data}) => {
+          this.init = true
+          console.log(data)
+          let {chat, linkmen, notice, visit} = data
+          this.listV2.forEach((item, index) => {
+            switch (index) {
+              case 0:
+                item.message = chat
+                break
+              case 1:
+                item.message = visit
+                break
+              case 2:
+                item.message = notice
+                break
+            }
+          })
+          this.listV2 = [...this.listV2]
+          this.$apply()
+          console.log(this.listV2)
+          if (!linkmen.data.length) {
+            this.noMore = true
+            this.list = [...this.list]
+            this.$apply()
+            return
+          }
+          if (linkmen.data.length == 0 && linkmen.last_page == 1) {
+            this.noMore = true
+            this.loading = false
+            return
+          }
+          if (data.current_page > data.last_page) {
+            this.noMore = true
+            this.loading = false
+            return
+          }
+          data = linkmen.data
+          if (this.isArray(data) && data.length === 0) {
+            this.noMore = true
+            this.loading = false
+            return
+          }
+          if (this.list.length === 0 || this.page === 1) {
+            // this.list = []
+            // this.list = [...this.typeList]
+            if (data.length > 0) {
+              for (let item of data) {
+                this.list.push({
+                  icon: item.other_user.circle_avatar ? item.other_user.circle_avatar : item.other_user.photo,
+                  title: item.other_user.nickname ? item.other_user.nickname : item.other_user.name,
+                  message: {
+                    content_type: item.last_message ? item.last_message.content_type : '',
+                    content: item.last_message ? item.last_message.content : '',
+                    created_at: item.last_message ? item.last_message.created_at : '',
+                    id: item.other_user.id,
+                    type: item.other_user.type,
+                    last_time: item.last_message.last_time,
+                    new_count: item.new_count,
+                    magId: item.id
+                  },
+                  path: `/pages/home/chitchat?id=${item.other_user.id}&name=${item.other_user.nickname ? item.other_user.nickname : item.other_user.name}&type=${item.other_user.type}`
+                })
+              }
+            }
+            this.loading = false
+            this.$apply()
+          } else {
+            let items = []
+            for (let item of linkmen.data) {
+              items.push({
+                icon: item.other_user.circle_avatar,
+                title: item.other_user.nickname ? item.other_user.nickname : item.other_user.name,
+                message: {
+                  content_type: item.last_message ? item.last_message.content_type : '',
+                  content: item.last_message ? item.last_message.content : '',
+                  created_at: item.last_message ? item.last_message.created_at : '',
+                  id: item.other_user.id,
+                  type: item.other_user.type,
+                  last_time: item.last_message.last_time,
+                  new_count: item.new_count,
+                  magId: item.id
+                },
+                path: `/pages/home/chitchat?id=${item.other_user.id}&name=${item.other_user.name}&type=${item.other_user.type}`
+              })
+            }
+            this.list = [...this.list, ...items]
+            console.log(this.list)
+            this.$apply()
+          }
+          this.noMore = true
+          this.page += 1
+          this.$apply()
+          console.log(this.list)
+        }
+      })
+    }
+    getLibraries(keyword) {
+      let _this = this
+      _this.loading = true
+      this.$get({
+        url: service.notices,
+        data: {
+          page: this.page,
+          type: 'single'
+        }
+      }, {
+        success: ({code, data}) => {
+          _this.init = true
+          _this.noMore = false
+          _this.loading = false
+          if (data.length == 0 && data.last_page == 1) {
+            _this.loading = false
+            _this.noMore = true
+            // _this.list = []
+            return
+          }
+          if (data.current_page > data.last_page) {
+            _this.noMore = true
+            _this.loading = false
+            return
+          }
+          data = data.data
+          if (this.isArray(data) && data.length === 0) {
+            _this.noMore = true
+            _this.list = []
+            return
+          }
+          if (this.list.length === 0 || this.page === 1) {
+            // this.list = []
+            // this.list = [...this.typeList]
+            if (data.length > 0) {
+              for (let item of data) {
+                this.list.push({
+                  icon: item.other_user.circle_avatar ? item.other_user.circle_avatar : item.other_user.photo,
+                  title: item.other_user.nickname ? item.other_user.nickname : item.other_user.name,
+                  type: item.type,
+                  id: item.id,
+                  message: {
+                    content_type: item.type ? item.type : '',
+                    content: item.content ? item.content : '',
+                    created_at: item.created_at ? item.created_at : '',
+                    id: item.other_user.id,
+                    type: item.other_user.type,
+                    last_time: item.last_message.last_time,
+                    new_count: item.new_count
+                  },
+                  path: `/pages/home/chitchat?id=${item.other_user.id}&name=${item.other_user.name}&type=${item.other_user.type}`
+                })
+              }
+            }
+            this.loading = false
+            this.$apply()
+          } else {
+            let items = []
+            for (let item of data) {
+              items.push({
+                icon: item.other_user.circle_avatar ? item.other_user.circle_avatar : item.other_user.photo,
+                title: item.other_user.nickname ? item.other_user.nickname : item.other_user.name,
+                type: item.type,
+                id: item.id,
+                message: {
+                  content_type: item.type ? item.type : '',
+                  content: item.content ? item.content : '',
+                  created_at: item.created_at ? item.created_at : '',
+                  id: item.other_user.id,
+                  type: item.other_user.type,
+                  last_time: item.last_message.last_time,
+                  new_count: item.new_count
+                },
+                path: `/pages/home/chitchat?id=${item.other_user.id}&name=${item.other_user.name}&type=${item.other_user.type}`
+              })
+            }
+            this.list = [...this.list, ...items]
+            console.log(this.list)
+            this.$apply()
+          }
+          // if (_this.list.length === 0 || _this.page === 1) {
+          //   _this.list = data
+          // } else {
+          //   data.map(function (item, index) {
+          //     _this.list.push(item)
+          //   })
+          // }
+          _this.noMore = true
+          _this.page += 1
+
+          //          _this.libs = data.data
+        },
+        fail: ({code, data}) => {
+        },
+        complete: () => {
+          this.loaded = false
+        }
+      })
+    }
+
+    methods = {
+      hideModal () {
+        this.modalName = ''
+        this.$apply()
+      },
+      gotoPage(url) {
+        this.modalName = ''
+        this.$apply()
+        this.$goto(url)
+      },
+      handleContact (e) {
+        console.log(e.detail.path)
+        console.log(e.detail.query)
+      },
+      deleteFn (id, index) {
+        console.log(index)
+        this.$delete({
+          url: `${service.host}/message/linkmen/${id}`
+        }, {
+          success: ({code, data}) => {
+            this.list.splice(index, 1)
+            console.log('删除成功')
+          },
+          fail: ({code, data}) => {
+          },
+          complete: () => {
+          }
+        })
+      },
+      // ListTouch触摸开始
+      ListTouchStart(e) {
+        this.ListTouchStart = e.touches[0].pageX
+        this.$apply()
+      },
+      // ListTouch计算方向
+      ListTouchMove(e) {
+        this.ListTouchDirection = e.touches[0].pageX - this.data.ListTouchStart > 0 ? 'right' : 'left'
+        this.$apply()
+      },
+
+      // ListTouch计算滚动
+      ListTouchEnd(e) {
+        if (this.ListTouchDirection == 'left') {
+          this.modalName = e.currentTarget.dataset.target
+          this.$apply()
+        } else {
+          this.modalName = null
+          this.$apply()
+        }
+        this.ListTouchDirection = null
+        this.$apply()
+      },
+      tabClick(value) { // NavTab返回值
+        this.$showLoading('加载中...')
+        console.log(value)
+        this.list = []
+        this.page = 1
+        this.type = value
+        this.$apply()
+        this.initPageData()
+      },
+      goto(index, path) {
+        console.log(index, path)
+        if (!this.token) {
+          this.modalName = 'ModalLogin'
+          this.$apply()
+          return
+        }
+        // let url = ''
+        // if (item.type) {
+        //   if (item.type == 'gift') {
+        //     url = '/pages/users/myGift'
+        //   } else if (item.type == 'follow') {
+        //     if (item.message.type == 'single') {
+        //       url = '/pages/home/information?id=' + item.message.id
+        //     } else {
+        //       url = '/pages/home/introducer?id=' + item.message.id
+        //     }
+        //   } else if (item.type == 'wechat') {
+        //     url = '/pages/users/examineWeChat?id=' + item.id
+        //   } else if (item.type == 'friend') {
+        //     url = '/pages/users/auditFriend?id=' + item.id
+        //   } else if (item.type == 'temp') {
+        //     url = '/pages/users/tempMember'
+        //   } else if (item.type == 'moment') {
+        //     url = `/pages/friendCircle/friendCircleDetail?id=${item.type_id}`
+        //   }
+        //   wx.navigateTo({url: url})
+        // }
+        wx.navigateTo({url: path})
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+  @import "../../styles/custom/fn.less";
+  @import "../../styles/custom/reset.less";
+page{
+  background: #f4f5f9;
+  .bg-news{background: white}
+  ._line{
+    width: 100%;
+    height: 4rpx;
+    background: #F6F6F6;
+  }
+  .service{
+    position: fixed;
+    bottom: 22vh;
+    right: 8vw;
+    image{
+      width: 130rpx;
+      height: 130rpx;
+    }
+  }
+  .cu-list.menu-avatar>.cu-item .action {
+    width: 132rpx;
+    text-align: center;
+  }
+}
+</style>

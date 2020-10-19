@@ -1,0 +1,207 @@
+<template>
+  <picker mode="multiSelector" @change="MultiPickerChange" @columnchange="MultiPickerColumnChange" value="{{multiIndex}}" range="{{objectArray}}">
+    <slot name="Input"></slot>
+  </picker>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import base from '../mixins/base.js'
+  import http from '../mixins/http'
+  import {service} from '../config.js'
+
+  export default class selectCity extends wepy.component {
+    mixins = [base, http]
+    data = {
+      region: [],
+      objectArray: [[], [], []],
+      multiIndex: [0, 18, 2],
+      provinces: [],
+      nationId: 0,
+      provinceId: 0,
+      cityId: 0
+    }
+    props = {
+      itemIndex: {
+        type: Number,
+        default: 0,
+        twoWay: true
+      },
+      AddressValue: {
+        type: Array,
+        default: []
+      }
+    }
+
+    onLoad () {
+      this.GetAddress()
+    }
+    GetAddress() {  // getaddress
+      let vm = this
+      vm.$get({url: `${service.host}/addresses`}, {
+        success: ({code, data}) => {
+          vm.provinces = data
+          if (vm.AddressValue.length > 0) {
+            debugger
+            vm.provinces.forEach((item, index) => {
+              vm.objectArray[0].push(item.name)
+              if (item.name == vm.AddressValue[0]) {
+                vm.multiIndex[0] = index
+                vm.$apply()
+              }
+            })
+            vm.provinces[vm.multiIndex[0]].son.forEach((item, index) => {
+              vm.objectArray[1].push(item.name)
+              if (item.name == vm.AddressValue[1]) {
+                vm.multiIndex[1] = index
+                vm.$apply()
+              }
+            })
+            vm.provinces[vm.multiIndex[0]].son[vm.multiIndex[1]].son.forEach((item, index) => {
+              vm.objectArray[2].push(item.name)
+              if (item.name == vm.AddressValue[2]) {
+                vm.multiIndex[2] = index
+                vm.$apply()
+              }
+            })
+          } else {
+            for (let item of vm.provinces) {
+              vm.objectArray[0].push(item.name)
+            }
+            for (let item of vm.provinces[vm.provinceId].son) {
+              vm.objectArray[1].push(item.name)
+            }
+            for (let item of vm.provinces[vm.cityId].son[0].son) {
+              vm.objectArray[2].push(item.name)
+            }
+            // console.log(vm.provinces[vm.cityId].son,'vm.provinces[vm.cityId].son')
+          }
+          vm.$apply()
+          console.log(vm.provinces)
+          console.log(vm.objectArray)
+        },
+        fail: ({code, data}) => { },
+        complete: () => { }
+      })
+    }
+
+    watch = {
+      AddressValue() {
+        // console.log(this.AddressValue)
+      }
+    }
+    methods = {
+      MultiPickerChange(e) { // 地址确定
+        console.log(this.itemIndex)
+        this.multiIndex = e.detail.value
+        console.log(this.multiIndex)
+        this.region[0] = this.provinces[this.multiIndex[0]].name
+        this.region[1] = this.provinces[this.multiIndex[0]].son[this.multiIndex[1]].name
+        this.region[2] = this.provinces[this.multiIndex[0]].son[this.multiIndex[1]].son[this.multiIndex[2]].name
+        this.$apply()
+        this.$emit('selectCity', this.region, this.itemIndex)
+      },
+      MultiPickerColumnChange(e) { // 省
+        let that = this,
+          province = [],
+          city = []
+        switch (e.detail.column) {
+          case 0:
+            that.nationId = e.detail.value
+            for (let item of that.provinces[that.nationId].son) {
+              province.push(item.name)
+            }
+            for (let item of that.provinces[that.nationId].son[0].son) {
+              city.push(item.name)
+            }
+            that.objectArray[1] = province
+            that.objectArray[2] = city
+            that.$apply()
+            break
+          case 1:
+            that.provinceId = e.detail.value
+            // console.log(that.provinces[e.detail.value])
+            for (let item of that.provinces[that.nationId].son[that.provinceId].son) {
+              city.push(item.name)
+            }
+            that.objectArray[2] = city
+            that.$apply()
+            break
+        }
+      }
+    }
+  }
+</script>
+
+<style lang="less" scoped>
+  .loading-box{
+     width: 100vw;height: 100vh;
+     background-image: url("http://images.ufutx.com/201901/14/ed1b2da08b3581efdc7372b26f1ba40b.png");
+     background-size: cover;
+     background-repeat: no-repeat;
+     position: fixed;
+     top: 0;
+     left: 0;
+     z-index: 1000;
+     .loading-image{
+       width: 500rpx;height: 500rpx;
+       margin: auto;
+       margin-top: 30vh;
+       z-index: -1;
+     }
+     .loading-item{
+       width: 100%;height: 400rpx;
+       position: relative;
+       position: absolute;
+       overflow: inherit;
+       left: 0 ;
+       top: 30vh;
+       .image{
+         width: 220rpx;
+         position: absolute;
+         left: 0;
+         top: 0;
+         animation: opacity 1200ms ease-in;
+         animation-fill-mode: forwards;
+       }
+     }
+   }
+  cover-image,cover-view {
+    overflow: visible !important;
+  }
+
+  .animate{
+    -webkit-animation:  move2 2s linear infinite;
+  }
+  .loading-icon {
+    width: 240rpx;
+  }
+  @-webkit-keyframes move2{
+    0%{-webkit-transform:rotate(0deg);}
+
+    50%{-webkit-transform:rotate(-180deg);}
+
+    100%{-webkit-transform:rotate(-360deg);}
+  }
+  .hide{
+    animation: opacity2 800ms ease-in;
+    animation-fill-mode: forwards;
+  }
+  @keyframes opacity{
+    0%{opacity: 0}
+    50%{opacity:.5;}
+    100%{opacity:1;}
+  }
+  @keyframes opacity2{
+    0%{opacity:1}
+    50%{opacity:.8;}
+    100%{opacity:0;}
+  }
+  @-webkit-keyframes move2{
+    0%{-webkit-transform:rotate(0deg);}
+
+    50%{-webkit-transform:rotate(-180deg);}
+
+    100%{-webkit-transform:rotate(-360deg);}
+  }
+</style>

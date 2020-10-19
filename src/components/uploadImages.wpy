@@ -1,0 +1,70 @@
+<template>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import {service} from '../config.js'
+  import http from '../mixins/http'
+  import base from '../mixins/base'
+  //  import ShareMessage from '../mixins/ShareMessage'
+  export default class uploadImages extends wepy.component {
+    mixins = [base, http]
+    props = {
+      pic: {
+        type: Array,
+        default: [],
+        twoWay: true
+      }
+    }
+    data = {
+    }
+    onLoad () {
+    }
+
+    uploadFile(filePath, filePaths, index) {
+      this.$showLoading('上传中')
+      wx.uploadFile({
+        url: service.image_upload,
+        filePath: filePath,
+        method: 'POST',
+        name: 'fileData',
+        header: {
+          'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+          'content-type': 'multipart/form-data',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        success: (res) => {
+          this.$emit('UpLoadImage', JSON.parse(res.data).data)
+          if (index == filePaths.length - 1) {
+            wx.hideLoading()
+          }
+        },
+        fail: (res) => {
+        },
+        complete: () => {
+        }
+      })
+    }
+
+    methods = {
+      chooseimage() {
+        let vm = this
+        wx.chooseImage({
+          count: 9,
+          // sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sizeType: ['compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+          success: (res) => {
+            let index = 0
+            for (let item of res.tempFilePaths) {
+              vm.uploadFile(item, res.tempFilePaths, index++)
+            }
+          }
+        })
+      }
+    }
+  }
+</script>
+
+<style type="less">
+</style>

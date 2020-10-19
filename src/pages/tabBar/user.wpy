@@ -1,0 +1,429 @@
+<template>
+  <view class="page-user">
+    <view class="animation-slide-top">
+      <userTitle :user.sync="user"></userTitle>
+      <view class="bc_tab color-333">
+        <view  class="text-center flo_l mainF"
+               @tap="goto('/pages/users/friendlist?type=friend')">
+          <view class="bold font_32 text-shadow text-black" >{{user.friend_count}}</view>
+          <view class="font_26">我的好友</view>
+        </view>
+        <view class="text-center flo_l mainFA "
+              @tap="goto('/pages/users/friendlist?type=attention')">
+          <view class="bold font_32 text-shadow text-black" >{{user.follow_count}}</view>
+          <view class="font_26">我的关注</view>
+        </view>
+        <view class="text-center flo_l mainF" @tap="goto('/pages/users/friendlist?type=fans')">
+          <view class="bold font_32 text-shadow text-black" >{{user.fans_count}}</view>
+          <view class="font_26">关注我的</view>
+        </view>
+      </view>
+    </view>
+    <view class="animation-slide-bottom">
+      <block  wx:for="{{list}}" wx:key="index">
+        <block wx:if="{{item.title == '会员中心'}}">
+          <block wx:if="{{system != 'iOS'}}">
+            <view class="_list" @tap="goto({{item.path}})" >
+              <image src="{{item.icon}}" mode="widthFix" class="img flo_l"></image>
+              <span class="font_30 color-333">{{item.title}}</span>
+              <image src="https://images.ufutx.com/202007/25/689bff0c89256e207de558b37a77877f.png" mode="aspectFill" class="icon flo_r"></image>
+              <view class="zf-tag font_20 flo_r bg-gradual-red padding radius text-center" wx:if="{{item.title == '推荐给好友'}}">领取会员</view>
+              <view class="font_24 flo_r zf-tag-text  text-shadow {{user.deadline?'text-orange':'red'}}" wx:if="{{item.title == '会员中心'}}">
+                <span wx:if="{{user.deadline}}">{{user.deadline}} 到期</span>
+                <span wx:else>未激活</span>
+              </view>
+              <view class="font_24 flo_r zf-tag-text  text-shadow {{user.is_approved?'text-green':'red'}}" wx:if="{{item.title == '认证中心'}}">
+                <span wx:if="{{user.is_approved}}">已认证</span>
+                <span wx:else>完善认证 解锁更多功能</span>
+              </view>
+            </view>
+          </block>
+        </block>
+        <block wx:else>
+          <view class="_list" @tap="goto({{item.path}})" >
+            <image src="{{item.icon}}" mode="widthFix" class="img flo_l"></image>
+            <span class="font_30 color-333">{{item.title}}</span>
+            <image src="https://images.ufutx.com/202002/26/3dbd6cf89a117a0f0a1c79d0204b557d.png" mode="aspectFill" class="icon flo_r"></image>
+            <view class="zf-tag font_20 flo_r bg-gradual-red padding radius text-center" wx:if="{{item.title == '推荐给好友'}}">领取会员</view>
+            <view class="font_24 flo_r zf-tag-text  text-shadow {{user.deadline?'text-orange':'red'}}" wx:if="{{item.title == '会员中心'}}">
+              <span wx:if="{{user.deadline}}">{{user.deadline}} 到期</span>
+              <span wx:else>未激活</span>
+            </view>
+            <view class="font_24 flo_r zf-tag-text  text-shadow {{user.is_approved?'text-green':'red'}}" wx:if="{{item.title == '认证中心'}}">
+              <span wx:if="{{user.is_approved}}">已认证</span>
+              <span wx:else>完善认证 解锁更多功能</span>
+            </view>
+          </view>
+        </block>
+      </block>
+      <view style="height: 160rpx"></view>
+    </view>
+    <view class="cu-modal {{modalName=='ModalEdit'?'show':''}}">
+      <view class="cu-dialog">
+        <view class="cu-bar bg-white justify-end">
+          <view class="content">提示</view>
+          <view class="action" bindtap="hideModal">
+            <text class="cuIcon-close text-red"></text>
+          </view>
+        </view>
+        <view class="padding-xl text-left">
+          你的 <span class="text-shadow text-orange" @tap.stop="gotoPage('/pages/users/unmarriV2')">个人资料</span> 未完善，资料完善度越高，匹配越精准哦！
+          <button class="btn text-center font_30 btn-box white radius shadow bg-blue margin-top send" @tap.stop="gotoPage('/pages/users/unmarriV2')">完善资料
+          </button>
+        </view>
+      </view>
+    </view>
+    <view class="cu-modal {{modalName=='ModalLogin'?'show':''}}">
+      <view class="cu-dialog">
+        <view class="cu-bar bg-white justify-end">
+          <view class="content">提示</view>
+          <view class="action" bindtap="hideModal">
+            <text class="cuIcon-close text-red"></text>
+          </view>
+        </view>
+        <view class="padding-xl text-left">
+          你还没登录呢！请先
+          <button class="text-center btn-box white radius shadow inline-block font_26 bg_theme" style="margin-bottom: -12rpx;line-height: 46rpx;" @tap="gotoPage('/pages/userInfo/typeSelect')">登录</button>
+        </view>
+      </view>
+    </view>
+    <view class="cu-modal {{modalName=='Modal'?'show':''}}">
+      <view class="cu-dialog">
+        <view class="cu-bar bg-white justify-end">
+          <view class="content">提示</view>
+          <view class="action" bindtap="hideModal">
+            <text class="cuIcon-close text-red"></text>
+          </view>
+        </view>
+        <view class="padding-xl text-left">
+          福分商城正在维护中,下个版本将开放福分商城，福分可在福分商城里购买商品，对应的使用规则，敬请期待!
+        </view>
+      </view>
+    </view>
+    <!--<official-account style="position:fixed;bottom:0;width:100%;height:168rpx;"></official-account>-->
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import http from '../../mixins/http'
+  import base from '../../mixins/base'
+  import user from '../../mixins/user'
+  import {service} from '../../config.js'
+  import userTitle from '../../components/userTitle'
+  import Loading from '../../components/loading'
+
+  // const innerAudioContext = wx.createInnerAudioContext()
+  export default class User extends wepy.page {
+    mixins = [base, http, user]
+    config = {
+      navigationBarTitleText: '我的',
+      enablePullDownRefresh: true,
+      navigationBarBackgroundColor: '#f4f5f9',
+      navigationStyle: 'custom'
+    }
+    components = {userTitle, Loading}
+    data = {
+      user: {
+        friend_count: 0,
+        follow_count: 0,
+        fans_count: 0
+      },
+      modalName: '',
+      is_vip: false,
+      title: '向你推荐《福恋》',
+      token: wx.getStorageSync('token'),
+      system: wx.getStorageSync('system'),
+      list: [
+        {
+          icon: 'https://images.ufutx.com/202003/31/36d229ac60d08f68ae80d614387f64f3.png',
+          title: '认证中心',
+          type: 'navigateTo',
+          path: '/pages/users/realName'
+        },
+        {
+          icon: 'https://images.ufutx.com/202003/31/01c07e1193e4fa4e1ab88728bf08e1f6.png',
+          title: '会员中心',
+          type: 'navigateTo',
+          path: '/pages/users/upgradeVIP'
+        },
+        {
+          icon: 'https://images.ufutx.com/202007/25/ffa699647f0f392f6eb8d2ea7433748b.png',
+          title: '服务套餐',
+          type: 'navigateTo',
+          path: '/pages/users/upgradeVIP2'
+        },
+        {
+          icon: 'https://images.ufutx.com/202003/31/d818cf51568200f390e2f15897c1e624.png',
+          title: '我的福分',
+          type: 'navigateApp',
+          path: ''
+        },
+        {
+          icon: 'https://images.ufutx.com/202003/31/639d18a3c5883e90c200fe99910ccab1.png',
+          title: '我的订单',
+          type: 'navigateTo',
+          path: '/pages/users/myOrderList'
+        },
+        {
+          icon: 'https://images.ufutx.com/202003/31/a70ff1e938748c2ee4821c2c19b4c537.png',
+          title: '我的活动',
+          type: 'navigateTo',
+          path: '/pages/users/myActivity'
+        },
+        {
+          icon: 'https://images.ufutx.com/202003/31/7a6550c4caf427111ee747f47302b236.png',
+          title: '推荐给好友',
+          type: 'navigateTo',
+          path: '/pages/users/myShare'
+        },
+        {
+          icon: 'https://images.ufutx.com/202004/22/975b8a657710b588ffbff8a4023164a2.png',
+          title: '通用设置',
+          type: 'navigateTo',
+          path: '/pages/users/setTing'
+        },
+        {
+          icon: 'https://images.ufutx.com/202003/31/ee0a4f2e9bd9cb6e81dc5def6f08bf3a.png',
+          title: '关于福恋',
+          type: 'navigateTo',
+          path: '/pages/users/aboutLove'
+        }
+      ]
+    }
+
+    computed = {}
+
+    onShow() {
+      this.token = wx.getStorageSync('token')
+      this.$apply()
+      if (this.token) {
+        // this.$goto('/pages/userInfo/typeSelect')
+        this.getNewCount()
+        this.initPageData()
+        // return
+      }
+      // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
+    }
+
+    onShareAppMessage(res) {
+      let that = this
+      let openid = wx.getStorageSync('openid')
+      let url = `/pages/tabBar/welcome?from_openid=${openid}&share_user_id=${that.id}`
+      console.log(url)
+      return {
+        title: that.title,
+        path: url,
+        // imageUrl: 'https://images.ufutx.com/202004/29/baac955e5878e0cb03c17eef0c92f473.jpeg',
+        success: function(res) {
+          wx.showToast({
+            title: '转发成功',
+            icon: 'success',
+            duration: 1500
+          })
+          var shareTickets = res.shareTickets
+          if (shareTickets.length == 0) {
+            return false
+          }
+        },
+        fail: function(res) {
+          // 转发失败
+        }
+      }
+    }
+
+    onLoad(e) {}
+
+    onPullDownRefresh() {
+      if (this.token) {
+        this.initPageData()
+      }
+    }
+
+    getUid() {
+      let that = this
+      that.$get({
+        url: service.account,
+        data: {
+          openid: wx.getStorageSync('openid')
+        }
+      }, {
+        success: ({code, data}) => {
+          console.log(data)
+          that.extraData = {
+            'uid': data.uid
+          }
+          that.$apply()
+        }
+      })
+    }
+
+    getNewCount() {
+      this.$get({url: `${service.host}/new/message/count`}, {
+        success: ({code, data}) => {
+          let {new_count} = data
+          if (new_count > 0) {
+            wx.setTabBarBadge({
+              index: 2,
+              text: `${new_count}`
+            })
+          } else {
+            wx.removeTabBarBadge({
+              index: 2
+            })
+          }
+        }
+      })
+    }
+
+    // 初始化页面数据
+    initPageData() {
+      let data = {
+        type: 'single'
+      }
+      this.$get({url: `${service.user}/v3`, data}, {
+        success: ({code, data}) => {
+          this.init = true
+          this.user = data
+          if (data.is_profile != 1) {
+            this.modalName = 'ModalEdit'
+            this.$apply()
+          }
+          this.title = `我是"${data.nickname}"，这是我的小程序卡片`
+          this.$apply()
+          wx.setStorageSync('type', data.type)
+        }
+      })
+    }
+
+    methods = {
+      hideModal () {
+        this.modalName = ''
+        this.$apply()
+      },
+      gotoPage(url) {
+        this.modalName = ''
+        this.$apply()
+        this.$goto(url)
+      },
+      goto(url) {
+        if (!this.token) {
+          this.modalName = 'ModalLogin'
+          this.$apply()
+          return
+        }
+        if (url) {
+          wx.navigateTo({url: url})
+          return
+        }
+        this.modalName = 'Modal'
+        this.$apply()
+      }
+    }
+    events = {
+      'modalValue': (value) => { // 搜索返回值
+        this.modalName = value
+        this.$apply()
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+  @import "../../styles/custom/reset.less";
+  @import "../../styles/custom/fn.less";
+
+  page {
+    background: #f4f5f9;
+    .bc_tab{
+      width: 100%;
+      height: 120rpx;
+      background: white;
+      position: relative;
+      padding-top: 16rpx;
+      margin-bottom: 22rpx;
+      .mainF, .mainFA{
+        width: 33%;
+        height: 100%;
+      }
+      .mainFA{
+        position: relative;
+        &:after,&:before{
+          content: " ";
+          position: absolute;
+          top: 16rpx;
+          height: 28px;
+          width: 1px;
+          background: #f6f6f6;
+        }
+        &:after{left: 0;}
+        &:before{right: 0;}
+      }
+    }
+    ._list{
+      background: #FFFFFF;
+      padding: 0 32rpx;
+      overflow: hidden;
+      line-height: 100rpx;
+      border-bottom: 2rpx solid #f6f6f6;
+      .zf-tag {
+        height: 36rpx;
+        line-height: 36rpx;
+        border-radius: 8rpx;
+        padding: 0 12rpx;
+        margin-top: 38rpx;
+        margin-right: 12rpx;
+        animation: zy 2.5s .15s linear infinite;
+        @keyframes zy{
+          10%{transform: rotate(8deg);}
+          20%{transform: rotate(-6deg);}
+          30%{transform: rotate(3deg);}
+          40%{transform: rotate(-3deg);}
+          50%,100%{transform: rotate(0deg);}
+        }
+      }
+      .zf-tag-text{
+        height: 36rpx;
+        margin-top: 5rpx;
+        margin-right: 12rpx;
+      }
+      .img{
+        width: 44rpx;
+        height: auto;
+        line-height: 100rpx;
+        margin-top: 3.6vw;
+        margin-right: 8rpx;
+      }
+      .icon{
+        width: 32rpx;
+        height: 32rpx;
+        margin-top: 5vw;
+      }
+    }
+    ._listV2{
+      margin-bottom: 0;
+      position: relative;
+      &:before{
+        content: " ";
+        width: 87vw;
+        height: 2rpx;
+        background: #eeeded;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+      }
+    }
+  }
+  .btn-box{
+    width: 80%;
+    background: #D92553;
+    border-radius: 6rpx;
+    padding: 16rpx;
+    margin: 16rpx auto;
+    letter-spacing: 8rpx;
+  }
+  .send{
+    margin: 50rpx auto;
+    margin-bottom: -12rpx;
+  }
+</style>

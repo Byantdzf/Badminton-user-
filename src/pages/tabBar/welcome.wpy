@@ -1,0 +1,241 @@
+<template>
+  <view class="box {{hide?'hide':''}}">
+    <image src="https://images.ufutx.com/201908/16/7d151aa8067ab044838add608e7395fd.jpeg" mode="aspectFill" class="image"></image>
+    <view @tap="goto('/pages/users/registerV2')" class="next" wx:if="{{hideBtn}}"></view>
+    <view class="wrapper" @tap="jump">
+      <view class="font_24 flo_l text-center time">{{time}}s</view>
+      <view class="font_24 flo_l">跳过</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import base from '../../mixins/base'
+  import {service} from '../../config.js'
+  import http from '../../mixins/http'
+  import ShareMessage from '../../mixins/ShareMessage'
+
+  export default class welcome extends wepy.page {
+    mixins = [base, http, ShareMessage]
+    config = {
+      navigationBarTitleText: '欢迎使用',
+      enablePullDownRefresh: false,
+      navigationStyle: 'custom'
+    }
+    components = {}
+    data = {
+      hide: false,
+      hideBtn: false,
+      time: 3,
+      token: '',
+      setIntervalFn: '',
+      startImage: '',
+      type: ''
+    }
+
+    computed = {}
+
+    onShow() {
+      this.type = wx.getStorageSync('type')
+      this.$apply()
+      this.changeWallpaper()
+      // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
+    }
+
+    onLoad(e) {
+      this.$showLoading('加载中')
+      this.login()
+      if (wx.getStorageSync('startImage')) {
+        this.startImage = wx.getStorageSync('startImage')
+        this.$apply()
+      }
+      this.setIntervalFn = setInterval(() => {
+        this.time--
+        this.$apply()
+        if (this.time === 0) {
+          clearInterval(this.setIntervalFn)
+          if (this.token) {
+            if (this.type == 'marriage') {
+              // this.$goto('/pages/marriedPage/home')
+            } else {
+              this.$gotoTab('/pages/tabBar/home')
+            }
+          } else {
+            // this.$goto('/pages/userInfo/typeSelect')
+          }
+        }
+      }, 1000)
+      if (e.from_platform) {
+        wx.setStorageSync('from_platform', e.from_platform)
+      }
+    }
+
+    changeWallpaper() {
+      let myDate = new Date()
+      console.log(myDate.getDate())
+      console.log(myDate.getSeconds())
+      this.startImage = 'https://images.ufutx.com/201908/06/28c03d3961c2e936cc6234f52d82e965.jpeg'
+      this.$apply()
+    }
+
+    login() {
+      let that = this
+      if (wx.getStorageSync('token')) {
+        this.token = wx.getStorageSync('token')
+        this.$apply()
+        wx.hideLoading()
+        return
+      }
+      wepy.login({
+        success: (res) => {
+          that.$post({url: service.login, data: {code: res.code}}, {
+            success: ({code, data}) => {
+              if (data.token) {
+                that.hide = true
+                that.token = data.token
+                that.$apply()
+                wx.setStorageSync('token', data.token)
+                wx.setStorageSync('openid', data.openid)
+                wx.setStorageSync('temp_member', data.user.temp_member)
+                let userInfo = {
+                  nickName: data.user.name,
+                  avatarUrl: data.user.avatar,
+                  type: data.user.type
+                }
+                wx.setStorageSync('userInfo', userInfo)
+                wx.setStorageSync('user_id', data.user.id)
+                wx.setStorageSync('type', data.user.type)
+                that.type = data.user.type
+                that.$apply()
+                if (this.time == 0) {
+                  setTimeout(() => {
+                    if (that.type == 'marriage') {
+                      this.$goto('/pages/marriedPage/home')
+                    } else {
+                      that.$gotoTab('/pages/tabBar/home')
+                    }
+                  }, 800)
+                }
+              } else {
+                that.hideBtn = true
+                that.$apply()
+              }
+              wx.hideLoading()
+            }
+          })
+        },
+        fail: (res) => {
+          console.log('wepy.login.fail:', res)
+        }
+      })
+    }
+
+    onPullDownRefresh() {
+    }
+
+    methods = {
+      jump() {
+        clearInterval(this.setIntervalFn)
+        if (this.token) {
+          if (this.type == 'marriage') {
+            this.$goto('/pages/marriedPage/home')
+          } else {
+            this.$gotoTab('/pages/tabBar/home')
+          }
+        } else {
+          this.$goto('/pages/userInfo/typeSelect')
+        }
+      },
+      gotoTab(url) {
+        if (wx.getStorageSync('token')) {
+          return this.$gotoTab(url)
+        }
+      },
+      goto(url) {
+        wx.navigateTo({url: url})
+      }
+    }
+  }
+</script>
+
+<style lang="less" scoped>
+  @import "../../styles/custom/fn.less";
+  @import "../../styles/custom/reset.less";
+
+  page {
+    background: #ffffff;
+    .box {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      /*background: url('http://images.ufutx.com/201901/09/3d0d453feb5ad6b5625ece9670fd7d31.png') no-repeat contain;*/
+      .wrapper {
+        width: 154rpx;
+        height: 60rpx;
+        background: rgba(99, 97, 101, 0.6);
+        position: absolute;
+        right: 30rpx;
+        bottom: 30rpx;
+        border-radius: 32rpx;
+        /*border: 1rpx solid #b6b6b6;*/
+        color: white;
+        .time {
+          width: 42rpx;
+          margin-left: 22rpx;
+          height: 32rpx;
+          line-height: 32rpx;
+          margin-top: 14rpx;
+          margin-right: 12rpx;
+          border-right: 2px solid #b6b6b6;
+        }
+
+        view {
+          line-height: 60rpx;
+        }
+      }
+
+      .image {
+        width: 100vw;
+        height: 100vh;
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+      .image-btn {
+        width: 100vw;
+        height: 12vh;
+        position: absolute;
+        left: 0;
+        bottom: 0;
+      }
+
+      .next {
+        width: 100vw;
+        height: 8vh;
+        /*background: red;*/
+        position: absolute;
+        left: 0;
+        bottom: 26vh;
+      }
+    }
+
+    .hide {
+      animation: opacity2 800ms ease-in;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes opacity2 {
+      0% {
+        opacity: 1
+      }
+      50% {
+        opacity: .8;
+      }
+      100% {
+        opacity: 0;
+        display: none;
+      }
+    }
+  }
+</style>
