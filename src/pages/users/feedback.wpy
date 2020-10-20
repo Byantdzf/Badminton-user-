@@ -1,0 +1,217 @@
+<template>
+  <NavBar rgba="#ffffff" bag="#ffffff" :title.sync="title"></NavBar>
+  <Loading :init.sync="init"></Loading>
+  <view class="wrapper">
+    <view class="_input">
+      <input type="text" placeholder="请输入标题">
+    </view>
+    <view class="themes">
+      <textarea class="textarea font_28 color-666 text-left" maxlength="240"  placeholder="请详细写下您的建议和感想吧！" @input="typing('informValue')" @blur="typing('informValue')"  adjust-position="true"  value="{{informValue}}" />
+      <view class="font_28 text-right bold color-666">{{informValue.length}}/240</view>
+    </view>
+<!--    <view class="uploadPic">-->
+<!--      <view class="font_26 color-666" style="margin-bottom: 22rpx">为了能够让开发者更快的处理您的反馈，建议您上传要反馈内容的截图。</view>-->
+<!--      <image src="http://images.ufutx.com/201902/27/fc2da5fdf813b12f7c8a616eff6dbf03.png" @tap="uploadPic" mode="widthFix" class="image"></image>-->
+<!--      <block wx:for="{{informImages}}" wx:key="{{index}}" wx:if="{{informImages}}">-->
+<!--        <image src="{{item}}"   mode="aspectFill" class="upLoadImage" @tap="previewImages({{item}},{{informImages}})" @longpress="deletePic({{index}})"></image>-->
+<!--      </block>-->
+<!--    </view>-->
+    <view class="clearfloat"></view>
+    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="save">提交
+    </button>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  import { service } from '../../config.js'
+  import http from '../../mixins/http'
+  import base from '../../mixins/base'
+  import user from '../../mixins/user'
+  import ShareMessage from '../../mixins/ShareMessage'
+  import NavBar from '../../components/NavBar'
+  import Loading from '../../components/loading'
+  import uploadImages from '../../components/uploadImages'
+
+  export default class feedback extends wepy.page {
+    mixins = [base, http, user, ShareMessage]
+    config = {
+      navigationBarTitleText: '意见反馈'
+    }
+
+    components = {NavBar, Loading, uploadImages}
+    data = {
+      loaded: false,
+      init: false,
+      name: '',
+      informText: ['骚扰、广告', '形象照、资料虚假或假冒', '辱骂、攻击等', '色情、暴力等', '诈骗钱财', '其他'],
+      informIndex: 0,
+      informValue: '',
+      informClass: '',
+      informImages: [],
+      id: ''
+    }
+
+    computed = {}
+
+    onShareAppMessage(res) {
+      return this.$parent.onShareAppMessage(this.config.navigationBarTitleText)
+    }
+
+    async onLoad(e) {
+      this.id = e.id
+      setTimeout(() => {
+        this.init = true
+        this.$apply()
+      }, 500)
+    }
+
+    onShow() {
+      this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
+    }
+
+    onPullDownRefresh() {
+    }
+    onReachBottom() {
+    }
+
+    methods = {
+      deletePic(index) {
+        let vm = this
+        wx.showModal({
+          title: '提示',
+          content: '删除该照片？',
+          success(res) {
+            if (res.confirm) {
+              vm.informImages.splice(index, 1)
+              vm.$apply()
+            } else if (res.cancel) {
+              console.log('用户点击取消')
+            }
+          }
+        })
+      },
+      previewImages(item, list) {
+        this.$previewImages(item, list)
+      },
+      typing(type, e) {
+        this[type] = e.detail.value
+        this.$apply()
+        console.log(this[type])
+      },
+      uploadPic() { // 上传组件
+        this.$invoke('uploadImages', 'chooseimage')
+      },
+      bindPickerChange(e) {
+        this.informIndex = e.detail.value
+        this.informClass = this.informText[this.informIndex]
+        this.$apply()
+      },
+      gotoFriendPage(item) {
+        let url = ''
+        if (item.type == 'single') {
+          url = '/pages/home/information?id=' + item.id
+        } else {
+          url = '/pages/home/introducer?id=' + item.id
+        }
+        wx.navigateTo({url: url})
+      },
+      save() {
+        let data = {
+            content: this.informValue,
+            photos: this.informImages
+          },
+          vm = this
+        for (let item in data) {
+          if (!data[item]) {
+            return vm.$showToast('请填写反馈信息！')
+          }
+        }
+        console.log(data)
+        vm.$post({url: `${service.host}/feedback`, data}, {
+          success: ({code, data}) => {
+            wx.showModal({
+              title: '反馈成功！',
+              content: '非常感谢您的反馈！我们将以最快速度处理您的反馈。',
+              success(res) {
+                if (res.confirm) {
+                  vm.$gotoBack(1)
+                } else if (res.cancel) {
+                  console.log('用户点击取消')
+                }
+              }
+            })
+          }
+        })
+      }
+    }
+    events = {
+      'UpLoadImage': (value) => {
+        this.informImages.push(value)
+        this.$apply()
+      }
+    }
+  }
+
+</script>
+
+<style lang="less">
+  @import "../../styles/weui/base/fn.wxss";
+  @import "../../styles/custom/fn.less";
+  page{
+    background: #f9f2db;
+    .wrapper{
+      padding: 26rpx 12rpx;
+      .section,.themes,{
+        overflow: hidden;
+        padding: 16rpx 26rpx;
+        background: white;
+        margin: 22rpx 16rpx;
+        border-radius: 18rpx;
+      }
+      ._input{
+        margin: 6rpx 32rpx;
+        border-bottom: 2rpx solid #000;
+        input{
+          padding: 0 12rpx;
+        }
+      }
+      .textarea{
+        width: 100%;
+        height: 250rpx;
+      }
+      .uploadPic{
+        padding: 16rpx 26rpx;
+        .image{
+          width: 180rpx;
+          height: 180rpx;
+          margin-right: 36rpx;
+        }
+        .upLoadImage{
+          width: 180rpx;
+          height: 180rpx;
+          margin-right: 22rpx;
+          border: 1rpx solid #d3d3d3;
+        }
+      }
+      .infromBtn{
+        /*padding: 2rpx 32rpx 42rpx 12rpx;*/
+        margin: 32rpx;
+        width: 220rpx;
+        background: #D92553;
+      }
+    }
+  }
+  .btn-box{
+    width: 68%;
+    background: #f8b51e;
+    border-radius: 48rpx;
+    padding: 16rpx 0;
+    margin: 42rpx auto;
+    margin-bottom: 28rpx;
+    letter-spacing: 8rpx;
+    position: fixed;
+    left: 16%;
+    bottom: 42rpx;
+    color: black;
+  }
+</style>

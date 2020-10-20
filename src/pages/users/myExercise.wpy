@@ -1,0 +1,213 @@
+<template>
+  <view class="">
+    <template is="list" data="{{list,active}}"></template>
+  </view>
+  <template name="list">
+    <view class="text-center arenaStyle">
+      <span class="_text font_32   {{active == '1'?'bold color_0':'color-666'}}" @tap="tabFn('1')">打卡记录</span>
+      <span class='color-666 font_24'>|</span>
+      <span class="_text font_32  {{active == '2'?'bold color_0':'color-666'}}" @tap="tabFn('2')">训练视频</span>
+    </view>
+    <view class="listBox">
+      <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this">
+        <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
+               class="image flo_l"></image>
+        <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
+        <view class="flo_l  ellipsis_1 _address">
+          <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"
+                 class="icon"></image>
+          <span class="font_24">2020年09月26日 18:00-19:30</span>
+        </view>
+      </view>
+    </view>
+  </template>
+</template>
+
+<script>
+import wepy from 'wepy'
+import {service} from '../../config.js'
+import http from '../../mixins/http'
+import base from '../../mixins/base'
+import user from '../../mixins/user'
+// import ShareMessage from '../../mixins/ShareMessage'
+
+let date = new Date()
+export default class home extends wepy.page {
+  mixins = [base, http, user]
+  config = {
+    navigationBarTitleText: '课程首页',
+    onReachBottomDistance: 10,
+    enablePullDownRefresh: false
+  }
+  components = {}
+
+  data = {
+    cycleList: [], // 周期
+    list: [],
+    city: '深圳',
+    swiperList: [
+      {  // 轮播
+        id: 0,
+        link: 'https://baidu.com',
+        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg'
+      }, {
+        id: 1,
+        link: 'https://baidu.com',
+        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big84001.jpg'
+      }, {
+        id: 2,
+        link: 'https://baidu.com',
+        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big39000.jpg'
+      }],
+    searchTime: '',
+    chnNumChar: {
+      1: '一',
+      2: '二',
+      3: '三',
+      4: '四',
+      5: '五',
+      6: '六',
+      7: '七'
+    },
+    id: '',
+    cardCur: 0,
+    tabBox: 1,
+    active: 1,
+    token: wx.getStorageSync('token'),
+    modalName: '',
+    throttle: true, // 节流
+    day: date,
+    actEndTime: '2020-4-19 18:50:00',
+    refresh: false // 是否刷新
+  }
+
+  computed = {}
+
+  async onLoad(e) {
+    this.getDate()
+  }
+
+  onShow() {
+  }
+
+  getList() {   // 获取用户数据
+    let vm = this,
+      url = `${service.host}/home/v3`,
+      data = {
+        sex: `${vm.touristsSex}`
+      }
+    vm.cardCur = 0
+    vm.list = []
+    vm.$apply()
+    vm.$showLoading('加载中')
+    vm.$get({
+      url: url, data
+    }, {
+      success: ({code, data}) => {
+        vm.list = data
+        vm.$apply()
+        wx.hideLoading()
+        console.log(vm.list)
+      }
+    })
+  }
+
+  upDate() {
+    let vm = this
+    let url = `${service.host}/user/v3`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        vm.is_approved = data.is_approved
+        vm.is_profile = data.is_profile
+        vm.$apply()
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+        wx.hideLoading()
+      }
+    })
+  }
+
+  methods = {
+    tabFn(val) {
+      let vm = this
+      vm.$showLoading('加载中...')
+      setTimeout(() => {
+        vm.$hideLoading()
+      }, 800)
+      this.active = val
+      this.$apply()
+    },
+    gotoLink(link) {
+      console.log(link)
+      this.$gotoH5(link)
+    },
+    goto(url) {
+      this.modalName = ''
+      this.$apply()
+      console.log(url)
+      this.$goto(url)
+    }
+  }
+  events = {
+  }
+}
+</script>
+
+<style lang="less">
+@import "../../styles/custom/fn.less";
+@import "../../styles/custom/reset.less";
+
+page {
+  background: #f9f2db;
+
+  .arenaStyle{
+    margin-top: 12rpx;
+    letter-spacing: 2rpx;
+    ._text{
+      margin: 0 22rpx;
+    }
+    .color_0{
+      color: #000000;
+    }
+  }
+  .listBox{
+    margin: 12rpx 32rpx;
+    ._title{
+      color: black;
+      margin: 12rpx 14rpx;
+      width: 52%;
+    }
+    ._address{
+      width: 62%;
+      overflow: hidden;
+      margin: -20rpx 14rpx 0 14rpx;
+      color: black;
+      .icon{
+        width: 20rpx;
+        height: 20rpx;
+        vertical-align: middle;
+        margin-bottom: 6rpx;
+        margin-right: 6rpx;
+      }
+    }
+    .listItem{
+      margin-top: 12rpx;
+      position: relative;
+      border-radius: 22rpx;
+      overflow: hidden;
+      height: 200rpx;
+      background: #f8b51e;
+      margin-bottom: 24rpx;
+      .image{
+        width: 200rpx;
+        height: 200rpx;
+        border-radius: 22rpx;
+      }
+    }
+  }
+}
+</style>

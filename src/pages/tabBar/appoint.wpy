@@ -1,0 +1,223 @@
+<template>
+  <view class="">
+    <template is="mainUser" data="{{day, num}}"></template>
+    <template is="list" data="{{list}}"></template>
+  </view>
+  <template name="mainUser">
+    <view class="_userInfo radius shadow bg-white">
+      <view class="_item bold"><view class="font_52 white">{{day}}</view><span>累计天数</span></view>
+      <view class="_item"><image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill" class="photo "></image></view>
+      <view class="_item bold"><view class="font_52 white">{{num}}</view><span>累计训练/次</span></view>
+    </view>
+  </template>
+  <template name="list">
+    <view class="listBox">
+      <view class="_title">
+        <span class="font_30">预约记录</span>
+        <image src="https://images.ufutx.com/202010/20/267ae6ff1cba531887957f23212a39a8.png" mode="aspectFill"
+               class="_icon"></image>
+      </view>
+      <view class="listItem radius shadow bg-white" wx:for="{{2}}" wx:key="this">
+        <view class="_item"><view class="font_42 white">1</view><span>训练次数</span></view>
+        <view class="_item"><view class="font_42 white">8</view><span>训练天数</span></view>
+        <view class="_item"><view class="font_42 white">30</view><span>训练时长/分钟</span></view>
+      </view>
+    </view>
+  </template>
+</template>
+
+<script>
+import wepy from 'wepy'
+import {service} from '../../config.js'
+import http from '../../mixins/http'
+import base from '../../mixins/base'
+import user from '../../mixins/user'
+// import ShareMessage from '../../mixins/ShareMessage'
+
+let date = new Date()
+export default class home extends wepy.page {
+  mixins = [base, http, user]
+  config = {
+    navigationBarTitleText: '我的预约',
+    enablePullDownRefresh: false
+  }
+  components = {}
+  data = {
+    list: [],
+    city: '深圳',
+    day: '10', // 累计天数
+    num: '7',  // 累积训练次数
+    refresh: false // 是否刷新
+  }
+
+  computed = {}
+
+  async onLoad(e) {
+  }
+
+  onShow() {
+    let vm = this
+    vm.cardCur = 0
+    vm.token = wx.getStorageSync('token')
+    vm.$apply()
+    if (wx.getStorageSync('touristsSex')) {
+      vm.touristsSex = wx.getStorageSync('touristsSex')
+      vm.$apply()
+      console.log(vm.touristsSex, 'touristsSex')
+    }
+    if (vm.token == '') {
+      wepy.login({
+        success: (res) => {
+          vm.$post({url: service.login, data: {code: res.code}}, {
+            success: ({code, data}) => {
+              if (data.token) {
+                wx.setStorageSync('token', data.token)
+                wx.setStorageSync('openid', data.openid)
+                let userInfo = {
+                  nickName: data.user.name,
+                  avatarUrl: data.user.avatar,
+                  type: data.user.type
+                }
+                wx.setStorageSync('userInfo', userInfo)
+                wx.setStorageSync('user_id', data.user.id)
+                wx.setStorageSync('type', data.user.type)
+              }
+              if (data.token) {
+                vm.page = 1
+                vm.$apply()
+                vm.upDate()
+              }
+            }
+          })
+          vm.getList()
+        },
+        fail: (res) => {
+          console.log('wepy.login.fail:', res)
+        }
+      })
+    } else {
+      vm.page = 1
+      vm.$apply()
+      vm.getList()
+      vm.upDate()
+    }
+    // vm.$parent.getTracker(vm.$root.$name, vm.config.navigationBarTitleText)
+  }
+
+  timeFormat(param) {
+    return param < 10 ? '0' + param : param
+  }
+
+  getList() {   // 获取用户数据
+    let vm = this,
+      url = `${service.host}/home/v3`,
+      data = {
+        sex: `${vm.touristsSex}`
+      }
+    vm.cardCur = 0
+    vm.list = []
+    vm.$apply()
+    vm.$showLoading('加载中')
+    vm.$get({
+      url: url, data
+    }, {
+      success: ({code, data}) => {
+        vm.list = data
+        vm.$apply()
+        wx.hideLoading()
+        console.log(vm.list)
+      }
+    })
+  }
+
+  upDate() {
+    let vm = this
+    let url = `${service.host}/user/v3`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        vm.is_approved = data.is_approved
+        vm.is_profile = data.is_profile
+        vm.$apply()
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+        wx.hideLoading()
+      }
+    })
+  }
+
+  methods = {
+    goto(url) {
+      this.modalName = ''
+      this.$apply()
+      console.log(url)
+      this.$goto(url)
+    }
+  }
+  events = {}
+}
+</script>
+
+<style lang="less">
+@import "../../styles/custom/fn.less";
+@import "../../styles/custom/reset.less";
+
+page {
+  background: #f9f2db;
+  ._userInfo{
+    background: #f8b51e;
+    overflow: hidden;
+    padding-top: 32rpx;
+    .photo{
+      width: 180rpx;
+      height: 180rpx;
+      border-radius: 50%;
+      box-shadow: 1rpx 1rpx 12rpx #a1a1a1;
+      margin-top: -42rpx;
+      margin-bottom: 22rpx;
+    }
+    ._item{
+      color: black;
+      width: 33%;
+      float: left;
+      text-align: center;
+      margin-top: 52rpx;
+    }
+  }
+  .listBox{
+    margin: 12rpx 32rpx;
+    ._title{
+      margin: 22rpx 0;
+      ._icon{
+        width: 22rpx;
+        height: 22rpx;
+        vertical-align: middle;
+        margin: 0 0 6rpx 6rpx;
+      }
+    }
+    .listItem{
+      margin-top: 12rpx;
+      position: relative;
+      border-radius: 22rpx;
+      overflow: hidden;
+      height: 200rpx;
+      background: #f8b51e;
+      margin-bottom: 24rpx;
+      ._item{
+        color: black;
+        width: 33.3%;
+        float: left;
+        text-align: center;
+        margin-top: 48rpx;
+      }
+
+    }
+  }
+  .font_52{
+    font-size: 52rpx;
+  }
+}
+</style>

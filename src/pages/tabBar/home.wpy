@@ -8,7 +8,7 @@
     <view class=" addressStyle">
       <image src="https://images.ufutx.com/202010/19/6430391dbc48d09f21da1fd000ad1480.png" mode="widthFix"
              class="iconStyle"></image>
-      <span class="font_30 bold">{{ city }}</span>
+      <span class="font_32 bold">{{ city }}</span>
     </view>
     <swiper class="card-swiper" circular="true" autoplay="true" interval="5000" duration="500"
             bindchange="cardSwiper">
