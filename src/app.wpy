@@ -48,7 +48,8 @@ export default class extends wepy.app {
           'userInfo',
           'myCourses',
           'myExercise',
-          'feedback'
+          'feedback',
+          'unmarri'
         ]
       }
     ],
