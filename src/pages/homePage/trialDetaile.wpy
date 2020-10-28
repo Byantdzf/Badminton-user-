@@ -1,0 +1,402 @@
+<template>
+  <Loading :init.sync="init"></Loading>
+  <view class="wrapper">
+    <template is="video"></template>
+    <template is="title"></template>
+    <template is="_detaile" data="{{active,dataList,picList}}"></template>
+<!--    <template is="appraise" data="{{starMap,star}}"></template>-->
+    <view class="height160"></view>
+    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="save">立即预约
+    </button>
+  </view>
+  <template name="video">
+    <view class="videoStyle">
+      <image src="https://images.ufutx.com/202010/28/a0b762859636f4ae43b694d4edf10b2e.jpeg" mode="widthFix" class="image"></image>
+    </view>
+  </template>
+  <template name="title">
+    <view class="_title">
+      <view class="_name font_32 bold">基础课程
+
+        <view class="_name font_36 bold flo_r color-red">￥6800</view>
+      </view>
+      <view class="_time ellipsis_1">
+        <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
+               class="icon"></image>
+        <span class="font_26">深圳市南山区阳光科创A座121</span>
+      </view>
+      <view class="font_24 ellipsis_1 _member">
+        <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
+               class="icon"></image>
+        <span class="color_0 font_26"><span class="white"> 5 </span>/ 10</span>
+        <view class="_name font_32 bold flo_r">100m</view>
+      </view>
+    </view>
+  </template>
+  <template name="_detaile">
+    <view class="_detaileStyle">
+      <view class="arenaStyle">
+        <span class="_text font_30   {{active == '1'?'bold color_0':'color-666'}}" @tap="tabFn('1')">课程介绍</span>
+        <span class='color-666 font_24'>|</span>
+        <span class="_text font_30  {{active == '2'?'bold color_0':'color-666'}}" @tap="tabFn('2')">课表</span>
+      </view>
+      <block wx:if="{{active == '1'}}">
+        <view style="margin: 0 20rpx;">
+          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">
+            <block wx:for="{{picList}}" wx:key="this">
+              <image src="{{item}}" mode="aspectFill" class="pic radius shadow bg-white"></image>
+            </block>
+          </scroll-view>
+          <view style="margin-top: 12rpx;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="tabBoxStyle text-center">
+          <view class="_tr inline-block bold">课时</view>
+          <view class="_trV inline-block bold">时间</view>
+          <block wx:for="{{4}}" wx:key="this">
+            <view class="_tr _td inline-block color-333 {{index == 3?'noBorder':''}}">第一节</view>
+            <view class="_trV _tdV inline-block color-666 {{index == 3?'noBorder':''}}">2020.09.26 15:00-18:00</view>
+          </block>
+
+        </view>
+      </block>
+    </view>
+
+  </template>
+</template>
+<script>
+import wepy from 'wepy'
+import { service } from '../../config.js'
+import http from '../../mixins/http'
+import base from '../../mixins/base'
+import user from '../../mixins/user'
+import ShareMessage from '../../mixins/ShareMessage'
+import NavBar from '../../components/NavBar'
+import Loading from '../../components/loading'
+import uploadImages from '../../components/uploadImages'
+
+export default class feedback extends wepy.page {
+  mixins = [base, http, user, ShareMessage]
+  config = {
+    navigationBarTitleText: '体验课详情'
+    // navigationStyle: 'custom'
+  }
+
+  components = {NavBar, Loading, uploadImages}
+  data = {
+    loaded: false,
+    init: false,
+    name: '',
+    informText: ['骚扰、广告', '形象照、资料虚假或假冒', '辱骂、攻击等', '色情、暴力等', '诈骗钱财', '其他'],
+    informIndex: 0,
+    picList: [
+      'https://images.ufutx.com/202010/28/348a87abc5f0870ed4d0e6085fd032fb.png',
+      'https://images.ufutx.com/202010/28/392ce20af613a5bb8d69091c050dfa56.jpeg',
+      'https://images.ufutx.com/202010/28/4ee41c9ca9fc86d007cff7d12fe3c542.jpeg'
+    ],
+    informValue: '',
+    id: '',
+    active: 2,
+    // 赞
+    star: 3
+  }
+
+  computed = {}
+
+  onShareAppMessage(res) {
+    return this.$parent.onShareAppMessage(this.config.navigationBarTitleText)
+  }
+
+  async onLoad(e) {
+    this.id = e.id
+    setTimeout(() => {
+      this.init = true
+      this.$apply()
+    }, 500)
+  }
+
+  onShow() {
+    // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
+  }
+
+  onPullDownRefresh() {
+  }
+  onReachBottom() {
+  }
+
+  methods = {
+    tabFn(val) {
+      let vm = this
+      vm.$showLoading('加载中...')
+      setTimeout(() => {
+        vm.$hideLoading()
+      }, 800)
+      this.active = val
+      this.$apply()
+    },
+    goto(url) {
+      let vm = this
+      vm.$goto(url)
+    },
+    myStarChoose(e) {
+      let star = parseInt(e.target.dataset.star) || 0
+      this.star = star
+      this.$apply()
+    },
+    deletePic(index) {
+      let vm = this
+      wx.showModal({
+        title: '提示',
+        content: '删除该照片？',
+        success(res) {
+          if (res.confirm) {
+            vm.informImages.splice(index, 1)
+            vm.$apply()
+          } else if (res.cancel) {
+            console.log('用户点击取消')
+          }
+        }
+      })
+    },
+    previewImages(item, list) {
+      this.$previewImages(item, list)
+    },
+    typing(type, e) {
+      this[type] = e.detail.value
+      this.$apply()
+      console.log(this[type])
+    },
+    uploadPic() { // 上传组件
+      this.$invoke('uploadImages', 'chooseimage')
+    },
+    bindPickerChange(e) {
+      this.informIndex = e.detail.value
+      this.informClass = this.informText[this.informIndex]
+      this.$apply()
+    },
+    gotoFriendPage(item) {
+      let url = ''
+      if (item.type == 'single') {
+        url = '/pages/home/information?id=' + item.id
+      } else {
+        url = '/pages/home/introducer?id=' + item.id
+      }
+      wx.navigateTo({url: url})
+    },
+    save() {
+      let data = {
+          content: this.informValue,
+          photos: this.informImages
+        },
+        vm = this
+      vm.$showToast('评价成功！')
+      vm.$gotoBack(1)
+      return
+      for (let item in data) {
+        if (!data[item]) {
+          return vm.$showToast('请输入评价内容！')
+        }
+      }
+      console.log(data)
+      vm.$post({url: `${service.host}/feedback`, data}, {
+        success: ({code, data}) => {
+          wx.showModal({
+            title: '反馈成功！',
+            content: '非常感谢您的反馈！我们将以最快速度处理您的反馈。',
+            success(res) {
+              if (res.confirm) {
+                vm.$gotoBack(1)
+              } else if (res.cancel) {
+                console.log('用户点击取消')
+              }
+            }
+          })
+        }
+      })
+    }
+  }
+  events = {
+    'UpLoadImage': (value) => {
+      this.informImages.push(value)
+      this.$apply()
+    }
+  }
+}
+
+</script>
+
+<style lang="less">
+@import "../../styles/weui/base/fn.wxss";
+@import "../../styles/custom/fn.less";
+page{
+  background: #f9f2db;
+  .tabBoxStyle{
+    margin: 22rpx;
+    border-radius: 16rpx;
+    overflow: hidden;
+    ._tr{
+      width: 35%;
+      background: #f8b51e;
+      padding: 6rpx 0;
+      border-right: 1rpx solid #000;
+    }
+    ._trV,_tdV{
+      width: 65%;
+      background: #f8b51e;
+      padding: 6rpx 0;
+    }
+    ._td, ._tdV{
+      background: #f8cd6a;
+      border-bottom: 1rpx solid #2d2d2d;
+      padding: 16rpx 0;
+    }
+    .noBorder{
+      border-bottom: none;
+    }
+  }
+  /*隐藏滚动条*/
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    color: transparent;
+  }
+  .btn-box{
+    width: 68%;
+    background: #f8b51e;
+    border-radius: 48rpx;
+    padding: 16rpx 0;
+    margin: 42rpx auto;
+    margin-bottom: 28rpx;
+    letter-spacing: 8rpx;
+    position: fixed;
+    left: 16%;
+    bottom: 42rpx;
+    color: black;
+  }
+  ._detaileStyle{
+    padding: 22rpx;
+    .scroll-view_H{
+      white-space: nowrap;
+      margin-top: 32rpx;
+      .pic{
+        width: 300rpx;
+        height: 180rpx;
+        margin-right: 28rpx;
+        border-radius: 22rpx;
+      }
+    }
+    .arenaStyle{
+      margin-top: 12rpx;
+      letter-spacing: 2rpx;
+      ._text{
+        margin: 0 22rpx;
+      }
+      .color_0{
+        color: #000000;
+      }
+    }
+  }
+  .wrapper{
+    .videoStyle{
+      width: 100vw;
+      .image{
+        width: 100%;
+      }
+    }
+    ._title{
+      margin-top: -12rpx;
+      padding: 16rpx 32rpx;
+      background: #f8b51e;
+      ._time{
+        overflow: hidden;
+        color: black;
+        .icon{
+          width: 24rpx;
+          height: 24rpx;
+          vertical-align: middle;
+          margin-bottom: 6rpx;
+          margin-right: 4rpx;
+        }
+      }
+      ._member{
+        width: 100%;
+        overflow: hidden;
+        //margin: -10rpx 14rpx 0 14rpx;
+        color: black;
+        .icon{
+          width: 24rpx;
+          height: 24rpx;
+          vertical-align: middle;
+          margin-bottom: 6rpx;
+          margin-right: 4rpx;
+        }
+      }
+    }
+    .appraiseStyle{
+      padding: 12rpx 32rpx;
+      ._item{
+        margin-top: 8rpx;
+        overflow: hidden;
+        ._photo{
+          width: 17%;
+          .image{
+            width: 100rpx;
+            height: 100rpx;
+            border-radius: 50%;
+          }
+        }
+        ._content{
+          width: 83%;
+          padding-top: 12rpx;
+          //background: pink;
+          .starStyle{
+            image{
+              width: 32rpx;
+              height: 32rpx;
+            }
+          }
+        }
+      }
+    }
+    .section,.themes,{
+      overflow: hidden;
+      padding: 16rpx 26rpx;
+      background: white;
+      margin: 22rpx 16rpx;
+      border-radius: 18rpx;
+    }
+    ._input{
+      margin: 6rpx 32rpx;
+      border-bottom: 2rpx solid #000;
+      input{
+        padding: 0 12rpx;
+      }
+    }
+    .textarea{
+      width: 100%;
+      height: 250rpx;
+    }
+    .uploadPic{
+      padding: 16rpx 26rpx;
+      .image{
+        width: 180rpx;
+        height: 180rpx;
+        margin-right: 36rpx;
+      }
+      .upLoadImage{
+        width: 180rpx;
+        height: 180rpx;
+        margin-right: 22rpx;
+        border: 1rpx solid #d3d3d3;
+      }
+    }
+    .infromBtn{
+      /*padding: 2rpx 32rpx 42rpx 12rpx;*/
+      margin: 32rpx;
+      width: 220rpx;
+      background: #D92553;
+    }
+  }
+}
+</style>

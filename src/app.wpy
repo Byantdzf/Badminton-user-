@@ -42,14 +42,38 @@ export default class extends wepy.app {
           'h5Detail'
         ]
       },
+      {   //  首页
+        'root': 'pages/homePage',
+        'pages': [
+          'taemDetaile', // 团课详情
+          'networkDetaile',  // 网课详情
+          'trialDetaile' // 体验课详情
+        ]
+      },
+      {   //  球场
+        'root': 'pages/arenaPage',
+        'pages': [
+          'arenaDetaile' // 球场详情
+        ]
+      },
+      {   //  预约
+        'root': 'pages/appointPage',
+        'pages': [
+          'appointRecord' // 预约记录
+        ]
+      },
       {   //  个人中心
         'root': 'pages/users',
         'pages': [
-          'userInfo',
+          'userInfo', // 个人资料
           'myCourses',
           'myExercise',
-          'feedback',
-          'unmarri'
+          'feedback', // 投诉
+          'unmarri', // 编辑资料
+          'uploadVideo', // 上传视频
+          'clockVideoDetaile', // 打卡视频详情
+          'drillVideoDetaile', // 训练视频详情
+          'appraise' // 评价教练
         ]
       }
     ],
@@ -63,7 +87,7 @@ export default class extends wepy.app {
     },
     tabBar: {
       color: '#b4b4b4',
-      selectedColor: '#D92553',
+      selectedColor: '#000',
       backgroundColor: '#ffffff',
       borderStyle: 'black',
       list: [{

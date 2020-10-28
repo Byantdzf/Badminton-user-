@@ -1,6 +1,6 @@
 <template>
   <view class="box {{hide?'hide':''}}">
-    <image src="https://images.ufutx.com/201908/16/7d151aa8067ab044838add608e7395fd.jpeg" mode="aspectFill" class="image"></image>
+    <image src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1603907202178&di=aa40a811e7e35b2942809f2844dfb0c3&imgtype=0&src=http%3A%2F%2Fimg3.imgtn.bdimg.com%2Fit%2Fu%3D1870124918%2C2575391705%26fm%3D214%26gp%3D0.jpg" mode="aspectFill" class="image"></image>
     <view @tap="goto('/pages/users/registerV2')" class="next" wx:if="{{hideBtn}}"></view>
     <view class="wrapper" @tap="jump">
       <view class="font_24 flo_l text-center time">{{time}}s</view>
