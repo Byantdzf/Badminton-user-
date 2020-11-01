@@ -8,10 +8,31 @@
     <view class="themes">
       <view class="flo_l text">视频</view>
       <view class="uploadVideo flo_l">
-        <image src="http://images.ufutx.com/201902/27/fc2da5fdf813b12f7c8a616eff6dbf03.png" @tap="uploadVideo" mode="widthFix" class="image"></image>
+        <block wx:if="{{src === ''}}">
+          <image src="http://images.ufutx.com/201902/27/fc2da5fdf813b12f7c8a616eff6dbf03.png" @tap="uploadVideo" mode="widthFix" class="image"></image>
+        </block>
+        <block wx:else>
+          <video src="{{src}}"
+                 objectFit='cover'
+                 controls
+                 class="image"></video>
+        </block>
       </view>
     </view>
-<!--    <view class="uploadPic">-->
+<!--    <view class="page-body-info">-->
+<!--      <block wx:if="{{src === ''}}">-->
+<!--        <view class="image-plus image-plus-nb" @tap="chooseVideo">-->
+<!--          <view class="image-plus-horizontal"></view>-->
+<!--          <view class="image-plus-vertical"></view>-->
+<!--        </view>-->
+<!--        <view class="image-plus-text">添加视频</view>-->
+<!--      </block>-->
+<!--      <block wx:if="{{src != ''}}">-->
+<!--        <video src="{{src}}" class="video"></video>-->
+<!--      </block>-->
+<!--    </view>-->
+  
+    <!--    <view class="uploadPic">-->
 <!--      <view class="font_26 color-666" style="margin-bottom: 22rpx">为了能够让开发者更快的处理您的反馈，建议您上传要反馈内容的截图。</view>-->
 <!--      <image src="http://images.ufutx.com/201902/27/fc2da5fdf813b12f7c8a616eff6dbf03.png" @tap="uploadPic" mode="widthFix" class="image"></image>-->
 <!--      <block wx:for="{{informImages}}" wx:key="{{index}}" wx:if="{{informImages}}">-->
@@ -25,7 +46,7 @@
 </template>
 <script>
   import wepy from 'wepy'
-  import { service } from '../../config.js'
+  import {service} from '../../config.js'
   import http from '../../mixins/http'
   import base from '../../mixins/base'
   import user from '../../mixins/user'
@@ -33,7 +54,7 @@
   import NavBar from '../../components/NavBar'
   import Loading from '../../components/loading'
   import uploadImages from '../../components/uploadImages'
-
+  
   export default class feedback extends wepy.page {
     mixins = [base, http, user, ShareMessage]
     config = {
@@ -50,6 +71,7 @@
       informValue: '',
       informClass: '',
       informImages: [],
+      src: '',
       id: ''
     }
 
@@ -77,6 +99,35 @@
     }
 
     methods = {
+      // 选择视频
+      chooseVideo() {
+        var that = this
+        wx.chooseVideo({
+          success: function(res) {
+            that.src = res.tempFilePath
+            that.$apply()
+          }
+        })
+      },
+      // 上传视频 目前后台限制最大100M，以后如果视频太大可以在选择视频的时候进行压缩
+      uploadvideo() {
+        var src = this.src
+        wx.uploadFile({
+          url: 'http://172.16.98.36:8080/upanddown/upload2', // 服务器接口
+          method: 'POST',
+          filePath: src,
+          header: {
+            'content-type': 'multipart/form-data'
+          },
+          name: 'files', // 服务器定义的Key值
+          success: function() {
+            console.log('视频上传成功')
+          },
+          fail: function() {
+            console.log('接口调用失败')
+          }
+        })
+      },
       deletePic(index) {
         let vm = this
         wx.showModal({
@@ -102,7 +153,25 @@
       },
       uploadVideo() { // 上传组件
         // this.$invoke('uploadImages', 'chooseimage')
-        this.$showToast('还没调试！')
+        // this.$showToast('还没调试！')
+        var that = this
+        wx.chooseVideo({
+          sourceType: ['album', 'camera'],
+          maxDuration: 60,
+          camera: 'back',
+          success: function (res) {
+            debugger
+            that.src = res.tempFilePath
+            that.$apply()
+            console.log(that.src, 'asdddd')
+          },
+          fail: function (res) {
+            console.log(res)
+            that.$showToast('上传失败,模拟上传中...')
+            that.src = 'http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400'
+            that.$apply()
+          }
+        })
       },
       bindPickerChange(e) {
         this.informIndex = e.detail.value
@@ -124,6 +193,7 @@
             photos: this.informImages
           },
           vm = this
+        vm.$showToast('上传失败,未调试接口...')
         vm.$gotoBack(1)
         return
         // for (let item in data) {

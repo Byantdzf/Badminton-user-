@@ -176,7 +176,7 @@ export default class feedback extends wepy.page {
         },
         vm = this
       vm.$showToast('评价成功！')
-      vm.$gotoBack(1)
+      vm.$goto('/pages/homePage/order')
       return
       for (let item in data) {
         if (!data[item]) {

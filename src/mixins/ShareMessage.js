@@ -60,7 +60,7 @@ export default class ShareMessage extends wepy.mixin {
       let that = this,
         url = that.getCurrentPageUrlWithArgs(),
         page = that.getCurrentPageUrl(),
-        imageUrl = 'https://images.ufutx.com/202004/29/baac955e5878e0cb03c17eef0c92f473.jpeg'
+        imageUrl = ''
       console.log(page)
       console.log(url)
       if (page == '/pages/home/information') {

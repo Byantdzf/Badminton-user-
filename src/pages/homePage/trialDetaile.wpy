@@ -6,7 +6,7 @@
     <template is="_detaile" data="{{active,dataList,picList}}"></template>
 <!--    <template is="appraise" data="{{starMap,star}}"></template>-->
     <view class="height160"></view>
-    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="save">立即预约
+    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active" open-type="share"  @tap="save">立即预约
     </button>
   </view>
   <template name="video">

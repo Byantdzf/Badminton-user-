@@ -4,12 +4,12 @@
     <template is="list" data="{{list}}"></template>
   </view>
   <template name="mainUser">
-    <view class="_userInfo radius shadow bg-white">
-      <view class="_item bold"><view class="font_52 white">{{day}}</view><span>累计天数</span></view>
-      <view class="_item"><image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill" class="photo "></image></view>
-      <view class="_item bold"><view class="font_52 white">{{num}}</view><span>累计训练/次</span></view>
-    </view>
-  </template>
+  <view class="_userInfo radius shadow bg-white">
+    <view class="_item bold"><view class="font_52 white">{{day}}</view><span>累计天数</span></view>
+    <view class="_item"><image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill" class="photo "></image></view>
+    <view class="_item bold"><view class="font_52 white">{{num}}</view><span>累计训练/次</span></view>
+  </view>
+</template>
   <template name="list">
     <view class="listBox">
       <view class="_title" @tap="goto('/pages/appointPage/appointRecord')">

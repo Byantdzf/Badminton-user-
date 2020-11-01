@@ -11,13 +11,44 @@
   </view>
   <template name="_detaile">
     <view class="listBox">
-      <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this">
+      <view class="listItem radius shadow bg-white" wx:for="{{2}}" wx:key="this">
         <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
                class="image flo_l"></image>
         <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
         <view class="flo_l  ellipsis_1 _address">
           <view class="font_24 white">十次卡</view>
-          <view class="font_42 color-red">￥6800</view>
+          <view class="font_36 color-red bold">￥6800</view>
+        </view>
+        <view class="roundStyle flo_r">
+          <checkbox class="round black" checked></checkbox>
+        </view>
+      </view>
+      <view class="listStyle radius shadow bg-white">
+        <view class="list">
+          <span class="font_28 color_0">姓名</span>
+          <input type="text" placeholder="请输入姓名" class="Inp font_28 text"  @blur="typing('name')"  value="{{name}}" cursor-spacing="50"/>
+        </view>
+        <view class="list">
+          <span class="font_28 color_0">电话</span>
+          <input type="text" placeholder="请输入电话号码" class="Inp font_28 text"  @blur="typing('mobile')"  value="{{name}}" cursor-spacing="50"/>
+        </view>
+        <view class="_list">
+          <view class="font_26 color_0">课程总计：6800</view>
+          <view class="font_28 color_0">总计：<span class="color-red bold">6800</span></view>
+        </view>
+      </view>
+      <view style="padding: 22rpx;" class="text-center color_0 font_24">温馨提示：预约成功后，课程开始前24小时内不能取消</view>
+      <view class="payModeStyle radius shadow bg-white">
+        <view class="_titleV">
+          <span class="font_28 color_0">支付方式</span>
+         </view>
+        <view class="mode">
+          微信支付
+          <checkbox class="round color-theme flo_r" ></checkbox>
+        </view>
+        <view class="mode no-border">
+          现金支付
+          <checkbox class="round color-theme flo_r" checked></checkbox>
         </view>
       </view>
     </view>
@@ -47,6 +78,7 @@ export default class feedback extends wepy.page {
     init: false,
     name: '',
     informValue: '',
+    mobile: '',
     id: '',
     active: 1,
     // 赞
@@ -183,19 +215,69 @@ export default class feedback extends wepy.page {
 page{
   background: #f9f2db;
   .wrapper{
-
+    .roundStyle{
+      position: absolute;
+      right: 22rpx;
+      top: 76rpx;
+    }
+    .Inp{
+      text-align: right;
+      width: 72%;height: 72rpx;
+      float: right;
+      margin-top: 6rpx;
+      font-weight: 200;
+    }
+    .Inp::-webkit-input-placeholder {
+      /* WebKit browsers */
+      color: #5f5f5f;
+    }
     .listBox{
+      position: relative;
       margin: 12rpx 32rpx;
       margin-top: 32rpx;
+      .listStyle{
+        background: #f8b51e;
+        border-radius: 22rpx;
+        .list{
+          height: 90rpx;
+          line-height: 90rpx;
+          font-size: 28rpx;
+          margin: 0 18rpx;
+          border-bottom: 2rpx solid #fff;
+        }
+        ._list{
+          margin-top: 4rpx;
+          height: 90rpx;
+          padding: 0 18rpx;
+        }
+        .no-border{border: none;}
+      }
       ._title{
         color: black;
         margin: 12rpx 14rpx;
         width: 52%;
       }
+      .payModeStyle{ // 支付方式
+        border-radius: 22rpx;
+        overflow: hidden;
+        ._titleV{
+          height: 72rpx;
+          line-height: 72rpx;
+          background: #f8b51e;
+          padding: 0 18rpx;
+        }
+        .no-border{border: none;}
+        .mode{
+          height: 90rpx;
+          line-height: 90rpx;
+          padding: 0 18rpx;
+          border-bottom: 1rpx solid #f9f2db;
+        }
+      }
       ._address{
         width: 62%;
         overflow: hidden;
-        margin: -20rpx 14rpx 0 14rpx;
+        margin: 20rpx 14rpx 0 14rpx;
         color: black;
         .icon{
           width: 20rpx;

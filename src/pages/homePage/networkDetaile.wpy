@@ -11,7 +11,19 @@
   </view>
   <template name="video">
     <view class="videoStyle">
-      <image src="https://images.ufutx.com/202010/28/a0b762859636f4ae43b694d4edf10b2e.jpeg" mode="widthFix" class="image"></image>
+      <video
+              id="myVideo"
+              src="http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400"
+              binderror="videoErrorCallback"
+              show-center-play-btn='{{false}}'
+              show-play-btn="{{true}}"
+              controls
+              objectFit='cover'
+              picture-in-picture-mode="{{['push', 'pop']}}"
+              bindenterpictureinpicture='bindVideoEnterPictureInPicture'
+              bindleavepictureinpicture='bindVideoLeavePictureInPicture'
+      ></video>
+<!--      <image src="https://images.ufutx.com/202010/28/a0b762859636f4ae43b694d4edf10b2e.jpeg" mode="widthFix" class="image"></image>-->
     </view>
   </template>
   <template name="title">
@@ -248,8 +260,8 @@ page{
   .wrapper{
     .videoStyle{
       width: 100vw;
-      .image{
-        width: 100%;
+      #myVideo{
+        width: 100vw;
       }
     }
     ._title{

@@ -15,7 +15,7 @@
       <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this" @tap="goto('/pages/arenaPage/arenaDetaile')">
         <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
                class="image flo_l"></image>
-        <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
+        <view class="flo_l _title bold font_30 ellipsis_1">南山文体中心</view>
         <view class="flo_r _distance font_28 ellipsis_1">100m</view>
         <view class="flo_l  ellipsis_1 _address">
           <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
