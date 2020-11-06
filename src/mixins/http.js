@@ -8,8 +8,8 @@ export default class httpMixin extends wepy.mixin {
     {
       success = () => {
       }, fail = () => {
-    }, complete = () => {
-    }
+      }, complete = () => {
+      }
     }
   ) {
     const methods = 'GET'
@@ -25,8 +25,8 @@ export default class httpMixin extends wepy.mixin {
     {
       success = () => {
       }, fail = () => {
-    }, complete = () => {
-    }
+      }, complete = () => {
+      }
     }
   ) {
     const methods = 'POST'
@@ -42,8 +42,8 @@ export default class httpMixin extends wepy.mixin {
     {
       success = () => {
       }, fail = () => {
-    }, complete = () => {
-    }
+      }, complete = () => {
+      }
     }
   ) {
     const methods = 'PUT'
@@ -59,8 +59,8 @@ export default class httpMixin extends wepy.mixin {
     {
       success = () => {
       }, fail = () => {
-    }, complete = () => {
-    }
+      }, complete = () => {
+      }
     }
   ) {
     const methods = 'DELETE'
@@ -80,9 +80,9 @@ export default class httpMixin extends wepy.mixin {
     {
       success = () => {
       }, error = () => {
-    }, fail = () => {
-    }, complete = () => {
-    }
+      }, fail = () => {
+      }, complete = () => {
+      }
     }
   ) {
     // 增强体验：加载中
@@ -90,11 +90,12 @@ export default class httpMixin extends wepy.mixin {
     // 构造请求体
     const request = {
       // url: url + '?XDEBUG_SESSION_START=1&from_openid='+ wx.getStorageSync('from_openid'),
-      url: url + '?XDEBUG_SESSION_START=1&formId=' + wx.getStorageSync('formId') + '&openGId=' + wx.getStorageSync('openGId') + '&from_openid=' + wx.getStorageSync('from_openid') + '&from_platform=' + wx.getStorageSync('from_platform') + '&systemInfo=' + wx.getStorageSync('SystemInfo') + '&system=' + wx.getStorageSync('system') + '&share_user_id=' + wx.getStorageSync('share_user_id') + '&versions=v5.0',
+      url: url + '?XDEBUG_SESSION_START=1',
       method: ['GET', 'POST', 'PUT', 'DELETE'].indexOf(methods) > -1 ? methods : 'GET',
       header: Object.assign({
         'Authorization': 'Bearer ' + wx.getStorageSync('token'),
-        'X-Requested-With': 'XMLHttpRequest'
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/x-www-form-urlencoded'
       }, headers),
       data: Object.assign({ // set something global
       }, data)
@@ -110,7 +111,7 @@ export default class httpMixin extends wepy.mixin {
         console.log('[SUCCESS]', statusCode, typeof data === 'object' ? data : data.toString().substring(0, 100))
 
         // 状态码正常 & 确认有数据
-        if (0 === +data.code && data.data) {
+        if (+data.code === 0 && data.data) {
           // 成功回调
           wx.removeStorageSync('formId')
           return setTimeout(() => {
@@ -236,7 +237,6 @@ export default class httpMixin extends wepy.mixin {
             }
           })
         }
-
       },
       fail: ({statusCode, data}) => {
         console.log('[ERROR]', statusCode, data)

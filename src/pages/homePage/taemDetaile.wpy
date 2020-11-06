@@ -1,50 +1,56 @@
 <template>
   <Loading :init.sync="init"></Loading>
   <view class="wrapper">
-    <template is="video"></template>
-    <template is="title"></template>
-    <template is="_detaile" data="{{active,dataList,picList}}"></template>
+    <template is="video" data="{{courseList}}"></template>
+    <template is="title" data="{{courseList}}"></template>
+    <template is="_detaile" data="{{active,dataList,picList,courseList}}"></template>
 <!--    <template is="appraise" data="{{starMap,star}}"></template>-->
     <view class="height160"></view>
-    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="save">立即预约
+    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold" style="background: #fce1a2;" hover-class="btn_active"  @tap="save" wx:if="{{courseList.status == '已开始'}}">
+      已开始
+    </button>
+    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="save" wx:else>
+      立即预约
     </button>
   </view>
   <template name="video">
     <view class="videoStyle">
-      <image src="https://images.ufutx.com/202010/28/a0b762859636f4ae43b694d4edf10b2e.jpeg" mode="widthFix" class="image"></image>
+      <image src="{{courseList.pic}}" mode="widthFix" class="image"></image>
     </view>
   </template>
   <template name="title">
     <view class="_title">
-      <view class="_name font_32 bold">幻鹰羽毛球馆
+      <view class="_name font_32 bold">{{courseList.name}}
 
-        <view class="_name font_36 bold flo_r color-red">￥6800</view>
+        <view class="_name font_36 bold flo_r color-red">￥{{courseList.price}}</view>
       </view>
       <view class="_time ellipsis_1">
         <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                class="icon"></image>
-        <span class="font_26">深圳市南山区阳光科创A座121</span>
+        <span class="font_26">{{courseList.address}}</span>
       </view>
       <view class="font_24 ellipsis_1 _member">
         <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
                class="icon"></image>
-        <span class="color_0 font_26"><span class="white"> 5 </span>/ 10</span>
-        <view class="_name font_32 bold flo_r">100m</view>
+        <span class="color_0 font_26"><span class="white">{{ courseList.schedule.booking_count || 0 }} </span>/ {{ courseList.schedule.num || 0 }}</span>
+        <view class="_name font_32 bold flo_r">{{courseList.distance}}m</view>
       </view>
     </view>
   </template>
   <template name="_detaile">
     <view class="_detaileStyle">
       <view class="arenaStyle">
-        <span class="_text font_30 bold color_0">课程介绍</span>
+        <span class="_text font_30 bold color_0">课程详情</span>
       </view>
         <view style="margin: 0 20rpx;">
-          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">
-            <block wx:for="{{picList}}" wx:key="this">
-              <image src="{{item}}" mode="aspectFill" class="pic radius shadow bg-white"></image>
-            </block>
-          </scroll-view>
-          <view style="margin-top: 12rpx;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>
+<!--          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">-->
+<!--            <block wx:for="{{picList}}" wx:key="this">-->
+<!--              <image src="{{item}}" mode="aspectFill" class="pic radius shadow bg-white"></image>-->
+<!--            </block>-->
+<!--          </scroll-view>-->
+          <view style="margin-top: 12rpx;">
+            <rich-text nodes="{{courseList.detail}}"></rich-text>
+          </view>
         </view>
     </view>
 
@@ -73,14 +79,12 @@ export default class feedback extends wepy.page {
     loaded: false,
     init: false,
     name: '',
-    informText: ['骚扰、广告', '形象照、资料虚假或假冒', '辱骂、攻击等', '色情、暴力等', '诈骗钱财', '其他'],
-    informIndex: 0,
     picList: [
       'https://images.ufutx.com/202010/28/348a87abc5f0870ed4d0e6085fd032fb.png',
       'https://images.ufutx.com/202010/28/392ce20af613a5bb8d69091c050dfa56.jpeg',
       'https://images.ufutx.com/202010/28/4ee41c9ca9fc86d007cff7d12fe3c542.jpeg'
     ],
-    informValue: '',
+    courseList: [],
     id: '',
     active: 1,
     // 赞
@@ -95,6 +99,7 @@ export default class feedback extends wepy.page {
 
   async onLoad(e) {
     this.id = e.id
+    this.$apply()
     setTimeout(() => {
       this.init = true
       this.$apply()
@@ -102,12 +107,32 @@ export default class feedback extends wepy.page {
   }
 
   onShow() {
+    this.upDate()
     // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
   }
 
   onPullDownRefresh() {
   }
   onReachBottom() {
+  }
+
+  upDate() { // 获取基本数据
+    let vm = this
+    let url = `${service.host}/course/schedules/${vm.id}`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        this.courseList = data
+        this.$apply()
+        console.log(this.courseList)
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+        wx.hideLoading()
+      }
+    })
   }
 
   methods = {

@@ -13,7 +13,8 @@
           <view class="picker">
             <span class="font_28 color_0">性别</span>
             <view class="text">
-              <span class="color-999">{{sexIndex?sex[sexIndex]:'请选择'}}</span>
+              <span class="color-999" wx:if="{{sexIndex == '0'}}">请选择</span>
+              <span class="color-999" wx:else>{{sexIndex?sex[sexIndex]:'请选择'}}</span>
               <text class="cuIcon-right lg text-gray"></text>
             </view>
           </view>
@@ -33,25 +34,25 @@
       <view class="section list">
         <view class="picker">
           <span class="font_28 color_0">电话</span>
-          <input type="text" placeholder="请输入电话号码" class="Inp font_28 text"  @blur="typing('name')"  value="{{name}}" cursor-spacing="50"/>
+          <input type="text" placeholder="请输入电话号码" class="Inp font_28 text"  @blur="typing('mobile')"  value="{{mobile}}" cursor-spacing="50"/>
         </view>
       </view>
       <view class="section list">
         <view class="picker">
           <span class="font_28 color_0">一周运动次数</span>
-          <input type="text" placeholder="请输入次数" class="Inp font_28 text"  @blur="typing('name')"  value="{{name}}" cursor-spacing="50"/>
+          <input type="text" placeholder="请输入次数" class="Inp font_28 text"  @blur="typing('sport_num')"  value="{{sport_num}}" cursor-spacing="50"/>
         </view>
       </view>
       <view class="section list">
         <view class="picker">
           <span class="font_28 color_0">预期收获</span>
-          <input type="text" placeholder="请输入预期收获" class="Inp font_28 text"  @blur="typing('name')"  value="{{name}}" cursor-spacing="50"/>
+          <input type="text" placeholder="请输入预期收获" class="Inp font_28 text"  @blur="typing('expect')"  value="{{expect}}" cursor-spacing="50"/>
         </view>
       </view>
       <view class="section list" style="border: none;">
         <view class="picker">
           <span class="font_28 color_0">正在培训课程</span>
-          <input type="text" placeholder="请输入培训名称" class="Inp font_28 text"  @blur="typing('name')"  value="{{name}}" cursor-spacing="50"/>
+          <input type="text" placeholder="请输入培训名称" class="Inp font_28 text"  @blur="typing('course_name')"  value="{{course_name}}" cursor-spacing="50"/>
         </view>
       </view>
 <!--      <view class="height160"></view>-->
@@ -70,23 +71,26 @@ import base from '../../mixins/base'
 import user from '../../mixins/user'
 import NavBar from '../../components/NavBar'
 import Loading from '../../components/loading'
-import selectCity1 from '../../components/selectCity'
-import selectCity from '../../components/selectCity'
 import uploadImages from '../../components/uploadImages'
 
 export default class Unmarried extends wepy.page {
   mixins = [base, http, user]
-  components = {NavBar, Loading, selectCity1, selectCity, uploadImages}
+  components = {NavBar, Loading, uploadImages}
   config = {
     navigationBarTitleText: '编辑资料',
     enablePullDownRefresh: false
   }
   data = {
     init: false,
-    sex: ['男', '女'],
+    sex: ['', '男', '女'],
     sexIndex: 0,
+    sport_num: '',
+    mobile: '',
     birthday: '',
-    name: ''
+    userInfo: {},
+    expect: '',
+    name: '',
+    course_name: ''
   }
 
   onLoad() {
@@ -99,35 +103,39 @@ export default class Unmarried extends wepy.page {
     this.$apply()
   }
   onShow() {
+    this.upDate()
     console.log(this.route)
     // this.$parent.getTracker(this.$root.$name, '个人信息（基础）修改')
   }
 
-  getuser() {
-    let that = this
-    this.loading = true
-    this.$get({url: `${service.profile}/v2`}, {
+  upDate() {
+    let vm = this
+    let url = `${service.host}/user/info`
+    vm.$get({
+      url: url
+    }, {
       success: ({code, data}) => {
-        that.init = true
-        let result = data
-        that.name = result.nickname
-        that.age = result.age
-        that.avatar = result.avatar
-        if (result.birthday) {
-          that.birthday = result.birthday
-        }
-        that.$apply()
+        vm.userInfo = data
+        vm.name = data.name
+        vm.mobile = data.mobile
+        vm.sexIndex = data.profile.sex || 0
+        vm.birthday = data.profile.birthday
+        vm.sport_num = data.profile.sport_num
+        vm.expect = data.profile.expect
+        vm.course_name = data.profile.course_name
+        vm.$apply()
+        console.log(vm.sexIndex)
       },
       fail: ({code, data}) => {
       },
       complete: () => {
-        this.loading = false
+        wx.hideLoading()
       }
     })
   }
 
   ensureData(data) { // 保存
-    this.$put({url: `${service.host}/profile/v2`, data}, {
+    this.$put({url: `${service.host}/user/info`, data}, {
       success: ({code, data}) => {
         console.log('参数保存成功！')
         this.$gotoBack(1)
@@ -142,82 +150,27 @@ export default class Unmarried extends wepy.page {
     saveFn() {  // 检索参数
       let vm = this
       let data = {
-        nickname: vm.name,
-        birthday: vm.birthday
+        name: vm.name,
+        mobile: vm.mobile,
+        sex: vm.sexIndex,
+        birthday: vm.birthday,
+        sport_num: vm.sport_num,
+        expect: vm.expect,
+        course_name: vm.course_name
       }
-      vm.$gotoBack(1)
-      // this.ensureData(data)
-    },
-    bindMultiPickerChange2(e) {
-      console.log(e)
-      console.log('picker发送选择改变，携带值为', e.detail.value)
-      this.multiIndex2 = e.detail.value
-      this.$apply()
-    },
-    bindMultiPickerColumnChange2(e) {
-      let that = this
-      that.show = false
-      that.multiIndex2[e.detail.column] = e.detail.value
-      switch (e.detail.column) {
-        case 0:
-          for (let i = 0; i < that.Business.length; i++) {
-            if (that.multiIndex2[0] === i) {
-              that.objectMultiArray[1] = that.Business[i].items
-            }
-          }
-          that.multiIndex2[1] = 0
-          break
-      }
-      that.$apply()
+      console.log(data)
+      // vm.$gotoBack(1)
+      this.ensureData(data)
     },
     typing(type, e) {
       console.log(e.detail.value)
       this[type] = e.detail.value
       this.$apply()
-      console.log(this.name, 'name')
-      console.log(this.birthday, 'birthday')
-      console.log(this.graduate_school, 'graduate_school')
-      console.log(this.wechat_id, 'wechat_id')
-    },
-    stateChange(e) { // 单身状态
-      this.stateIndex = e.detail.value
-      this.$apply()
-      console.log(this.state[this.stateIndex])
     },
     sexChange(e) { // 性别
       this.sexIndex = e.detail.value
       this.$apply()
       console.log(this.sexIndex)
-    },
-    statureChange(e) { // 身高
-      this.statureIndex = e.detail.value
-      this.stature = this.statureList[this.statureIndex]
-      this.$apply()
-      console.log(this.stature)
-    },
-    weightChange(e) { // 体重
-      this.weightIndex = e.detail.value
-      this.weight = this.weightList[this.weightIndex]
-      this.$apply()
-      console.log(this.weight)
-    },
-    degreeChange(e) {
-      this.ShowDegree = true
-      this.degreeIndex = e.detail.value
-      this.$apply()
-    },
-    work_sortChange(e) {
-      this.WorkShow = true
-      this.work_sortIndex = e.detail.value
-      this.$apply()
-    },
-    beliefChange(e) {
-      this.beliefIndex = e.detail.value
-      this.$apply()
-    },
-    incomeChange(e) {  // 年收入
-      this.incomeIndex = e.detail.value
-      this.$apply()
     }
   }
   events = {

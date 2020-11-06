@@ -5,52 +5,60 @@
       <view class="section list">
         <view class="picker">
           <span class="font_28 color_0">姓名</span>
-          <span class="font_28 text">幻鹰</span>
+          <span class="font_28 text">{{ userInfo.name }}</span>
         </view>
       </view>
       <view class="section list">
         <view class="picker">
           <span class="font_28 color_0">性别</span>
-          <span class="font_28 text">男</span>
+          <block wx:if="{{userInfo.profile.sex}}">
+            <span class="font_28 text">{{userInfo.profile.sex == 1?'男':'女'}}</span>
+          </block>
+          <block wx:else>
+            <span class="font_28 text">未填写</span>
+          </block>
         </view>
       </view>
       <view class="section list">
         <view class="picker">
           <span class="font_28 color_0">出生年月</span>
-          <span class="font_28 text">2020.09.26</span>
+          <span class="font_28 text">{{userInfo.profile.birthday || '未填写'}}</span>
         </view>
       </view>
       <view class="section list">
         <view class="picker">
           <span class="font_28 color_0">电话</span>
-          <span class="font_28 text">15707534403</span>
+          <span class="font_28 text">{{ userInfo.mobile }}</span>
         </view>
       </view>
       <view class="section list">
         <view class="picker">
           <span class="font_28 color_0">一周运动次数</span>
-          <span class="font_28 text">3次</span>
+          <span class="font_28 text">{{ userInfo.profile.sport_num || '未填写'}}</span>
         </view>
       </view>
       <view class="section list">
         <view class="picker">
           <span class="font_28 color_0">预期收获</span>
-          <span class="font_28 text">增强抵抗力</span>
+          <span class="font_28 text">{{ userInfo.profile.expect || '未填写'}}</span>
         </view>
       </view>
       <view class="section list" style="border: none;">
         <view class="picker">
           <span class="font_28 color_0">正在培训课程</span>
-          <span class="font_28 text">培训班</span>
+          <span class="font_28 text">{{ userInfo.profile.course_name || '暂无'}}</span>
         </view>
       </view>
       <view class="_bc20"></view>
       <view class="section list" style="border: none;">
         <view class="picker">
           <span class="font_28 color_0">我的教练</span>
-          <view class="flo_r">
+          <view class="flo_r" wx:if="{{userInfo.profile.coach_id}}">
             <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill" class="_photo flo_l"></image>
-            <span class="font_28 text">Mamba</span>
+            <span class="font_28 text">{{ userInfo.profile.coach_name || '暂无'}}</span>
+          </view>
+          <view wx:else class="flo_r">
+            <span class="font_28 text">{{ userInfo.profile.coach_name || '暂无'}}</span>
           </view>
         </view>
       </view>
@@ -58,7 +66,7 @@
     <view class="mainBtn">
       <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="goto('/pages/users/unmarri')">编辑
       </button>
-      <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"    @tap="goto('/pages/users/appraise')">评价教练
+      <button wx:if="{{userInfo.profile.coach_id}}" class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"    @tap="goto('/pages/users/appraise')">评价教练
       </button>
     </view>
   </view>
@@ -71,93 +79,41 @@ import base from '../../mixins/base'
 import user from '../../mixins/user'
 import NavBar from '../../components/NavBar'
 import Loading from '../../components/loading'
-import selectCity1 from '../../components/selectCity'
-import selectCity from '../../components/selectCity'
 import uploadImages from '../../components/uploadImages'
 
 export default class Unmarried extends wepy.page {
   mixins = [base, http, user]
-  components = {NavBar, Loading, selectCity1, selectCity, uploadImages}
+  components = {NavBar, Loading, uploadImages}
   config = {
     navigationBarTitleText: '个人资料',
     enablePullDownRefresh: false
   }
   data = {
     init: false,
-    sex: ['男', '女'],
-    sexIndex: -1,
-    selectSex: false,
-    state: ['从未结婚', '离异', '丧偶'],
-    statureList: [], // 身高list
-    statureIndex: -1, // 默认160cm
-    weightList: [], // 体重list
-    weightIndex: -1, // 默认160cm
-    stateIndex: -1,
-    residentIndex: 0,
-    degree: ['小学', '初中', '高中', '中专', '大专', '本科', '硕士', '博士', '其他'],
-    degreeIndex: -1,
-    // work_sort: ['事业单位', '公务员', '央企', '国企', '私企', '外企'],
-    // work_sortIndex: 0,
-    incomeList: ['5~10w', '10~15w', '15~30w', '30~50w', '50~100w', '100~500w', '500w以上'],
-    incomeIndex: -1,
-    belief: ['基督教', '佛教', '伊斯兰教', '其他'],
-    beliefIndex: -1,
-    salary: [],
-    salaryIndex: 0,
-    region: ['', '', ''],
-    region_id: ['', '', ''],
-    CITY_INDEX: 0,
-    photos: [],
-    CITY_INDEX1: 1,
-    birthday: '',
-    name: '',
-    age: '',
-    weight: '',
-    country: '',
-    stature: '',
-    graduate_school: '',
-    company: '',
-    introduction: '',
-    ideal_mate: '',
-    post: '',
-    wechat_id: '',
-    Business: [],
-    show: true,
-    Salaryshow: false,
-    avatar: '',  // 头像
-    work_text: '',
-    WorkShow: false,
-    DegreeText: '',
-    ShowDegree: false,
-    industry: '',
-    industry_sub: '',
-    multiIndex2: [0, 0],
-    objectMultiArray: [],
-    salary_id: '',
-    salaries: [],
-    endDate: '', // 结束时间
-    tempMember: 0 // 是否有可领取会员
+    userInfo: {}
   }
 
   onLoad() {
   }
   onShow() {
     console.log(this.route)
+    this.upDate()
     // this.$parent.getTracker(this.$root.$name, '个人信息（基础）修改')
   }
-  getuser() {
-    let that = this
-    this.loading = true
-    this.$get({url: `${service.profile}/v2`}, {
+  upDate() {
+    let vm = this
+    let url = `${service.host}/user/info`
+    vm.$get({
+      url: url
+    }, {
       success: ({code, data}) => {
-        that.init = true
-        let result = data
-        that.$apply()
+        vm.userInfo = data
+        vm.$apply()
       },
       fail: ({code, data}) => {
       },
       complete: () => {
-        this.loading = false
+        wx.hideLoading()
       }
     })
   }

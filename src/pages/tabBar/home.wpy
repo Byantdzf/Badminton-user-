@@ -1,9 +1,9 @@
 <template>
   <view class="">
-    <template is="swiper" data="{{swiperList,cardCur,city, region}}"></template>
-    <template is="cycle" data="{{cycleList,tabBox,active}}"></template>
-    <block wx:if="{{tabBox == '1'}}">
-      <template is="list" data="{{list}}"></template>
+    <template is="swiper" data="{{carousels,cardCur,city, region}}"></template>
+    <template is="cycle" data="{{cycleList,type,active}}"></template>
+    <block wx:if="{{type == 'league'}}">
+      <template is="list" data="{{courses}}"></template>
     </block>
     <block wx:else>
       <template is="listV2" data="{{list}}"></template>
@@ -18,13 +18,12 @@
           <span class="font_28">{{ region[1] }}，{{ region[2] }}</span>
         </view>
       </picker>
-      
     </view>
     <swiper class="card-swiper" circular="true" autoplay="true" interval="5000" duration="500"
             bindchange="cardSwiper">
-      <swiper-item wx:for="{{swiperList}}" wx:key="this" class="{{cardCur==index?'cur':''}}" >
+      <swiper-item wx:for="{{carousels}}" wx:key="this" class="{{cardCur==index?'cur':''}}" >
         <view class="swiper-item">
-          <image src="{{item.url}}" mode="aspectFill" @tap="gotoLink({{item.link}})"></image>
+          <image src="{{item.pic}}" mode="aspectFill" @tap.stop="gotoLink({{item.path}})"></image>
         </view>
       </swiper-item>
     </swiper>
@@ -34,14 +33,14 @@
   </template>
   <template name="cycle">
     <view class="cycleStyle">
-      <view class="font_30 inline-block tabStyle {{tabBox == '1'? 'tabBox bold font_32':''}}" @tap="tabFn('1')">团课</view>
-      <view class="font_30 inline-block {{tabBox == '2'? 'tabBox bold font_32':''}}" @tap="tabFn('2')">网课</view>
-      <block wx:if="{{tabBox == '1'}}">
+      <view class="font_30 inline-block tabStyle {{type == 'league'? 'tabBox bold font_32':''}}" @tap.stop="tabFn('league')">团课</view>
+      <view class="font_30 inline-block {{type == 'online'? 'tabBox bold font_32':''}}" @tap.stop="tabFn('online')">网课</view>
+      <block wx:if="{{type == 'league'}}">
         <view class="dayStyle">
           <view><view class="datItem inline-block color-666 font_24 text-center {{item.active?'activeText bold':''}}" wx:for="{{cycleList}}" wx:key="this">{{item.dateTime}}</view></view>
           <view class="text-center"><view class="datItem inline-block color-666 font_24  {{item.active?'activeBox bold radius shadow bg-white':''}}" wx:for="{{cycleList}}" wx:key="this">{{item.week}}</view></view>
         </view>
-        <view class="text-center color-theme arenaStyle">------  <span style="color: black">万达球馆</span> ------</view>
+        <view class="text-center color-theme arenaStyle">------  <span style="color: black">球场名称</span> ------</view>
       </block>
       <block wx:else>
         <view class="arenaStyle text-center">
@@ -56,32 +55,32 @@
   </template>
   <template name="list">
     <view class="listBox">
-      <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this" @tap="goto({{item == '1'?'/pages/homePage/taemDetaile':'/pages/homePage/trialDetaile'}})">
-        <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
+      <view class="listItem radius shadow bg-white" wx:for="{{courses}}" wx:key="this" @tap="goto({{item == '1'?'/pages/homePage/taemDetaile':'/pages/homePage/trialDetaile'}})">
+        <image src="{{item.pic}}" mode="aspectFill"
                class="image flo_l"></image>
-        <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
-        <view class="flo_r _distance font_28 ellipsis_1">100m</view>
+        <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
+        <view class="flo_r _distance font_28 ellipsis_1">{{item.distance}}m</view>
         <view class="flo_l  ellipsis_1 _address">
           <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                  class="icon"></image>
-          <span class="font_24">深圳市 南山区 阳光科创</span>
+          <span class="font_24">{{ item.store.city }} {{item.store.dist}} {{item.store.address}}</span>
         </view>
         <view class="flo_l font_24 ellipsis_1 _price">
           <image src="https://images.ufutx.com/202010/19/138118c117bf8d24abeef9cf16968b96.png" mode="widthFix"
                  class="icon"></image>
-          <span class="color-red font_26">78</span>
+          <span class="color-red font_26">{{ item.price }}</span>
         </view>
         <view class="flo_l font_24 ellipsis_1 _member">
           <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
                  class="icon"></image>
-          <span class="color_0 font_24"><span class="white">5 </span>/ 10</span>
+          <span class="color_0 font_24"><span class="white">{{ item.schedule.booking_count || 0 }} </span>/ {{ item.schedule.num || 0 }}</span>
         </view>
         <view class="flo_l font_24 ellipsis_1 _time">
           <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"
                  class="icon"></image>
-          <span class="white font_24">18:00 - 22:00</span>
+          <span class="white font_24">{{item.time}}</span>
         </view>
-        <view class="_btn text-center" wx:if="{{item == 0}}">已开始</view>
+        <view class="_btn text-center" wx:if="{{item.status == '已开始'}}">已开始</view>
         <view class="_btn _btnA text-center color-theme" wx:else>预约</view>
       </view>
 
@@ -89,7 +88,7 @@
   </template>
   <template name="listV2">
     <view class="listBox">
-      <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this" @tap="goto('/pages/homePage/networkDetaile')">
+      <view class="listItem radius shadow bg-white" wx:for="{{courses}}" wx:key="this" @tap="goto('/pages/homePage/networkDetaile')">
         <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
                class="image flo_l"></image>
         <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
@@ -126,30 +125,14 @@ export default class home extends wepy.page {
     enablePullDownRefresh: false
   }
   components = {}
-  watch = {
-    list() {
-    }
-  }
+
   data = {
     cycleList: [], // 周期
     list: [],
     city: '深圳',
     region: ['广东省', '深圳市', '南山区'],
     customItem: '全部',
-    swiperList: [
-      {  // 轮播
-        id: 0,
-        link: 'https://baidu.com',
-        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg'
-      }, {
-        id: 1,
-        link: 'https://baidu.com',
-        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big84001.jpg'
-      }, {
-        id: 2,
-        link: 'https://baidu.com',
-        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big39000.jpg'
-      }],
+    carousels: [],   // 轮播
     searchTime: '',
     chnNumChar: {
       1: '一',
@@ -162,12 +145,15 @@ export default class home extends wepy.page {
     },
     id: '',
     cardCur: 0,
-    tabBox: 1,
+    // league:团课，online:网课
+    type: 'league',
     active: 1,
     token: wx.getStorageSync('token'),
     modalName: '',
     throttle: true, // 节流
-    day: date,
+    day: '',
+    page: 1,
+    courses: [],
     actEndTime: '2020-4-19 18:50:00',
     refresh: false // 是否刷新
   }
@@ -182,75 +168,14 @@ export default class home extends wepy.page {
     let vm = this
     vm.cardCur = 0
     vm.token = wx.getStorageSync('token')
+    vm.page = 1
     vm.$apply()
-    if (wx.getStorageSync('touristsSex')) {
-      vm.touristsSex = wx.getStorageSync('touristsSex')
-      vm.$apply()
-      console.log(vm.touristsSex, 'touristsSex')
-    }
-    if (vm.token == '') {
-      wepy.login({
-        success: (res) => {
-          vm.$post({url: service.login, data: {code: res.code}}, {
-            success: ({code, data}) => {
-              if (data.token) {
-                wx.setStorageSync('token', data.token)
-                wx.setStorageSync('openid', data.openid)
-                let userInfo = {
-                  nickName: data.user.name,
-                  avatarUrl: data.user.avatar,
-                  type: data.user.type
-                }
-                wx.setStorageSync('userInfo', userInfo)
-                wx.setStorageSync('user_id', data.user.id)
-                wx.setStorageSync('type', data.user.type)
-              }
-              if (data.token) {
-                vm.page = 1
-                vm.$apply()
-                vm.upDate()
-              }
-            }
-          })
-          vm.getList()
-        },
-        fail: (res) => {
-          console.log('wepy.login.fail:', res)
-        }
-      })
-    } else {
-      vm.page = 1
-      vm.$apply()
-      vm.getList()
-      vm.upDate()
-    }
-    // vm.$parent.getTracker(vm.$root.$name, vm.config.navigationBarTitleText)
+    // vm.getList()
+    vm.upDate()
   }
 
   timeFormat(param) {
     return param < 10 ? '0' + param : param
-  }
-
-  getList() {   // 获取用户数据
-    let vm = this,
-      url = `${service.host}/home/v3`,
-      data = {
-        sex: `${vm.touristsSex}`
-      }
-    vm.cardCur = 0
-    vm.list = []
-    vm.$apply()
-    vm.$showLoading('加载中')
-    vm.$get({
-      url: url, data
-    }, {
-      success: ({code, data}) => {
-        vm.list = data
-        vm.$apply()
-        wx.hideLoading()
-        console.log(vm.list)
-      }
-    })
   }
 
   dealTime(dayNum, dat) {
@@ -280,16 +205,27 @@ export default class home extends wepy.page {
     let dateObj = {
       dateTime: `${mon}.${day}`,
       week: `周${this.chnNumChar[dayNum]}`,
-      active: this.searchTime === dateStr ? true : false
+      active: this.searchTime == dateStr ? true : false
     }
-    console.log(dateObj)
+    console.log(dateObj, 'asssearchTime', this.searchTime, dateStr)
     this.cycleList.push(dateObj)
     return dateStr
   }
 
   getDate() {
+    var now = new Date()
+    var year = now.getFullYear()       // 年
+    var month = now.getMonth() + 1     // 月
+    var day = now.getDate()            // 日
+    var clock = year + '-'
+    if (month < 10) { clock += '0' }
+    clock += month + '-'
+    if (day < 10) { clock += '0' }
+    clock += day
+    console.log(clock.split('-').join(''), 'clock')
     let date = {}
-    this.searchTime = new Date().toLocaleDateString().split('/').join('')
+    this.day = clock
+    this.searchTime = clock.split('-').join('')
     date.mon = '周一 - ' + (this.dealTime(1, this.searchTime))
     date.tue = '周二 - ' + (this.dealTime(2, this.searchTime))
     date.wed = '周三 - ' + (this.dealTime(3, this.searchTime))
@@ -300,16 +236,37 @@ export default class home extends wepy.page {
     console.log(date)
   }
 
-  upDate() {
-    let vm = this
-    let url = `${service.host}/user/v3`
+  upDate() { // 获取基本数据
+    let vm = this,
+      data = {
+        type: vm.type,
+        city: vm.region[1],
+        latitude: '22.519517',
+        longitude: '113.920928',
+        date: '2020-10-24'
+      }
+    let url = `${service.host}/home`
     vm.$get({
-      url: url
+      url: url, data
     }, {
       success: ({code, data}) => {
-        vm.is_approved = data.is_approved
-        vm.is_profile = data.is_profile
+        this.carousels = data.carousels
+        this.$apply()
+        if (!data.courses.data.length) {
+          return console.log('没有更多了')
+        }
+        if (vm.page == 1) {
+          vm.courses = data.courses.data
+          vm.$apply()
+        } else {
+          data.courses.data.map(function (item, index) {
+            vm.courses.push(item)
+            vm.$apply()
+          })
+        }
+        vm.page += 1
         vm.$apply()
+        console.log(vm.courses, 'asaaa')
       },
       fail: ({code, data}) => {
       },
@@ -340,9 +297,9 @@ export default class home extends wepy.page {
       setTimeout(() => {
         vm.$hideLoading()
       }, 800)
-      this.tabBox = val
-
-      this.$apply()
+      vm.type = val
+      vm.$apply()
+      vm.upDate()
     },
     gotoLink(link) {
       console.log(link)
@@ -363,7 +320,7 @@ export default class home extends wepy.page {
     cardSwiper(e) {
       this.cardCur = e.detail.current
       this.$apply()
-      console.log(this.cardCur, 'this.cardCur')
+      // console.log(this.cardCur, 'this.cardCur')
     },
     goto(url) {
       this.modalName = ''
@@ -398,8 +355,11 @@ page {
     }
   }
   .card-swiper{
-    height: 340rpx !important;
+    height: 260rpx !important;
     margin-top: 22rpx;
+    swiper-item{
+      padding: 20rpx !important;
+    }
   }
   .dotsStyle{
     margin-top: -62rpx;
@@ -414,6 +374,7 @@ page {
     .active{width: 30rpx;background: #fbc707;}
   }
   .cycleStyle{
+    margin-top: 62rpx;
     padding: 12rpx 32rpx;
     .tabStyle{
       margin-right: 22rpx;
@@ -447,9 +408,10 @@ page {
     ._title{
       color: black;
       margin: 12rpx 14rpx;
-      width: 52%;
+      width: 50%;
     }
     ._distance{
+      width: 12%;
       margin-right: 22rpx;
       margin-top: 12rpx;
       color: black;

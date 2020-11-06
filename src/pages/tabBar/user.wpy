@@ -1,16 +1,16 @@
 <template>
   <view class="">
-    <template is="_user" data="{{items}}"></template>
+    <template is="_user" data="{{items,userInfo}}"></template>
   </view>
   <template name="_user">
     <view class="_bg">
       <image src="https://images.ufutx.com/202010/20/348a87abc5f0870ed4d0e6085fd032fb.png" mode="widthFix"></image>
     </view>
     <view class="mainUser" @tap="goto('/pages/users/userInfo')">
-      <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill" class="_photo flo_l"></image>
-      <view class="font_32 bold _naim flo_l">mamba out</view>
+      <image src="{{userInfo.photo}}" mode="aspectFill" class="_photo flo_l"></image>
+      <view class="font_32 bold _naim flo_l">{{userInfo.name}}</view>
       <view class="font_24  _code flo_l">
-        账号：1257216536751
+        账号：{{ userInfo.mobile}}
         <image src="https://images.ufutx.com/202010/20/267ae6ff1cba531887957f23212a39a8.png" mode="aspectFill"
                class="_icon flo_r"></image>
       </view>
@@ -52,7 +52,7 @@ let date = new Date()
 export default class home extends wepy.page {
   mixins = [base, http, user]
   config = {
-    navigationBarTitleText: '球场',
+    navigationBarTitleText: '我的',
     enablePullDownRefresh: false,
     navigationStyle: 'custom'
   }
@@ -60,6 +60,7 @@ export default class home extends wepy.page {
   data = {
     list: [],
     city: '深圳',
+    userInfo: {},
     items: [
       { icon: 'https://images.ufutx.com/202010/20/793a67bc0b7169f392c9f3de415b2e5d.png',
         title: '个人资料',
@@ -82,89 +83,21 @@ export default class home extends wepy.page {
   }
 
   onShow() {
-    let vm = this
-    vm.cardCur = 0
-    vm.token = wx.getStorageSync('token')
-    vm.$apply()
-    if (wx.getStorageSync('touristsSex')) {
-      vm.touristsSex = wx.getStorageSync('touristsSex')
-      vm.$apply()
-      console.log(vm.touristsSex, 'touristsSex')
-    }
-    if (vm.token == '') {
-      wepy.login({
-        success: (res) => {
-          vm.$post({url: service.login, data: {code: res.code}}, {
-            success: ({code, data}) => {
-              if (data.token) {
-                wx.setStorageSync('token', data.token)
-                wx.setStorageSync('openid', data.openid)
-                let userInfo = {
-                  nickName: data.user.name,
-                  avatarUrl: data.user.avatar,
-                  type: data.user.type
-                }
-                wx.setStorageSync('userInfo', userInfo)
-                wx.setStorageSync('user_id', data.user.id)
-                wx.setStorageSync('type', data.user.type)
-              }
-              if (data.token) {
-                vm.page = 1
-                vm.$apply()
-                vm.upDate()
-              }
-            }
-          })
-          vm.getList()
-        },
-        fail: (res) => {
-          console.log('wepy.login.fail:', res)
-        }
-      })
-    } else {
-      vm.page = 1
-      vm.$apply()
-      vm.getList()
-      vm.upDate()
-    }
+    this.upDate()
     // vm.$parent.getTracker(vm.$root.$name, vm.config.navigationBarTitleText)
   }
 
   timeFormat(param) {
     return param < 10 ? '0' + param : param
   }
-
-  getList() {   // 获取用户数据
-    let vm = this,
-      url = `${service.host}/home/v3`,
-      data = {
-        sex: `${vm.touristsSex}`
-      }
-    vm.cardCur = 0
-    vm.list = []
-    vm.$apply()
-    vm.$showLoading('加载中')
-    vm.$get({
-      url: url, data
-    }, {
-      success: ({code, data}) => {
-        vm.list = data
-        vm.$apply()
-        wx.hideLoading()
-        console.log(vm.list)
-      }
-    })
-  }
-
   upDate() {
     let vm = this
-    let url = `${service.host}/user/v3`
+    let url = `${service.host}/user/info`
     vm.$get({
       url: url
     }, {
       success: ({code, data}) => {
-        vm.is_approved = data.is_approved
-        vm.is_profile = data.is_profile
+        vm.userInfo = data
         vm.$apply()
       },
       fail: ({code, data}) => {
