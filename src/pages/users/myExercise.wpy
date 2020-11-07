@@ -1,6 +1,7 @@
 <template>
   <view class="">
     <template is="list" data="{{list,active}}"></template>
+    <template is="loading" data="{{loading,noMore}}"></template>
   </view>
   <template name="list">
     <view class="text-center arenaStyle">
@@ -8,6 +9,7 @@
       <span class='color-666 font_24'>|</span>
       <span class="_text font_32  {{active == '2'?'bold color_0':'color-666'}}" @tap="tabFn('2')">训练视频</span>
     </view>
+    <view style="height: 80rpx;"></view>
     <view class="listBox">
       <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this" @tap="gotoDetaile('2')">
         <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
@@ -28,6 +30,19 @@
       </view>
     </block>
   </template>
+  <template name="loading">
+    <block wx:if="{{loading}}">
+      <view class="weui-loadmore">
+        <view class="weui-loading"></view>
+        <view class="weui-loadmore__tips bc_theme">正在加载</view>
+      </view>
+    </block>
+    <block wx:if="{{noMore}}">
+      <view class="weui-loadmore weui-loadmore_line weui-loadmore_dot">
+        <view class="weui-loadmore__tips weui-loadmore__tips_in-line weui-loadmore__tips_in-dot bc_theme"></view>
+      </view>
+    </block>
+  </template>
 </template>
 
 <script>
@@ -42,13 +57,16 @@ let date = new Date()
 export default class home extends wepy.page {
   mixins = [base, http, user]
   config = {
-    navigationBarTitleText: '课程首页',
+    navigationBarTitleText: '运动轨迹',
     onReachBottomDistance: 10,
-    enablePullDownRefresh: false
+    enablePullDownRefresh: true
   }
   components = {}
 
   data = {
+    noMore: false,
+    loading: true,
+    page: 1,
     cycleList: [], // 周期
     list: [],
     city: '深圳',
@@ -95,26 +113,51 @@ export default class home extends wepy.page {
   }
 
   onShow() {
+    this.getList()
   }
-
-  getList() {   // 获取用户数据
+  onPullDownRefresh() {
+    this.page = 1
+    this.getList()
+  }
+  onReachBottom() {
+    setTimeout(() => {
+      this.getList()
+    }, 200)
+  }
+  getList() {   // 获取数据
     let vm = this,
-      url = `${service.host}/home/v3`,
       data = {
-        sex: `${vm.touristsSex}`
+        page: vm.page,
+        type: `${vm.active == 1 ? 'CLOCKIN' : 'TRAIN'}`
       }
-    vm.cardCur = 0
-    vm.list = []
-    vm.$apply()
-    vm.$showLoading('加载中')
+    vm.loading = true
+    let url = `${service.host}/user/video/logs`
     vm.$get({
       url: url, data
     }, {
       success: ({code, data}) => {
-        vm.list = data
+        vm.loading = false
+        if (!data.data.length) {
+          return console.log('没有更多了')
+        }
+        if (vm.page == 1) {
+          vm.list = data.data
+          vm.$apply()
+        } else {
+          data.data.map(function (item, index) {
+            vm.list.push(item)
+            vm.$apply()
+          })
+        }
+        vm.noMore = true
+        vm.page += 1
         vm.$apply()
+        console.log(vm.list, 'asaaa')
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
         wx.hideLoading()
-        console.log(vm.list)
       }
     })
   }
@@ -155,6 +198,8 @@ export default class home extends wepy.page {
         vm.$hideLoading()
       }, 800)
       this.active = val
+      this.page = 1
+      this.getList()
       this.$apply()
     },
     gotoLink(link) {
@@ -204,8 +249,13 @@ page {
     }
   }
   .arenaStyle{
-    margin-top: 12rpx;
-    letter-spacing: 2rpx;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 12rpx 0;
+    z-index: 9999;
+    background: #f9f2db;
     ._text{
       margin: 0 22rpx;
     }

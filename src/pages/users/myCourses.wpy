@@ -1,217 +1,325 @@
 <template>
-  <NavBar rgba="#ffffff" bag="#ffffff" :title.sync="title"></NavBar>
-  <Loading :init.sync="init"></Loading>
-  <view class="wrapper ff">
-    <!--<view class="section font_28">-->
-        <!--<picker bindchange="bindPickerChange" value="{{informIndex}}" range="{{informText}}">-->
-          <!--<view class="picker">-->
-            <!--<span class="bold">举报类型</span>-->
-            <!--<view class="flo_r" style="width: 70%">-->
-               <!--<input placeholder="请选择举报类型" class="color-666 text-right" style="width: 92%" disabled value="{{informClass}}"/>-->
-              <!--<view class="weui-cell__ft weui-cell__ft_in-access " style="top: -26rpx;"></view>-->
-            <!--</view>-->
-          <!--</view>-->
-        <!--</picker>-->
-    <!--</view>-->
-    <view class="themes">
-      <textarea class="textarea font_28 color-666 text-left" maxlength="240"  placeholder="请详细写下您的建议和感想吧！" @input="typing('informValue')" @blur="typing('informValue')"  adjust-position="true"  value="{{informValue}}" />
-      <view class="font_28 text-right bold">{{informValue.length}}/240</view>
-    </view>
-    <view class="uploadPic">
-      <view class="font_26 color-666" style="margin-bottom: 22rpx">为了能够让开发者更快的处理您的反馈，建议您上传要反馈内容的截图。</view>
-      <image src="http://images.ufutx.com/201902/27/fc2da5fdf813b12f7c8a616eff6dbf03.png" @tap="uploadPic" mode="widthFix" class="image"></image>
-      <block wx:for="{{informImages}}" wx:key="{{index}}" wx:if="{{informImages}}">
-        <image src="{{item}}"   mode="aspectFill" class="upLoadImage" @tap="previewImages({{item}},{{informImages}})" @longpress="deletePic({{index}})"></image>
-      </block>
-    </view>
-    <button class="btn text-center font_30 btn-box white radius shadow bg-blue margin-top send"  hover-class="btn_active"  @tap="save">提交
-    </button>
-    <!--<button class=" infromBtn font_28  flo_r white" @tap="save">提交</button>-->
-    <view class="clearfloat"></view>
+  <view class="">
+    <template is="list" data="{{list,active}}"></template>
+    <template is="loading" data="{{loading,noMore}}"></template>
   </view>
+  <template name="list">
+    <view class="text-center arenaStyle">
+      <span class="_text font_32   {{active == '1'?'bold color_0':'color-666'}}" @tap="tabFn('1')">团课</span>
+      <span class='color-666 font_24'>|</span>
+      <span class="_text font_32  {{active == '2'?'bold color_0':'color-666'}}" @tap="tabFn('2')">网课</span>
+    </view>
+    <view style="height: 80rpx;"></view>
+    <block wx:if="{{list.length > 0}}">
+      <view class="listBox">
+        <view class="listItem radius shadow bg-white" wx:for="{{list}}" wx:key="this" @tap="gotoDetaile('2')">
+          <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
+                 class="image flo_l"></image>
+          <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
+          <view class="flo_r _title font_24 ellipsis_1" wx:if="{{active == '1'}}">剩余次数：9次</view>
+          <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
+            <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
+                   class="icon"></image>
+            <span class="font_24">深圳市南山区阳光科创A座129</span>
+          </view>
+          <block wx:if="{{active == '1'}}">
+            <view class="btnStyle">
+              <view class="flo_l _price bold color-red font_32">￥6800</view>
+              <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  @tap.stop="cancelFn">立即预约
+              </button>
+            </view>
+          </block>
+          <block wx:else>
+            <view class="btnStyle">
+              <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  @tap.stop="cancelFn">继续观看
+              </button>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="text-center">
+        <image src="https://images.ufutx.com/202011/07/73597a9bf3dd8028a10a5ab43d5e65b9.jpeg" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
+      </view>
+    </block>
+  </template>
+  <template name="loading">
+    <block wx:if="{{loading}}">
+      <view class="weui-loadmore">
+        <view class="weui-loading"></view>
+        <view class="weui-loadmore__tips bc_theme">正在加载</view>
+      </view>
+    </block>
+    <block wx:if="{{noMore}}">
+      <view class="weui-loadmore weui-loadmore_line weui-loadmore_dot">
+        <view class="weui-loadmore__tips weui-loadmore__tips_in-line weui-loadmore__tips_in-dot bc_theme"></view>
+      </view>
+    </block>
+  </template>
 </template>
+
 <script>
-  import wepy from 'wepy'
-  import { service } from '../../config.js'
-  import http from '../../mixins/http'
-  import base from '../../mixins/base'
-  import user from '../../mixins/user'
-  import ShareMessage from '../../mixins/ShareMessage'
-  import NavBar from '../../components/NavBar'
-  import Loading from '../../components/loading'
-  import uploadImages from '../../components/uploadImages'
+import wepy from 'wepy'
+import {service} from '../../config.js'
+import http from '../../mixins/http'
+import base from '../../mixins/base'
+import user from '../../mixins/user'
+// import ShareMessage from '../../mixins/ShareMessage'
 
-  export default class feedback extends wepy.page {
-    mixins = [base, http, user, ShareMessage]
-    config = {
-      navigationBarTitleText: '使用反馈'
-    }
+let date = new Date()
+export default class myCourses extends wepy.page {
+  mixins = [base, http, user]
+  config = {
+    navigationBarTitleText: '我的课程',
+    onReachBottomDistance: 10,
+    enablePullDownRefresh: true
+  }
+  components = {}
 
-    components = {NavBar, Loading, uploadImages}
-    data = {
-      loaded: false,
-      init: false,
-      name: '',
-      informText: ['骚扰、广告', '形象照、资料虚假或假冒', '辱骂、攻击等', '色情、暴力等', '诈骗钱财', '其他'],
-      informIndex: 0,
-      informValue: '',
-      informClass: '',
-      informImages: [],
-      id: ''
-    }
-
-    computed = {}
-
-    onShareAppMessage(res) {
-      return this.$parent.onShareAppMessage(this.config.navigationBarTitleText)
-    }
-
-    async onLoad(e) {
-      this.id = e.id
-      setTimeout(() => {
-        this.init = true
-        this.$apply()
-      }, 500)
-    }
-
-    onShow() {
-      // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
-    }
-
-    onPullDownRefresh() {
-    }
-    onReachBottom() {
-    }
-
-    methods = {
-      deletePic(index) {
-        let vm = this
-        wx.showModal({
-          title: '提示',
-          content: '删除该照片？',
-          success(res) {
-            if (res.confirm) {
-              vm.informImages.splice(index, 1)
-              vm.$apply()
-            } else if (res.cancel) {
-              console.log('用户点击取消')
-            }
-          }
-        })
-      },
-      previewImages(item, list) {
-        this.$previewImages(item, list)
-      },
-      typing(type, e) {
-        this[type] = e.detail.value
-        this.$apply()
-        console.log(this[type])
-      },
-      uploadPic() { // 上传组件
-        this.$invoke('uploadImages', 'chooseimage')
-      },
-      bindPickerChange(e) {
-        this.informIndex = e.detail.value
-        this.informClass = this.informText[this.informIndex]
-        this.$apply()
-      },
-      gotoFriendPage(item) {
-        let url = ''
-        if (item.type == 'single') {
-          url = '/pages/home/information?id=' + item.id
-        } else {
-          url = '/pages/home/introducer?id=' + item.id
-        }
-        wx.navigateTo({url: url})
-      },
-      save() {
-        let data = {
-            content: this.informValue,
-            photos: this.informImages
-          },
-          vm = this
-        for (let item in data) {
-          if (!data[item]) {
-            return vm.$showToast('请填写反馈信息！')
-          }
-        }
-        console.log(data)
-        vm.$post({url: `${service.host}/feedback`, data}, {
-          success: ({code, data}) => {
-            wx.showModal({
-              title: '反馈成功！',
-              content: '非常感谢您的反馈！我们将以最快速度处理您的反馈。',
-              success(res) {
-                if (res.confirm) {
-                  vm.$gotoBack(1)
-                } else if (res.cancel) {
-                  console.log('用户点击取消')
-                }
-              }
-            })
-          }
-        })
-      }
-    }
-    events = {
-      'UpLoadImage': (value) => {
-        this.informImages.push(value)
-        this.$apply()
-      }
-    }
+  data = {
+    noMore: false,
+    loading: true,
+    page: 1,
+    cycleList: [], // 周期
+    list: [],
+    city: '深圳',
+    swiperList: [
+      {  // 轮播
+        id: 0,
+        link: 'https://baidu.com',
+        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg'
+      }, {
+        id: 1,
+        link: 'https://baidu.com',
+        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big84001.jpg'
+      }, {
+        id: 2,
+        link: 'https://baidu.com',
+        url: 'https://ossweb-img.qq.com/images/lol/web201310/skin/big39000.jpg'
+      }],
+    searchTime: '',
+    chnNumChar: {
+      1: '一',
+      2: '二',
+      3: '三',
+      4: '四',
+      5: '五',
+      6: '六',
+      7: '七'
+    },
+    id: '',
+    cardCur: 0,
+    tabBox: 1,
+    active: 1,
+    token: wx.getStorageSync('token'),
+    modalName: '',
+    throttle: true, // 节流
+    day: date,
+    actEndTime: '2020-4-19 18:50:00',
+    refresh: false // 是否刷新
   }
 
+  computed = {}
+
+  async onLoad(e) {
+    // this.getDate()
+  }
+
+  onShow() {
+    this.getList()
+  }
+  onPullDownRefresh() {
+    this.page = 1
+    this.getList()
+  }
+  onReachBottom() {
+    setTimeout(() => {
+      this.getList()
+    }, 200)
+  }
+  getList() {   // 获取数据
+    let vm = this,
+      data = {
+        page: vm.page,
+        type: `${vm.active == 1 ? 'league' : 'online'}`
+      }
+    vm.loading = true
+    let url = `${service.host}/user/courses`
+    vm.$get({
+      url: url, data
+    }, {
+      success: ({code, data}) => {
+        vm.loading = false
+        if (!data.data.length) {
+          return console.log('没有更多了')
+        }
+        if (vm.page == 1) {
+          vm.list = data.data
+          vm.$apply()
+        } else {
+          data.data.map(function (item, index) {
+            vm.list.push(item)
+            vm.$apply()
+          })
+        }
+        vm.noMore = true
+        vm.page += 1
+        vm.$apply()
+        console.log(vm.list, 'asaaa')
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+        wx.hideLoading()
+      }
+    })
+  }
+
+  upDate() {
+    let vm = this
+    let url = `${service.host}/user/v3`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        vm.is_approved = data.is_approved
+        vm.is_profile = data.is_profile
+        vm.$apply()
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+        wx.hideLoading()
+      }
+    })
+  }
+
+  methods = {
+    cancelFn() {
+      let vm = this
+      wx.showModal({
+        title: '提示',
+        content: '是否确定取消预约？',
+        success: function (res) {
+          if (res.confirm) {
+            vm.$Toast_error('已取消')
+            console.log('用户点击确认')
+          } else if (res.cancel) {
+            console.log('用户点击取消')
+          }
+        }
+      })
+    },
+    saveFn(url) {  // 检索参数
+      let vm = this
+      vm.$goto(1)
+    },
+    tabFn(val) {
+      let vm = this
+      vm.$showLoading('加载中...')
+      setTimeout(() => {
+        vm.$hideLoading()
+      }, 800)
+      this.active = val
+      this.page = 1
+      this.getList()
+      this.$apply()
+    },
+    gotoLink(link) {
+      console.log(link)
+      this.$gotoH5(link)
+    },
+    gotoDetaile() {
+      let vm = this,
+        url = ''
+      if (vm.active == 1) {
+        url = '/pages/homePage/taemDetaile?id=1'
+      } else {
+        url = '/pages/homePage/networkDetaile'
+      }
+      this.$goto(url)
+    },
+    goto(url) {
+      console.log(url)
+      this.$goto(url)
+    }
+  }
+  events = {
+  }
+}
 </script>
 
 <style lang="less">
-  @import "../../styles/weui/base/fn.wxss";
-  @import "../../styles/custom/fn.less";
-  page{
-    background: #f8f9f9;
-    .wrapper{
-      padding: 26rpx 12rpx;
-      .section,.themes{
-        overflow: hidden;
-        padding: 16rpx 26rpx;
-        border-bottom: 12rpx solid #ededed;
+@import "../../styles/custom/fn.less";
+@import "../../styles/custom/reset.less";
+
+page {
+  background: #f9f2db;
+  .btnStyle{
+    ._price{
+      margin-top: 20rpx;
+      margin-left: 12rpx;
+    }
+    .btn-box{
+      width: 28%;
+      background: black;
+      padding: 8rpx 0;
+      border-radius: 62rpx;
+      margin-top: 18rpx;
+      margin-right: 12rpx;
+    }
+  }
+  .arenaStyle{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 12rpx 0;
+    letter-spacing: 2rpx;
+    z-index: 9999;
+    background: #f9f2db;
+    ._text{
+      margin: 0 22rpx;
+    }
+    .color_0{
+      color: #000000;
+    }
+  }
+  .listBox{
+    margin: 12rpx 32rpx;
+    ._title{
+      color: black;
+      margin: 12rpx 14rpx;
+      max-width: 48%;
+    }
+    ._address{
+      width: 62%;
+      overflow: hidden;
+      margin: -20rpx 14rpx 0 14rpx;
+      color: black;
+      .icon{
+        width: 20rpx;
+        height: 20rpx;
+        vertical-align: middle;
+        margin-bottom: 6rpx;
+        margin-right: 6rpx;
       }
-      .themes{
-        border: none;
-        border-bottom: 12rpx solid #f8f9f9;
-      }
-      .textarea{
-        width: 100%;
-        height: 250rpx;
-      }
-      .uploadPic{
-        padding: 16rpx 26rpx;
-        .image{
-          width: 180rpx;
-          height: 180rpx;
-          margin-right: 36rpx;
-        }
-        .upLoadImage{
-          width: 180rpx;
-          height: 180rpx;
-          margin-right: 22rpx;
-          border: 1rpx solid #d3d3d3;
-        }
-      }
-      .infromBtn{
-        /*padding: 2rpx 32rpx 42rpx 12rpx;*/
-        margin: 32rpx;
-        width: 220rpx;
-        background: #D92553;
+    }
+    .listItem{
+      //margin-top: 12rpx;
+      position: relative;
+      border-radius: 22rpx;
+      overflow: hidden;
+      height: 200rpx;
+      background: #f8b51e;
+      margin-bottom: 24rpx;
+      .image{
+        width: 200rpx;
+        height: 200rpx;
+        border-radius: 22rpx;
       }
     }
   }
-  .btn-box{
-    width:88%;
-    background: #D92553;
-    border-radius: 6rpx;
-    padding: 16rpx;
-    margin: 42rpx auto;
-    margin-bottom: 28rpx;
-    letter-spacing: 8rpx;
-  }
+}
 </style>

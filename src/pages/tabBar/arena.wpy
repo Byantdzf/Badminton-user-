@@ -1,29 +1,48 @@
 <template>
   <view class="">
-    <template is="city" data="{{city}}"></template>
+    <template is="city" data="{{carousels,city, region}}"></template>
     <template is="list" data="{{list}}"></template>
+    <template is="loading" data="{{loading,noMore}}"></template>
   </view>
   <template name="city">
     <view class=" addressStyle">
-      <image src="https://images.ufutx.com/202010/19/6430391dbc48d09f21da1fd000ad1480.png" mode="widthFix"
-             class="iconStyle"></image>
-      <span class="font_32 bold">{{ city }}</span>
+      <picker mode="region" bindchange="bindRegionChange" value="{{region}}" custom-item="{{customItem}}">
+        <view class="picker">
+          <image src="https://images.ufutx.com/202010/19/6430391dbc48d09f21da1fd000ad1480.png" mode="widthFix"
+                 class="iconStyle"></image>
+          <span class="font_28">{{ region[1] }}，{{ region[2] }}</span>
+        </view>
+      </picker>
     </view>
+    <view style="height: 80rpx;"></view>
   </template>
   <template name="list">
     <view class="listBox">
-      <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this" @tap="goto('/pages/arenaPage/arenaDetaile')">
-        <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
+      <view class="listItem radius shadow bg-white" wx:for="{{list}}" wx:key="this" @tap="goto('/pages/arenaPage/arenaDetaile')">
+        <image src="{{item.pic}}" mode="aspectFill"
                class="image flo_l"></image>
-        <view class="flo_l _title bold font_30 ellipsis_1">南山文体中心</view>
-        <view class="flo_r _distance font_28 ellipsis_1">100m</view>
+        <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
+        <view class="flo_r _distance font_28 ellipsis_1">10m</view>
         <view class="flo_l  ellipsis_1 _address">
           <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                  class="icon"></image>
-          <span class="font_24">深圳市 南山区 阳光科创B座2809</span>
+          <span class="font_24">{{ item.city }} {{ item.dist }} {{ item.address }}</span>
         </view>
       </view>
     </view>
+  </template>
+  <template name="loading">
+    <block wx:if="{{loading}}">
+      <view class="weui-loadmore">
+        <view class="weui-loading"></view>
+        <view class="weui-loadmore__tips bc_theme">正在加载</view>
+      </view>
+    </block>
+    <block wx:if="{{noMore}}">
+      <view class="weui-loadmore weui-loadmore_line weui-loadmore_dot">
+        <view class="weui-loadmore__tips weui-loadmore__tips_in-line weui-loadmore__tips_in-dot bc_theme"></view>
+      </view>
+    </block>
   </template>
 </template>
 
@@ -40,12 +59,17 @@ export default class home extends wepy.page {
   mixins = [base, http, user]
   config = {
     navigationBarTitleText: '球场',
-    enablePullDownRefresh: false
+    enablePullDownRefresh: true
   }
   components = {}
   data = {
+    noMore: false,
+    loading: true,
     list: [],
     city: '深圳',
+    page: 1,
+    region: ['广东省', '深圳市', '南山区'],
+    customItem: '全部',
     refresh: false // 是否刷新
   }
 
@@ -55,90 +79,53 @@ export default class home extends wepy.page {
   }
 
   onShow() {
-    let vm = this
-    vm.cardCur = 0
-    vm.token = wx.getStorageSync('token')
-    vm.$apply()
-    if (wx.getStorageSync('touristsSex')) {
-      vm.touristsSex = wx.getStorageSync('touristsSex')
-      vm.$apply()
-      console.log(vm.touristsSex, 'touristsSex')
-    }
-    if (vm.token == '') {
-      wepy.login({
-        success: (res) => {
-          vm.$post({url: service.login, data: {code: res.code}}, {
-            success: ({code, data}) => {
-              if (data.token) {
-                wx.setStorageSync('token', data.token)
-                wx.setStorageSync('openid', data.openid)
-                let userInfo = {
-                  nickName: data.user.name,
-                  avatarUrl: data.user.avatar,
-                  type: data.user.type
-                }
-                wx.setStorageSync('userInfo', userInfo)
-                wx.setStorageSync('user_id', data.user.id)
-                wx.setStorageSync('type', data.user.type)
-              }
-              if (data.token) {
-                vm.page = 1
-                vm.$apply()
-                vm.upDate()
-              }
-            }
-          })
-          vm.getList()
-        },
-        fail: (res) => {
-          console.log('wepy.login.fail:', res)
-        }
-      })
-    } else {
-      vm.page = 1
-      vm.$apply()
-      vm.getList()
-      vm.upDate()
-    }
-    // vm.$parent.getTracker(vm.$root.$name, vm.config.navigationBarTitleText)
+    this.upDate()
   }
-
+  onPullDownRefresh() {
+    this.page = 1
+    this.upDate()
+  }
+  onReachBottom() {
+    setTimeout(() => {
+      this.upDate()
+    }, 200)
+  }
   timeFormat(param) {
     return param < 10 ? '0' + param : param
   }
 
-  getList() {   // 获取用户数据
+  upDate() { // 获取基本数据
     let vm = this,
-      url = `${service.host}/home/v3`,
       data = {
-        sex: `${vm.touristsSex}`
+        page: vm.page,
+        city: vm.region[1],
+        latitude: '22.519517',
+        longitude: '113.920928',
+        date: '2020-10-24'
       }
-    vm.cardCur = 0
-    vm.list = []
-    vm.$apply()
-    vm.$showLoading('加载中')
+    vm.loading = true
+    let url = `${service.host}/stores`
     vm.$get({
       url: url, data
     }, {
       success: ({code, data}) => {
-        vm.list = data
+        vm.loading = false
+        if (!data.data.length) {
+          return console.log('没有更多了')
+        }
+        if (vm.page == 1) {
+          vm.list = data.data
+          vm.$apply()
+        } else {
+          data.data.map(function (item, index) {
+            vm.list.push(item)
+            vm.$apply()
+          })
+        }
+        vm.noMore = true
+        vm.page += 1
         vm.$apply()
-        wx.hideLoading()
-        console.log(vm.list)
-      }
-    })
-  }
-
-  upDate() {
-    let vm = this
-    let url = `${service.host}/user/v3`
-    vm.$get({
-      url: url
-    }, {
-      success: ({code, data}) => {
-        vm.is_approved = data.is_approved
-        vm.is_profile = data.is_profile
-        vm.$apply()
+        console.log(vm.list, 'asaaa')
       },
       fail: ({code, data}) => {
       },
@@ -149,6 +136,11 @@ export default class home extends wepy.page {
   }
 
   methods = {
+    bindRegionChange (e) {
+      console.log('picker发送选择改变，携带值为', e.detail.value)
+      this.region = e.detail.value
+      this.$apply()
+    },
     goto(url) {
       this.modalName = ''
       this.$apply()
@@ -172,7 +164,13 @@ export default class home extends wepy.page {
 page {
   background: #f9f2db;
   .addressStyle{
-    margin: 22rpx 32rpx;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 22rpx 32rpx;
+    z-index: 99999;
+    background: #f9f2db;
     //margin-bottom: -22rpx;
     .iconStyle{
       width: 22rpx;
@@ -216,6 +214,7 @@ page {
     letter-spacing: 2rpx;
   }
   .listBox{
+    z-index: 99;
     margin: 12rpx 32rpx;
     ._title{
       color: black;

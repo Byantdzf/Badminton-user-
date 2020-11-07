@@ -162,6 +162,7 @@ export default class home extends wepy.page {
 
   async onLoad(e) {
     this.getDate()
+    this.getRules()
   }
 
   onShow() {
@@ -235,7 +236,21 @@ export default class home extends wepy.page {
     date.sun = '周日 - ' + (this.dealTime(0, this.searchTime))
     console.log(date)
   }
-
+  getRules() {
+    let vm = this
+    let url = `${service.host}/courses/1/rules`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        console.log(data)
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+      }
+    })
+  }
   upDate() { // 获取基本数据
     let vm = this,
       data = {

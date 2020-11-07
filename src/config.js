@@ -12,7 +12,7 @@ if (_NODE_) {
 
 export const service = {
   // 登录接口
-  login: `${host}/login/wechat`,
+  login: `${host}/wechat/login`,
   // 微信注册接口
   register: `${host}/wechat/register`,
   // 主域
