@@ -152,7 +152,7 @@ export default class myCourses extends wepy.page {
       success: ({code, data}) => {
         vm.loading = false
         if (!data.data.length) {
-          return console.log('没有更多了')
+          return vm.$showToast('没有更多了')
         }
         if (vm.page == 1) {
           vm.list = data.data
@@ -167,25 +167,6 @@ export default class myCourses extends wepy.page {
         vm.page += 1
         vm.$apply()
         console.log(vm.list, 'asaaa')
-      },
-      fail: ({code, data}) => {
-      },
-      complete: () => {
-        wx.hideLoading()
-      }
-    })
-  }
-
-  upDate() {
-    let vm = this
-    let url = `${service.host}/user/v3`
-    vm.$get({
-      url: url
-    }, {
-      success: ({code, data}) => {
-        vm.is_approved = data.is_approved
-        vm.is_profile = data.is_profile
-        vm.$apply()
       },
       fail: ({code, data}) => {
       },
@@ -217,14 +198,10 @@ export default class myCourses extends wepy.page {
     },
     tabFn(val) {
       let vm = this
-      vm.$showLoading('加载中...')
-      setTimeout(() => {
-        vm.$hideLoading()
-      }, 800)
-      this.active = val
-      this.page = 1
-      this.getList()
-      this.$apply()
+      vm.active = val
+      vm.page = 1
+      vm.getList()
+      vm.$apply()
     },
     gotoLink(link) {
       console.log(link)

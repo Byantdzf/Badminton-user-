@@ -1,26 +1,26 @@
 <template>
   <Loading :init.sync="init"></Loading>
   <view class="wrapper">
-    <template is="video"></template>
-    <template is="title"></template>
-    <template is="_detaile" data="{{active,dataList,picList}}"></template>
+    <template is="video" data="{{arenaData}}"></template>
+    <template is="title" data="{{arenaData}}"></template>
+    <template is="_detaile" data="{{active,picList,arenaData,courses,coaches}}"></template>
 <!--    <template is="appraise" data="{{starMap,star}}"></template>-->
     <view class="height160"></view>
   </view>
   <template name="video">
     <view class="videoStyle">
-      <image src="https://images.ufutx.com/202010/28/a0b762859636f4ae43b694d4edf10b2e.jpeg" mode="widthFix" class="image"></image>
+      <image src="{{arenaData.pic}}" mode="widthFix" class="image"></image>
     </view>
   </template>
   <template name="title">
     <view class="_title">
-      <view class="_name font_32 bold">幻鹰羽毛球馆
-        <view class="_name font_32 bold flo_r">100m</view>
+      <view class="_name font_32 bold">{{ arenaData.name }}
+        <view class="_name font_32 bold flo_r">{{arenaData.distance}}m</view>
       </view>
       <view class="_time">
         <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                class="icon"></image>
-        <span class="font_26">深圳市南山区阳光科创A座121</span>
+        <span class="font_26">{{arenaData.city}} {{arenaData.dist}} {{arenaData.address}}</span>
       </view>
     </view>
   </template>
@@ -34,33 +34,36 @@
         <span class="_text font_30  {{active == '3'?'bold color_0':'color-666'}}" @tap="tabFn('3')">教练</span>
       </view>
       <block wx:if="{{active == '1'}}">
-        <view style="margin: 0 20rpx;">
-          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">
-            <block wx:for="{{picList}}" wx:key="this">
-              <image src="{{item}}" mode="aspectFill" class="pic radius shadow bg-white"></image>
-            </block>
-          </scroll-view>
-          <view style="margin-top: 12rpx;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>
+        <view style="margin-top: 12rpx;">
+          <rich-text nodes="{{arenaData.detail}}"></rich-text>
         </view>
+<!--        <view style="margin: 0 20rpx;">-->
+<!--          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">-->
+<!--            <block wx:for="{{picList}}" wx:key="this">-->
+<!--              <image src="{{item}}" mode="aspectFill" class="pic radius shadow bg-white"></image>-->
+<!--            </block>-->
+<!--          </scroll-view>-->
+<!--          <view style="margin-top: 12rpx;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>-->
+<!--        </view>-->
       </block>
       <block wx:if="{{active == '2'}}">
         <view class="listBox">
-          <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this" @tap="gotoDetaile('2')">
-            <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
+          <view class="listItem radius shadow bg-white" wx:for="{{courses}}" wx:key="this" @tap="gotoDetaile({{item.type}},{{item.id}})">
+            <image src="{{ item.pic }}" mode="aspectFill"
                    class="image flo_l"></image>
-            <view class="flo_l _titleV bold font_30 ellipsis_1">基础课程</view>
+            <view class="flo_l _titleV bold font_30 ellipsis_1">{{ item.name }}</view>
             <view class="flo_l font_24 ellipsis_1 _member">
               <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
                      class="icon"></image>
-              <span class="color_0 font_24"><span class="white"> 5 </span>/ 10</span>
+              <span class="color_0 font_24"><span class="white"> {{item.booking_count}} </span>/ {{item.total_count}}</span>
             </view>
             <view class="flo_l font_28 ellipsis_1 _price">
               <image src="https://images.ufutx.com/202010/19/138118c117bf8d24abeef9cf16968b96.png" mode="widthFix"
                      class="icon"></image>
-              <span class="color-red font_32 bold">78</span>
+              <span class="color-red font_32 bold">{{item.price}}</span>
             </view>
             <view class="btnStyle">
-              <button class="btn text-center font_26 btn-box bold flo_r color-theme"  hover-class="btn_active"  @tap.stop="cancelFn">立即购买
+              <button class="btn text-center font_26 btn-box bold flo_r color-theme"  hover-class="btn_active" >立即购买
               </button>
             </view>
           </view>
@@ -68,57 +71,15 @@
       </block>
       <block wx:if="{{active == '3'}}">
         <view class="listBoxV2">
-          <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this" @tap="gotoDetaile('2')">
-            <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
+          <view class="listItem radius shadow bg-white" wx:for="{{coaches}}" wx:key="this">
+            <image src="{{item.photo}}" mode="aspectFill"
                    class="image flo_l"></image>
-            <view class="flo_l _titleV bold font_30 ellipsis_1">Mamba</view>
-            <view class="flo_l _titleV2  font_26 ellipsis_1">国家以及羽毛球运动员</view>
-<!--            <view class="flo_l font_24 ellipsis_1 _member">-->
-<!--              <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"-->
-<!--                     class="icon"></image>-->
-<!--              <span class="color_0 font_24"><span class="white"> 5 </span>/ 10</span>-->
-<!--            </view>-->
-<!--            <view class="flo_l font_28 ellipsis_1 _price">-->
-<!--              <image src="https://images.ufutx.com/202010/19/138118c117bf8d24abeef9cf16968b96.png" mode="widthFix"-->
-<!--                     class="icon"></image>-->
-<!--              <span class="color-red font_32 bold">78</span>-->
-<!--            </view>-->
-<!--            <view class="btnStyle">-->
-<!--              <button class="btn text-center font_26 btn-box bold flo_r color-666" style="background: #fce1a2;" wx:if="{{item == '0'}}" hover-class="btn_active"  @tap.stop="cancelFn">满员-->
-<!--              </button>-->
-<!--              <button class="btn text-center font_26 btn-box bold flo_r color-theme" wx:else  hover-class="btn_active"  @tap.stop="cancelFn">预约-->
-<!--              </button>-->
-<!--            </view>-->
+            <view class="flo_l bold font_30 ellipsis_1 color_0">{{item.name}}</view>
           </view>
         </view>
       </block>
-
     </view>
-
   </template>
-<!--  <template name="appraise">-->
-<!--    <view class="appraiseStyle">-->
-<!--      <span class="color_0">教练评价</span>-->
-<!--      <view class="_item" wx:for="{{3}}" wx:key="this">-->
-<!--        <view class="_photo flo_l">-->
-<!--          <image src="https://images.ufutx.com/202010/28/392ce20af613a5bb8d69091c050dfa56.jpeg" mode="aspectFill" class="image"></image>-->
-<!--        </view>-->
-<!--        <view class="_content flo_l">-->
-<!--          <view class="name bold color_0 font_32">-->
-<!--            Mamba~-->
-<!--            <view class="color-666 font_26 flo_r" style="margin-top: 12rpx;">2020-10-12 16:00</view>-->
-<!--          </view>-->
-<!--          <view class="starStyle">-->
-<!--            <block wx:for="{{5}}" wx:key="this">-->
-<!--              <image src="https://images.ufutx.com/202010/28/59f941406f910c7f615f77ca4303dbe0.png" mode="aspectFill" wx:if="{{item > star-1}}"></image>-->
-<!--              <image src="https://images.ufutx.com/202010/28/ec7ebf5c490e0c71883fcfc8f6829856.png" mode="aspectFill" wx:else></image>-->
-<!--            </block>-->
-<!--          </view>-->
-<!--          <view>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>-->
-<!--        </view>-->
-<!--      </view>-->
-<!--    </view>-->
-<!--  </template>-->
 </template>
 <script>
 import wepy from 'wepy'
@@ -131,7 +92,7 @@ import NavBar from '../../components/NavBar'
 import Loading from '../../components/loading'
 import uploadImages from '../../components/uploadImages'
 
-export default class feedback extends wepy.page {
+export default class arenaDetaile extends wepy.page {
   mixins = [base, http, user, ShareMessage]
   config = {
     navigationBarTitleText: '球场详情'
@@ -143,13 +104,15 @@ export default class feedback extends wepy.page {
     loaded: false,
     init: false,
     name: '',
-    informText: ['骚扰、广告', '形象照、资料虚假或假冒', '辱骂、攻击等', '色情、暴力等', '诈骗钱财', '其他'],
     informIndex: 0,
     picList: [
       'https://images.ufutx.com/202010/28/348a87abc5f0870ed4d0e6085fd032fb.png',
       'https://images.ufutx.com/202010/28/392ce20af613a5bb8d69091c050dfa56.jpeg',
       'https://images.ufutx.com/202010/28/4ee41c9ca9fc86d007cff7d12fe3c542.jpeg'
     ],
+    courses: [],
+    coaches: [],
+    arenaData: {},
     informValue: '',
     id: '',
     active: 1,
@@ -172,23 +135,53 @@ export default class feedback extends wepy.page {
   }
 
   onShow() {
+    this.upDate()
     // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
   }
 
   onPullDownRefresh() {
+    this.upDate()
   }
   onReachBottom() {
   }
+  upDate() {
+    let vm = this
+    vm.$showLoading('加载中...')
+    let url = `${service.host}/stores/${this.id}`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        vm.arenaData = data
+        vm.courses = data.courses
+        vm.coaches = data.coaches
+        vm.$apply()
+        console.log(vm.coaches)
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+        wx.hideLoading()
+      }
+    })
+  }
 
   methods = {
+    gotoDetaile(type, id) {
+      let vm = this,
+        url = ''
+      // league:团课，online:网课
+      if (type == 'league') {
+        url = `/pages/homePage/taemDetaile?id=${id}`
+      } else {
+        url = `/pages/homePage/networkDetaile?id=${id}`
+      }
+      this.$goto(url)
+    },
     tabFn(val) {
       let vm = this
-      vm.$showLoading('加载中...')
-      setTimeout(() => {
-        vm.$hideLoading()
-      }, 800)
-      this.active = val
-      this.$apply()
+      vm.active = val
+      vm.$apply()
     },
     goto(url) {
       let vm = this
@@ -429,13 +422,14 @@ page{
       position: relative;
       border-radius: 22rpx;
       overflow: hidden;
-      height: 200rpx;
+      height: 120rpx;
+      line-height: 120rpx;
       background: #f8b51e;
       margin-bottom: 28rpx;
       .image{
-        width: 160rpx;
-        height: 160rpx;
-        margin: 25rpx 12rpx 25rpx 25rpx;
+        width: 100rpx;
+        height: 100rpx;
+        margin: 12rpx 22rpx;
         border-radius: 50%;
       }
     }

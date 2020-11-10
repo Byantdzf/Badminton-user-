@@ -9,27 +9,34 @@
       <span class="_text font_32  {{active == '2'?'bold color_0':'color-666'}}" @tap="tabFn('2')">已完成</span>
     </view>
     <view class="listBox">
-      <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this" @tap="gotoDetaile('2')">
-        <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
-               class="image flo_l"></image>
-        <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
-        <view class="flo_l  ellipsis_1 _address">
-          <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"
-                 class="icon"></image>
-          <span class="font_24">2020年09月26日 18:00-19:30</span>
-        </view>
-        <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
-          <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
-                 class="icon"></image>
-          <span class="font_24">深圳市南山区阳光科创A座129</span>
-        </view>
-        <block wx:if="{{active == '1'}}">
-          <view class="btnStyle">
-            <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  @tap.stop="cancelFn">取消预约
-            </button>
+      <block wx:if="{{list.length>0}}">
+        <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this" @tap="gotoDetaile('2')">
+          <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
+                 class="image flo_l"></image>
+          <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
+          <view class="flo_l  ellipsis_1 _address">
+            <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"
+                   class="icon"></image>
+            <span class="font_24">2020年09月26日 18:00-19:30</span>
           </view>
-        </block>
-      </view>
+          <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
+            <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
+                   class="icon"></image>
+            <span class="font_24">深圳市南山区阳光科创A座129</span>
+          </view>
+          <block wx:if="{{active == '1'}}">
+            <view class="btnStyle">
+              <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  @tap.stop="cancelFn">取消预约
+              </button>
+            </view>
+          </block>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="text-center">
+          <image src="https://images.ufutx.com/202011/07/73597a9bf3dd8028a10a5ab43d5e65b9.jpeg" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
+        </view>
+      </block>
     </view>
   </template>
 </template>
@@ -48,7 +55,7 @@ export default class home extends wepy.page {
   config = {
     navigationBarTitleText: '预约记录',
     onReachBottomDistance: 10,
-    enablePullDownRefresh: false
+    enablePullDownRefresh: true
   }
   components = {}
 
@@ -99,40 +106,48 @@ export default class home extends wepy.page {
   }
 
   onShow() {
+    this.getList()
   }
-
-  getList() {   // 获取用户数据
+  onPullDownRefresh() {
+    this.list = []
+    this.page = 1
+    this.getList()
+  }
+  onReachBottom() {
+    setTimeout(() => {
+      this.getList()
+    }, 200)
+  }
+  getList() {   // 获取数据
     let vm = this,
-      url = `${service.host}/home/v3`,
       data = {
-        sex: `${vm.touristsSex}`
+        page: vm.page,
+        status: `${vm.active == 1 ? '1' : '2'}`
       }
-    vm.cardCur = 0
-    vm.list = []
-    vm.$apply()
-    vm.$showLoading('加载中')
+    vm.loading = true
+    let url = `${service.host}/user/courses`
+    vm.$showLoading('加载中...')
     vm.$get({
       url: url, data
     }, {
       success: ({code, data}) => {
-        vm.list = data
+        vm.loading = false
+        if (!data.data.length) {
+          return console.log('没有更多了')
+        }
+        if (vm.page == 1) {
+          vm.list = data.data
+          vm.$apply()
+        } else {
+          data.data.map(function (item, index) {
+            vm.list.push(item)
+            vm.$apply()
+          })
+        }
+        vm.noMore = true
+        vm.page += 1
         vm.$apply()
-        wx.hideLoading()
-        console.log(vm.list)
-      }
-    })
-  }
-
-  upDate() {
-    let vm = this
-    let url = `${service.host}/user/v3`
-    vm.$get({
-      url: url
-    }, {
-      success: ({code, data}) => {
-        vm.is_approved = data.is_approved
-        vm.is_profile = data.is_profile
-        vm.$apply()
+        console.log(vm.list, 'asaaa')
       },
       fail: ({code, data}) => {
       },
@@ -168,8 +183,10 @@ export default class home extends wepy.page {
       setTimeout(() => {
         vm.$hideLoading()
       }, 800)
-      this.active = val
-      this.$apply()
+      vm.active = val
+      vm.page = 1
+      vm.getList()
+      vm.$apply()
     },
     gotoLink(link) {
       console.log(link)

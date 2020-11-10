@@ -1,7 +1,7 @@
 <template>
   <Loading :init.sync="init"></Loading>
   <view class="wrapper">
-    <template is="_detaile" data="{{active,dataList,picList}}"></template>
+    <template is="_detaile" data="{{active,dataList,picList,rulesList}}"></template>
     <view class="height160"></view>
     <view class="btnStyle text-right">
       <button class="btn text-center font_30 btn-box flo_r "  hover-class="btn_active"  @tap="save">支付
@@ -11,13 +11,13 @@
   </view>
   <template name="_detaile">
     <view class="listBox">
-      <view class="listItem radius shadow bg-white" wx:for="{{2}}" wx:key="this">
+      <view class="listItem radius shadow bg-white" wx:for="{{rulesList}}" wx:key="this">
         <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
                class="image flo_l"></image>
-        <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
+        <view class="flo_l _title bold font_30 ellipsis_1">{{item.name}}</view>
         <view class="flo_l  ellipsis_1 _address">
-          <view class="font_24 white">十次卡</view>
-          <view class="font_36 color-red bold">￥6800</view>
+          <view class="font_24 white">{{item.num}}次卡</view>
+          <view class="font_36 color-red bold">￥{{item.price}}</view>
         </view>
         <view class="roundStyle flo_r">
           <checkbox class="round black" checked></checkbox>
@@ -26,11 +26,11 @@
       <view class="listStyle radius shadow bg-white">
         <view class="list">
           <span class="font_28 color_0">姓名</span>
-          <input type="text" placeholder="请输入姓名" class="Inp font_28 text"  @blur="typing('name')"  value="{{name}}" cursor-spacing="50"/>
+          <input type="text" placeholder="请输入姓名" placeholder-class="color-666" class="Inp font_28 text"  @blur="typing('name')"  value="{{name}}" cursor-spacing="50"/>
         </view>
         <view class="list">
           <span class="font_28 color_0">电话</span>
-          <input type="text" placeholder="请输入电话号码" class="Inp font_28 text"  @blur="typing('mobile')"  value="{{name}}" cursor-spacing="50"/>
+          <input type="text" placeholder="请输入电话号码" placeholder-class="color-666" class="Inp font_28 text color-666"  @blur="typing('mobile')"  value="{{name}}" cursor-spacing="50"/>
         </view>
         <view class="_list">
           <view class="font_26 color_0">课程总计：6800</view>
@@ -77,6 +77,7 @@ export default class feedback extends wepy.page {
     loaded: false,
     init: false,
     name: '',
+    rulesList: [],
     informValue: '',
     mobile: '',
     id: '',
@@ -97,6 +98,7 @@ export default class feedback extends wepy.page {
       this.init = true
       this.$apply()
     }, 500)
+    this.upDate()
   }
 
   onShow() {
@@ -104,8 +106,28 @@ export default class feedback extends wepy.page {
   }
 
   onPullDownRefresh() {
+    this.upDate()
   }
   onReachBottom() {
+  }
+
+  upDate() { // 获取基本数据
+    let vm = this
+    let url = `${service.host}/courses/${vm.id}/rules`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        this.rulesList = data
+        this.$apply()
+        console.log(this.rulesList)
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+        wx.hideLoading()
+      }
+    })
   }
 
   methods = {
@@ -244,9 +266,10 @@ page{
           font-size: 28rpx;
           margin: 0 18rpx;
           border-bottom: 2rpx solid #fff;
+          padding: 0 12rpx;
         }
         ._list{
-          margin-top: 4rpx;
+          margin-top: 12rpx;
           height: 90rpx;
           padding: 0 18rpx;
         }

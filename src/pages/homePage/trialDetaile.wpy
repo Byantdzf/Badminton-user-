@@ -1,35 +1,35 @@
 <template>
   <Loading :init.sync="init"></Loading>
   <view class="wrapper">
-    <template is="video"></template>
-    <template is="title"></template>
-    <template is="_detaile" data="{{active,dataList,picList}}"></template>
+    <template is="video" data="{{courseList}}"></template>
+    <template is="title" data="{{courseList,schedule}}"></template>
+    <template is="_detaile" data="{{active,schedule,picList,courseList}}"></template>
 <!--    <template is="appraise" data="{{starMap,star}}"></template>-->
     <view class="height160"></view>
-    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active" open-type="share"  @tap="save">立即预约
+    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active" open-type="share" >立即预约体验
     </button>
   </view>
   <template name="video">
     <view class="videoStyle">
-      <image src="https://images.ufutx.com/202010/28/a0b762859636f4ae43b694d4edf10b2e.jpeg" mode="widthFix" class="image"></image>
+      <image src="{{courseList.pic}}" mode="widthFix" class="image"></image>
     </view>
   </template>
   <template name="title">
     <view class="_title">
-      <view class="_name font_32 bold">基础课程
+      <view class="_name font_32 bold">{{courseList.name}}
 
-        <view class="_name font_36 bold flo_r color-red">￥6800</view>
+        <view class="_name font_36 bold flo_r color-red">￥{{courseList.price}}</view>
       </view>
       <view class="_time ellipsis_1">
         <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                class="icon"></image>
-        <span class="font_26">深圳市南山区阳光科创A座121</span>
+        <span class="font_26">{{ courseList.address }}</span>
       </view>
       <view class="font_24 ellipsis_1 _member">
         <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
                class="icon"></image>
-        <span class="color_0 font_26"><span class="white"> 5 </span>/ 10</span>
-        <view class="_name font_32 bold flo_r">100m</view>
+        <span class="color_0 font_26"><span class="white"> {{courseList.booking_count}} </span>/ {{schedule.num}}</span>
+        <view class="_name font_32 bold flo_r">{{ courseList.distance}}m</view>
       </view>
     </view>
   </template>
@@ -41,23 +41,30 @@
         <span class="_text font_30  {{active == '2'?'bold color_0':'color-666'}}" @tap="tabFn('2')">课表</span>
       </view>
       <block wx:if="{{active == '1'}}">
-        <view style="margin: 0 20rpx;">
-          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">
-            <block wx:for="{{picList}}" wx:key="this">
-              <image src="{{item}}" mode="aspectFill" class="pic radius shadow bg-white"></image>
-            </block>
-          </scroll-view>
-          <view style="margin-top: 12rpx;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>
+<!--        <view style="margin: 0 20rpx;">-->
+<!--          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">-->
+<!--            <block wx:for="{{picList}}" wx:key="this">-->
+<!--              <image src="{{item}}" mode="aspectFill" class="pic radius shadow bg-white"></image>-->
+<!--            </block>-->
+<!--          </scroll-view>-->
+<!--          <view style="margin-top: 12rpx;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>-->
+<!--        </view>-->
+        <view style="margin-top: 12rpx;">
+          <rich-text nodes="{{courseList.detail}}"></rich-text>
         </view>
       </block>
       <block wx:else>
         <view class="tabBoxStyle text-center">
           <view class="_tr inline-block bold">课时</view>
           <view class="_trV inline-block bold">时间</view>
-          <block wx:for="{{4}}" wx:key="this">
-            <view class="_tr _td inline-block color-333 {{index == 3?'noBorder':''}}">第一节</view>
-            <view class="_trV _tdV inline-block color-666 {{index == 3?'noBorder':''}}">2020.09.26 15:00-18:00</view>
+          <block>
+            <view class="_tr _td inline-block color-333 noBorder">{{schedule.name}}</view>
+            <view class="_trV _tdV inline-block color-666 noBorder">{{schedule.created_at}}</view>
           </block>
+<!--          <block wx:for="{{4}}" wx:key="this">-->
+<!--            <view class="_tr _td inline-block color-333 {{index == 3?'noBorder':''}}">第一节</view>-->
+<!--            <view class="_trV _tdV inline-block color-666 {{index == 3?'noBorder':''}}">2020.09.26 15:00-18:00</view>-->
+<!--          </block>-->
 
         </view>
       </block>
@@ -76,7 +83,7 @@ import NavBar from '../../components/NavBar'
 import Loading from '../../components/loading'
 import uploadImages from '../../components/uploadImages'
 
-export default class feedback extends wepy.page {
+export default class trialDetaile extends wepy.page {
   mixins = [base, http, user, ShareMessage]
   config = {
     navigationBarTitleText: '体验课详情'
@@ -85,11 +92,11 @@ export default class feedback extends wepy.page {
 
   components = {NavBar, Loading, uploadImages}
   data = {
+    courseList: {},
+    schedule: {},
     loaded: false,
     init: false,
     name: '',
-    informText: ['骚扰、广告', '形象照、资料虚假或假冒', '辱骂、攻击等', '色情、暴力等', '诈骗钱财', '其他'],
-    informIndex: 0,
     picList: [
       'https://images.ufutx.com/202010/28/348a87abc5f0870ed4d0e6085fd032fb.png',
       'https://images.ufutx.com/202010/28/392ce20af613a5bb8d69091c050dfa56.jpeg',
@@ -117,12 +124,34 @@ export default class feedback extends wepy.page {
   }
 
   onShow() {
+    this.upDate()
     // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
   }
 
   onPullDownRefresh() {
+    this.upDate()
   }
   onReachBottom() {
+  }
+
+  upDate() { // 获取基本数据
+    let vm = this
+    let url = `${service.host}/course/schedules/${vm.id}`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        this.courseList = data
+        this.schedule = data.schedule
+        this.$apply()
+        console.log(this.courseList)
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+        wx.hideLoading()
+      }
+    })
   }
 
   methods = {

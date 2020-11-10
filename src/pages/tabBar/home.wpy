@@ -1,12 +1,12 @@
 <template>
   <view class="">
     <template is="swiper" data="{{carousels,cardCur,city, region}}"></template>
-    <template is="cycle" data="{{cycleList,type,active}}"></template>
+    <template is="cycle" data="{{cycleList,type,active,categories}}"></template>
     <block wx:if="{{type == 'league'}}">
       <template is="list" data="{{courses}}"></template>
     </block>
     <block wx:else>
-      <template is="listV2" data="{{list}}"></template>
+      <template is="listV2" data="{{courses}}"></template>
     </block>
   </view>
   <template name="swiper">
@@ -44,66 +44,79 @@
       </block>
       <block wx:else>
         <view class="arenaStyle text-center">
-          <span class="_text font_26   {{active == '1'?'bold color_0':'color-666'}}" @tap="tabFnV2('1')">持拍手</span>
-          <span class='color-666 font_24'>|</span>
-          <span class="_text font_26  {{active == '2'?'bold color_0':'color-666'}}" @tap="tabFnV2('2')">击球</span>
-          <span class='color-666 font_24'>|</span>
-          <span class="_text font_26  {{active == '3'?'bold color_0':'color-666'}}" @tap="tabFnV2('3')">拍形角度</span>
+          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">
+            <block wx:for="{{categories}}" wx:key="this">
+              <span class="_text font_26   {{active == index?'bold color_0':'color-666'}}" @tap="tabFnV2({{index}})">{{item.name}}</span>
+              <span class='color-666 font_24'  wx:if="{{categories.length != index+1}}">|</span>
+            </block>
+          </scroll-view>
         </view>
       </block>
     </view>
   </template>
   <template name="list">
     <view class="listBox">
-      <view class="listItem radius shadow bg-white" wx:for="{{courses}}" wx:key="this" @tap="goto({{item == '1'?'/pages/homePage/taemDetaile':'/pages/homePage/trialDetaile'}})">
-        <image src="{{item.pic}}" mode="aspectFill"
-               class="image flo_l"></image>
-        <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
-        <view class="flo_r _distance font_28 ellipsis_1">{{item.distance}}m</view>
-        <view class="flo_l  ellipsis_1 _address">
-          <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
-                 class="icon"></image>
-          <span class="font_24">{{ item.store.city }} {{item.store.dist}} {{item.store.address}}</span>
+      <block wx:if="{{courses.length>0}}">
+        <view class="listItem radius shadow bg-white" wx:for="{{courses}}" wx:key="this" @tap="gotoDetaile({{index}})">
+          <image src="{{item.pic}}" mode="aspectFill"
+                 class="image flo_l"></image>
+          <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
+          <view class="flo_r _distance font_28 ellipsis_1 text-right">{{item.distance}}m</view>
+          <view class="flo_l  ellipsis_1 _address">
+            <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
+                   class="icon"></image>
+            <span class="font_24">{{ item.store.city }} {{item.store.dist}} {{item.store.address}}</span>
+          </view>
+          <view class="flo_l font_24 ellipsis_1 _price">
+            <image src="https://images.ufutx.com/202010/19/138118c117bf8d24abeef9cf16968b96.png" mode="widthFix"
+                   class="icon"></image>
+            <span class="color-red font_26">{{ item.price }}</span>
+          </view>
+          <view class="flo_l font_24 ellipsis_1 _member">
+            <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
+                   class="icon"></image>
+            <span class="color_0 font_24"><span class="white">{{ item.schedule.booking_count || 0 }} </span>/ {{ item.schedule.num || 0 }}</span>
+          </view>
+          <view class="flo_l font_24 ellipsis_1 _time">
+            <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"
+                   class="icon"></image>
+            <span class="white font_24">{{item.time}}</span>
+          </view>
+          <view class="_btn text-center" wx:if="{{item.status == '已开始'}}">已开始</view>
+          <view class="_btn _btnA text-center color-theme" wx:else>预约</view>
         </view>
-        <view class="flo_l font_24 ellipsis_1 _price">
-          <image src="https://images.ufutx.com/202010/19/138118c117bf8d24abeef9cf16968b96.png" mode="widthFix"
-                 class="icon"></image>
-          <span class="color-red font_26">{{ item.price }}</span>
+      </block>
+      <block wx:else>
+        <view class="text-center">
+          <image src="https://images.ufutx.com/202011/07/73597a9bf3dd8028a10a5ab43d5e65b9.jpeg" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
         </view>
-        <view class="flo_l font_24 ellipsis_1 _member">
-          <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
-                 class="icon"></image>
-          <span class="color_0 font_24"><span class="white">{{ item.schedule.booking_count || 0 }} </span>/ {{ item.schedule.num || 0 }}</span>
-        </view>
-        <view class="flo_l font_24 ellipsis_1 _time">
-          <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"
-                 class="icon"></image>
-          <span class="white font_24">{{item.time}}</span>
-        </view>
-        <view class="_btn text-center" wx:if="{{item.status == '已开始'}}">已开始</view>
-        <view class="_btn _btnA text-center color-theme" wx:else>预约</view>
-      </view>
-
+      </block>
     </view>
   </template>
   <template name="listV2">
     <view class="listBox">
-      <view class="listItem radius shadow bg-white" wx:for="{{courses}}" wx:key="this" @tap="goto('/pages/homePage/networkDetaile')">
-        <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
-               class="image flo_l"></image>
-        <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
-        <view class="flo_l  ellipsis_1 _address">
-          <span class="font_24">简介：撒旦就卡了多久啦手机打开拉萨简单快乐了就打暑假快乐到家啊考虑到</span>
+      <block wx:if="{{courses.length>0}}">
+        <view class="listItem radius shadow bg-white" wx:for="{{courses}}" wx:key="this" @tap="goto('/pages/homePage/networkDetaile?id={{item.id}}')">
+          <image src="{{item.pic}}" mode="aspectFill"
+                 class="image flo_l"></image>
+          <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
+          <!--        <view class="flo_l  ellipsis_1 _address">-->
+          <!--          <span class="font_24">简介：撒旦就卡了多久啦手机打开拉萨简单快乐了就打暑假快乐到家啊考虑到</span>-->
+          <!--        </view>-->
+          <!--        <view class="flo_l font_24 ellipsis_1 _time" style="margin-top: 22rpx;">-->
+          <!--          <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"-->
+          <!--                 class="icon"></image>-->
+          <!--          <span class="white font_24">18:00 - 22:00</span>-->
+          <!--        </view>-->
+          <!--        <view class="_btn text-center" wx:if="{{item == 0}}">已开始</view>-->
+          <view class="_btn _btnA text-center color-theme">立即观看</view>
         </view>
-        <view class="flo_l font_24 ellipsis_1 _time" style="margin-top: 22rpx;">
-          <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"
-                 class="icon"></image>
-          <span class="white font_24">18:00 - 22:00</span>
+      </block>
+      <block wx:else>
+        <view class="text-center">
+          <image src="https://images.ufutx.com/202011/07/73597a9bf3dd8028a10a5ab43d5e65b9.jpeg" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
         </view>
-        <view class="_btn text-center" wx:if="{{item == 0}}">已开始</view>
-        <view class="_btn _btnA text-center color-theme" wx:else>立即观看</view>
-      </view>
-
+      </block>
     </view>
   </template>
 </template>
@@ -122,12 +135,13 @@ export default class home extends wepy.page {
   config = {
     navigationBarTitleText: '课程首页',
     onReachBottomDistance: 10,
-    enablePullDownRefresh: false
+    enablePullDownRefresh: true
   }
   components = {}
 
   data = {
     cycleList: [], // 周期
+    categories: [], // 分类
     list: [],
     city: '深圳',
     region: ['广东省', '深圳市', '南山区'],
@@ -147,7 +161,7 @@ export default class home extends wepy.page {
     cardCur: 0,
     // league:团课，online:网课
     type: 'league',
-    active: 1,
+    active: 0,
     token: wx.getStorageSync('token'),
     modalName: '',
     throttle: true, // 节流
@@ -163,6 +177,7 @@ export default class home extends wepy.page {
   async onLoad(e) {
     this.getDate()
     this.getRules()
+    this.upDate()
   }
 
   onShow() {
@@ -171,10 +186,16 @@ export default class home extends wepy.page {
     vm.token = wx.getStorageSync('token')
     vm.page = 1
     vm.$apply()
-    // vm.getList()
-    vm.upDate()
   }
-
+  onPullDownRefresh() {
+    this.page = 1
+    this.upDate()
+  }
+  onReachBottom() {
+    setTimeout(() => {
+      this.upDate()
+    }, 200)
+  }
   timeFormat(param) {
     return param < 10 ? '0' + param : param
   }
@@ -238,11 +259,13 @@ export default class home extends wepy.page {
   }
   getRules() {
     let vm = this
-    let url = `${service.host}/courses/1/rules`
+    let url = `${service.host}/course/categories`
     vm.$get({
       url: url
     }, {
       success: ({code, data}) => {
+        vm.categories = data
+        vm.$apply()
         console.log(data)
       },
       fail: ({code, data}) => {
@@ -254,12 +277,14 @@ export default class home extends wepy.page {
   upDate() { // 获取基本数据
     let vm = this,
       data = {
+        page: vm.page,
         type: vm.type,
         city: vm.region[1],
         latitude: '22.519517',
         longitude: '113.920928',
         date: '2020-10-24'
       }
+    if (vm.type == 'online') { data.category_id = vm.categories[vm.active].id }
     let url = `${service.host}/home`
     vm.$get({
       url: url, data
@@ -292,6 +317,16 @@ export default class home extends wepy.page {
   }
 
   methods = {
+    gotoDetaile(index) {
+      let {type} = this.courses[index],
+        url = ''
+      if (type == 'trial') {
+        url = `/pages/homePage/trialDetaile?id=${this.courses[index].id}`
+      } else {
+        url = `/pages/homePage/taemDetaile?id=${this.courses[index].id}`
+      }
+      this.$goto(url)
+    },
     bindRegionChange (e) {
       console.log('picker发送选择改变，携带值为', e.detail.value)
       this.region = e.detail.value
@@ -299,19 +334,16 @@ export default class home extends wepy.page {
     },
     tabFnV2(val) {
       let vm = this
-      vm.$showLoading('加载中...')
-      setTimeout(() => {
-        vm.$hideLoading()
-      }, 800)
-      this.active = val
-      this.$apply()
+      vm.courses = []
+      vm.page = 1
+      vm.active = val
+      vm.$apply()
+      vm.upDate()
     },
     tabFn(val) {
       let vm = this
-      vm.$showLoading('加载中...')
-      setTimeout(() => {
-        vm.$hideLoading()
-      }, 800)
+      vm.courses = []
+      vm.page = 1
       vm.type = val
       vm.$apply()
       vm.upDate()
@@ -400,6 +432,9 @@ page {
   .arenaStyle{
     margin-top: 12rpx;
     letter-spacing: 2rpx;
+    .scroll-view_H{
+      white-space: nowrap;
+      margin-top: 32rpx;}
     ._text{
       margin: 0 22rpx;
     }
@@ -423,10 +458,10 @@ page {
     ._title{
       color: black;
       margin: 12rpx 14rpx;
-      width: 50%;
+      width:42%;
     }
     ._distance{
-      width: 12%;
+      width: 17%;
       margin-right: 22rpx;
       margin-top: 12rpx;
       color: black;

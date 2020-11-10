@@ -34,7 +34,7 @@
       <view class="section list">
         <view class="picker">
           <span class="font_28 color_0">电话</span>
-          <input type="text" placeholder="请输入电话号码" class="Inp font_28 text"  @blur="typing('mobile')"  value="{{mobile}}" cursor-spacing="50"/>
+          <input type="text" placeholder="请输入电话号码" class="Inp font_28 text" disabled  @blur="typing('mobile')"  value="{{mobile}}" cursor-spacing="50"/>
         </view>
       </view>
       <view class="section list">

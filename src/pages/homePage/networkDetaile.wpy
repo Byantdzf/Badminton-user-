@@ -1,9 +1,9 @@
 <template>
   <Loading :init.sync="init"></Loading>
   <view class="wrapper">
-    <template is="video"></template>
-    <template is="title"></template>
-    <template is="_detaile" data="{{active,dataList,picList}}"></template>
+    <template is="video" data="{{courses}}"></template>
+    <template is="title" data="{{courses}}"></template>
+    <template is="_detaile" data="{{active,dataList,picList,courses}}"></template>
 <!--    <template is="appraise" data="{{starMap,star}}"></template>-->
     <view class="height160"></view>
     <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="goto('/pages/users/uploadVideo')">我要打卡
@@ -13,7 +13,7 @@
     <view class="videoStyle">
       <video
               id="myVideo"
-              src="http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400"
+              src="{{courses.video_id}}"
               binderror="videoErrorCallback"
               show-center-play-btn='{{false}}'
               show-play-btn="{{true}}"
@@ -28,7 +28,7 @@
   </template>
   <template name="title">
     <view class="_title">
-      <view class="_name font_32 bold">羽毛球扣球(网络体验课)
+      <view class="_name font_32 bold">{{courses.name}}
       </view>
     </view>
   </template>
@@ -38,12 +38,15 @@
         <span class="_text font_30 bold color_0">课程介绍</span>
       </view>
         <view style="margin: 0 20rpx;">
-          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">
-            <block wx:for="{{picList}}" wx:key="this">
-              <image src="{{item}}" mode="aspectFill" class="pic radius shadow bg-white"></image>
-            </block>
-          </scroll-view>
-          <view style="margin-top: 12rpx;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>
+          <view style="margin-top: 12rpx;">
+            <rich-text nodes="{{courses.detail}}"></rich-text>
+          </view>
+<!--          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">-->
+<!--            <block wx:for="{{picList}}" wx:key="this">-->
+<!--              <image src="{{item}}" mode="aspectFill" class="pic radius shadow bg-white"></image>-->
+<!--            </block>-->
+<!--          </scroll-view>-->
+<!--          <view style="margin-top: 12rpx;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>-->
         </view>
     </view>
 
@@ -81,6 +84,7 @@ export default class feedback extends wepy.page {
     ],
     informValue: '',
     id: '',
+    courses: {},
     active: 1,
     // 赞
     star: 3
@@ -101,6 +105,7 @@ export default class feedback extends wepy.page {
   }
 
   onShow() {
+    this.upDate()
     // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
   }
 
@@ -109,6 +114,24 @@ export default class feedback extends wepy.page {
   onReachBottom() {
   }
 
+  upDate() { // 获取基本数据
+    let vm = this
+    let url = `${service.host}/courses/${vm.id}`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        this.courses = data
+        this.$apply()
+        console.log(this.courses)
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+        wx.hideLoading()
+      }
+    })
+  }
   methods = {
     tabFn(val) {
       let vm = this

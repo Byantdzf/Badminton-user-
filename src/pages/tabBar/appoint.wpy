@@ -1,13 +1,13 @@
 <template>
   <view class="">
-    <template is="mainUser" data="{{day, num}}"></template>
-    <template is="list" data="{{list}}"></template>
+    <template is="mainUser" data="{{info}}"></template>
+    <template is="list" data="{{info}}"></template>
   </view>
   <template name="mainUser">
   <view class="_userInfo radius shadow bg-white">
-    <view class="_item bold"><view class="font_52 white">{{day}}</view><span>累计天数</span></view>
-    <view class="_item"><image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill" class="photo "></image></view>
-    <view class="_item bold"><view class="font_52 white">{{num}}</view><span>累计训练/次</span></view>
+    <view class="_item bold"><view class="font_52 white">{{info.train_day_num}}</view><span>累计天数</span></view>
+    <view class="_item"><image src="{{info.photo}}" mode="aspectFill" class="photo "></image></view>
+    <view class="_item bold"><view class="font_52 white">{{info.train_num}}</view><span>累计训练/次</span></view>
   </view>
 </template>
   <template name="list">
@@ -17,10 +17,10 @@
         <image src="https://images.ufutx.com/202010/20/267ae6ff1cba531887957f23212a39a8.png" mode="aspectFill"
                class="_icon"></image>
       </view>
-      <view class="listItem radius shadow bg-white" wx:for="{{2}}" wx:key="this">
-        <view class="_item"><view class="font_42 white">1</view><span>训练次数</span></view>
-        <view class="_item"><view class="font_42 white">8</view><span>训练天数</span></view>
-        <view class="_item"><view class="font_42 white">30</view><span>训练时长/分钟</span></view>
+      <view class="listItem radius shadow bg-white">
+        <view class="_item"><view class="font_42 white">{{info.booking_num}}</view><span>训练次数</span></view>
+        <view class="_item"><view class="font_42 white">{{info.booking_day_num}}</view><span>训练天数</span></view>
+        <view class="_item"><view class="font_42 white">{{info.course_duration}}</view><span>训练时长/分钟</span></view>
       </view>
     </view>
   </template>
@@ -35,7 +35,7 @@ import user from '../../mixins/user'
 // import ShareMessage from '../../mixins/ShareMessage'
 
 let date = new Date()
-export default class home extends wepy.page {
+export default class appoint extends wepy.page {
   mixins = [base, http, user]
   config = {
     navigationBarTitleText: '我的预约',
@@ -43,7 +43,7 @@ export default class home extends wepy.page {
   }
   components = {}
   data = {
-    list: [],
+    info: {},
     city: '深圳',
     day: '10', // 累计天数
     num: '7',  // 累积训练次数
@@ -56,51 +56,7 @@ export default class home extends wepy.page {
   }
 
   onShow() {
-    let vm = this
-    vm.cardCur = 0
-    vm.token = wx.getStorageSync('token')
-    vm.$apply()
-    if (wx.getStorageSync('touristsSex')) {
-      vm.touristsSex = wx.getStorageSync('touristsSex')
-      vm.$apply()
-      console.log(vm.touristsSex, 'touristsSex')
-    }
-    if (vm.token == '') {
-      wepy.login({
-        success: (res) => {
-          vm.$post({url: service.login, data: {code: res.code}}, {
-            success: ({code, data}) => {
-              if (data.token) {
-                wx.setStorageSync('token', data.token)
-                wx.setStorageSync('openid', data.openid)
-                let userInfo = {
-                  nickName: data.user.name,
-                  avatarUrl: data.user.avatar,
-                  type: data.user.type
-                }
-                wx.setStorageSync('userInfo', userInfo)
-                wx.setStorageSync('user_id', data.user.id)
-                wx.setStorageSync('type', data.user.type)
-              }
-              if (data.token) {
-                vm.page = 1
-                vm.$apply()
-                vm.upDate()
-              }
-            }
-          })
-          vm.getList()
-        },
-        fail: (res) => {
-          console.log('wepy.login.fail:', res)
-        }
-      })
-    } else {
-      vm.page = 1
-      vm.$apply()
-      vm.getList()
-      vm.upDate()
-    }
+    this.upDate()
     // vm.$parent.getTracker(vm.$root.$name, vm.config.navigationBarTitleText)
   }
 
@@ -108,37 +64,14 @@ export default class home extends wepy.page {
     return param < 10 ? '0' + param : param
   }
 
-  getList() {   // 获取用户数据
-    let vm = this,
-      url = `${service.host}/home/v3`,
-      data = {
-        sex: `${vm.touristsSex}`
-      }
-    vm.cardCur = 0
-    vm.list = []
-    vm.$apply()
-    vm.$showLoading('加载中')
-    vm.$get({
-      url: url, data
-    }, {
-      success: ({code, data}) => {
-        vm.list = data
-        vm.$apply()
-        wx.hideLoading()
-        console.log(vm.list)
-      }
-    })
-  }
-
   upDate() {
     let vm = this
-    let url = `${service.host}/user/v3`
+    let url = `${service.host}/user/booking/info`
     vm.$get({
       url: url
     }, {
       success: ({code, data}) => {
-        vm.is_approved = data.is_approved
-        vm.is_profile = data.is_profile
+        vm.info = data
         vm.$apply()
       },
       fail: ({code, data}) => {

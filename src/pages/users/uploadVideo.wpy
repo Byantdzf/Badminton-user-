@@ -3,13 +3,14 @@
   <Loading :init.sync="init"></Loading>
   <view class="wrapper">
     <view class="_input">
-      <input type="text" placeholder="请输入标题">
+      <input type="text" placeholder="请输入标题" @blur="typing('informValue')">
     </view>
     <view class="themes">
+
       <view class="flo_l text">视频</view>
       <view class="uploadVideo flo_l">
         <block wx:if="{{src === ''}}">
-          <image src="http://images.ufutx.com/201902/27/fc2da5fdf813b12f7c8a616eff6dbf03.png" @tap="uploadVideo" mode="widthFix" class="image"></image>
+          <image src="http://images.ufutx.com/201902/27/fc2da5fdf813b12f7c8a616eff6dbf03.png" @tap="chooseVideo" mode="widthFix" class="image"></image>
         </block>
         <block wx:else>
           <video src="{{src}}"
@@ -19,25 +20,21 @@
         </block>
       </view>
     </view>
-<!--    <view class="page-body-info">-->
-<!--      <block wx:if="{{src === ''}}">-->
-<!--        <view class="image-plus image-plus-nb" @tap="chooseVideo">-->
-<!--          <view class="image-plus-horizontal"></view>-->
-<!--          <view class="image-plus-vertical"></view>-->
+<!--    <view class="padding bg-white ">-->
+<!--&lt;!&ndash;      <view class="flex">&ndash;&gt;-->
+<!--&lt;!&ndash;        <view class="cu-progress round">&ndash;&gt;-->
+<!--&lt;!&ndash;          <view class="bg-green" style="width:{{loading?uploadPercent:''}};"></view>&ndash;&gt;-->
+<!--&lt;!&ndash;        </view>&ndash;&gt;-->
+<!--&lt;!&ndash;        <text class="cuIcon-roundcheckfill text-green margin-left-sm"></text>&ndash;&gt;-->
+<!--&lt;!&ndash;      </view>&ndash;&gt;-->
+<!--      <view class="flex margin-top">-->
+<!--        <view class="cu-progress round">-->
+<!--          <view class="bg-green" style="width:{{loading?uploadPercent:''}};"></view>-->
 <!--        </view>-->
-<!--        <view class="image-plus-text">添加视频</view>-->
-<!--      </block>-->
-<!--      <block wx:if="{{src != ''}}">-->
-<!--        <video src="{{src}}" class="video"></video>-->
-<!--      </block>-->
-<!--    </view>-->
-
-    <!--    <view class="uploadPic">-->
-<!--      <view class="font_26 color-666" style="margin-bottom: 22rpx">为了能够让开发者更快的处理您的反馈，建议您上传要反馈内容的截图。</view>-->
-<!--      <image src="http://images.ufutx.com/201902/27/fc2da5fdf813b12f7c8a616eff6dbf03.png" @tap="uploadPic" mode="widthFix" class="image"></image>-->
-<!--      <block wx:for="{{informImages}}" wx:key="{{index}}" wx:if="{{informImages}}">-->
-<!--        <image src="{{item}}"   mode="aspectFill" class="upLoadImage" @tap="previewImages({{item}},{{informImages}})" @longpress="deletePic({{index}})"></image>-->
-<!--      </block>-->
+<!--        <text class="margin-left">{{ uploadPercent }}</text>-->
+<!--      </view>-->
+<!--      <view class="margin-top">视频大小：{{size}}</view>-->
+<!--      <view class="margin-top">已上传：{{totalBytesSent}}</view>-->
 <!--    </view>-->
     <view class="clearfloat"></view>
     <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="save">上传
@@ -58,7 +55,8 @@
   export default class feedback extends wepy.page {
     mixins = [base, http, user, ShareMessage]
     config = {
-      navigationBarTitleText: '上传视频'
+      navigationBarTitleText: '上传视频',
+      enablePullDownRefresh: false
     }
 
     components = {NavBar, Loading, uploadImages}
@@ -66,15 +64,19 @@
       loaded: false,
       init: false,
       name: '',
-      informText: ['骚扰、广告', '形象照、资料虚假或假冒', '辱骂、攻击等', '色情、暴力等', '诈骗钱财', '其他'],
-      informIndex: 0,
       informValue: '',
       informClass: '',
       informImages: [],
+      loading: true,
       src: '',
+      uploadPercent: '',
+      totalBytesSent: '',
+      size: '',
+      play_url: '',
+      type: '',
       id: ''
     }
-
+    // CLOCKIN打卡 TRAIN:训练
     computed = {}
 
     onShareAppMessage(res) {
@@ -82,6 +84,7 @@
     }
 
     async onLoad(e) {
+      this.type = e.type
       this.id = e.id
       setTimeout(() => {
         this.init = true
@@ -97,39 +100,59 @@
     }
     onReachBottom() {
     }
-    uploadFile(filePath) {
-      let vm = this
-      vm.$showLoading('上传中')
-      console.log(filePath)
-      wx.uploadFile({
-        url: `${service.host}/upload/video`,
-        filePath: filePath,
-        method: 'POST',
-        name: 'fileData',
-        header: {
-          'Authorization': 'Bearer ' + wx.getStorageSync('token'),
-          'content-type': 'multipart/form-data'
-        },
-        success: (res) => {
-          console.log(res)
-        },
-        fail: (res) => {
-        },
-        complete: () => {
-        }
-      })
-    }
 
     methods = {
       // 选择视频
       chooseVideo() {
-        var that = this
-        wx.chooseImage({
-          success: function(res) {
-            console.log(res)
-            that.src = res.tempFilePaths[0]
-            that.$apply()
-          }
+        var _this = this
+        _this.$showLoading('上传中')
+        wx.chooseVideo({
+          ourceType: ['album', 'camera'],
+          maxDuration: 60,
+          camera: 'back',
+          success(res) {
+            _this.src = res.tempFilePath
+            _this.size = res.size / (1024 * 1024).toFixed(2)
+            _this.$apply()
+            const uploadTask = wx.uploadFile({
+              url: `${service.host}/upload/video`,
+              filePath: res.tempFilePath,
+              method: 'POST',
+              name: 'fileData',
+              timeout: '1000000',
+              header: {
+                'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+                'content-type': 'multipart/form-data'
+              },
+              success(res) {
+                wx.hideLoading()
+                _this.$Toast_success('上传成功！')
+                const data = JSON.parse(res.data)// 坑一：与wx.request不同，wx.uploadFile返回的是json字符串，需要自己转为JSON对象格式
+                console.log(data.data)
+                _this.play_url = data.data
+                _this.$apply()
+              },
+              fail: function (res) {
+                wx.hideLoading()
+                console.log(res)
+                _this.$showToast('上传失败...')
+              }
+            })
+            uploadTask.onProgressUpdate((res) => {
+              let uploadProgress = res.progress,
+                totalBytesSent = res.totalBytesSent
+              // _this.uploadPercent = uploadProgress + '%'
+              // _this.$apply()
+              _this.setData({
+                uploadPercent: uploadProgress + '%',
+                totalBytesSent: totalBytesSent / (1024 * 1024).toFixed(2)
+              })
+              console.log('上传进度', res.progress)
+              console.log('已经上传的数据长度', res.totalBytesSent)
+              console.log('预期需要上传的数据总长度', res.totalBytesExpectedToSend)
+            })
+          },
+          fail(res) { wx.hideLoading() }
         })
       },
       deletePic(index) {
@@ -155,66 +178,27 @@
         this.$apply()
         console.log(this[type])
       },
-      uploadVideo() { // 上传组件
-        let that = this
-        wx.chooseVideo({
-          sourceType: ['album', 'camera'],
-          maxDuration: 60,
-          camera: 'back',
-          success: function (res) {
-            that.src = res.tempFilePath
-            that.$apply()
-            that.uploadFile(that.src)
-            console.log(that.src, 'asdddd')
-          },
-          fail: function (res) {
-            console.log(res)
-            that.$showToast('上传失败,模拟上传中...')
-          }
-        })
-      },
-      bindPickerChange(e) {
-        this.informIndex = e.detail.value
-        this.informClass = this.informText[this.informIndex]
-        this.$apply()
-      },
-      gotoFriendPage(item) {
-        let url = ''
-        if (item.type == 'single') {
-          url = '/pages/home/information?id=' + item.id
-        } else {
-          url = '/pages/home/introducer?id=' + item.id
-        }
-        wx.navigateTo({url: url})
-      },
       save() {
         let data = {
-            content: this.informValue,
-            photos: this.informImages
+            type: 'CLOCKIN',
+            name: this.informValue,
+            play_url: this.play_url
           },
           vm = this
-        vm.$showToast('上传失败,未调试接口...')
-        vm.$gotoBack(1)
-        return
-        // for (let item in data) {
-        //   if (!data[item]) {
-        //     return vm.$showToast('请填写反馈信息！')
-        //   }
-        // }
         console.log(data)
-        vm.$post({url: `${service.host}/feedback`, data}, {
+        if (!vm.informValue) { return vm.$showToast('请先输入标题') }
+        if (!vm.play_url) { return vm.$showToast('请先上传视频') }
+        vm.$post({
+          url: `${service.host}/video/log`, data
+        }, {
           success: ({code, data}) => {
-            wx.showModal({
-              title: '反馈成功！',
-              content: '非常感谢您的反馈！我们将以最快速度处理您的反馈。',
-              success(res) {
-                if (res.confirm) {
-                  vm.$gotoBack(1)
-                } else if (res.cancel) {
-                  console.log('用户点击取消')
-                }
-              }
-            })
+            vm.$Toast_success('保存成功')
+            vm.$gotoBack(1)
+          },
+          fail: ({code, data}) => {
+          },
+          complete: () => {
+            wx.hideLoading()
           }
         })
       }

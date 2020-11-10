@@ -18,11 +18,11 @@
   </template>
   <template name="list">
     <view class="listBox">
-      <view class="listItem radius shadow bg-white" wx:for="{{list}}" wx:key="this" @tap="goto('/pages/arenaPage/arenaDetaile')">
+      <view class="listItem radius shadow bg-white" wx:for="{{list}}" wx:key="this" @tap="goto('/pages/arenaPage/arenaDetaile?id={{item.id}}')">
         <image src="{{item.pic}}" mode="aspectFill"
                class="image flo_l"></image>
         <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
-        <view class="flo_r _distance font_28 ellipsis_1">10m</view>
+        <view class="flo_r _distance font_28 ellipsis_1">{{item.distance}}m</view>
         <view class="flo_l  ellipsis_1 _address">
           <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                  class="icon"></image>

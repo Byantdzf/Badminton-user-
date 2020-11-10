@@ -6,10 +6,11 @@
     <template is="_detaile" data="{{active,dataList,picList,courseList}}"></template>
 <!--    <template is="appraise" data="{{starMap,star}}"></template>-->
     <view class="height160"></view>
-    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold" style="background: #fce1a2;" hover-class="btn_active"  @tap="save" wx:if="{{courseList.status == '已开始'}}">
+<!--    has_course-->
+    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold" style="background: #fce1a2;" hover-class="btn_active"  @tap="cancelFn" wx:if="{{courseList.status == '已开始'}}">
       已开始
     </button>
-    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="save" wx:else>
+    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="saveFn" wx:else>
       立即预约
     </button>
   </view>
@@ -21,7 +22,6 @@
   <template name="title">
     <view class="_title">
       <view class="_name font_32 bold">{{courseList.name}}
-
         <view class="_name font_36 bold flo_r color-red">￥{{courseList.price}}</view>
       </view>
       <view class="_time ellipsis_1">
@@ -67,10 +67,11 @@ import NavBar from '../../components/NavBar'
 import Loading from '../../components/loading'
 import uploadImages from '../../components/uploadImages'
 
-export default class feedback extends wepy.page {
+export default class taemDetaile extends wepy.page {
   mixins = [base, http, user, ShareMessage]
   config = {
-    navigationBarTitleText: '团课详情'
+    navigationBarTitleText: '团课详情',
+    enablePullDownRefresh: true
     // navigationStyle: 'custom'
   }
 
@@ -112,6 +113,7 @@ export default class feedback extends wepy.page {
   }
 
   onPullDownRefresh() {
+    this.upDate()
   }
   onReachBottom() {
   }
@@ -194,15 +196,29 @@ export default class feedback extends wepy.page {
       }
       wx.navigateTo({url: url})
     },
-    save() {
+    cancelFn() { this.$showToast('活动已开始！') },
+    saveFn() {
       let data = {
           content: this.informValue,
           photos: this.informImages
         },
         vm = this
-      vm.$showToast('评价成功！')
-      vm.$goto('/pages/homePage/order')
-      return
+      if (this.courseList.is_complete_info == 0) {
+        wx.showModal({
+          title: '提示！',
+          content: '购买前，请先完善个人信息',
+          success(res) {
+            if (res.confirm) {
+              vm.$goto('/pages/users/unmarri')
+            } else if (res.cancel) {
+              console.log('用户点击取消')
+            }
+          }
+        })
+        return
+      }
+      // vm.$showToast('评价成功！')
+      vm.$goto(`/pages/homePage/order?id=${this.id}`)
       for (let item in data) {
         if (!data[item]) {
           return vm.$showToast('请输入评价内容！')
