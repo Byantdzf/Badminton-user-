@@ -20,6 +20,10 @@
     <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="save">提交
     </button>
   </view>
+<!--  <view>-->
+<!--    <view style="min-width: 50%;display: inline-block;">测试测试测试测试测试啊飒飒车上</view>-->
+<!--    <view style="min-width: 50%;display: inline-block;">测试测试测试测试测试</view>-->
+<!--  </view>-->
 </template>
 <script>
   import wepy from 'wepy'

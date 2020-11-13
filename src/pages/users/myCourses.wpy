@@ -13,18 +13,18 @@
     <block wx:if="{{list.length > 0}}">
       <view class="listBox">
         <view class="listItem radius shadow bg-white" wx:for="{{list}}" wx:key="this" @tap="gotoDetaile('2')">
-          <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
+          <image src="{{item.photo}}" mode="aspectFill"
                  class="image flo_l"></image>
-          <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
-          <view class="flo_r _title font_24 ellipsis_1" wx:if="{{active == '1'}}">剩余次数：9次</view>
+          <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
+          <view class="flo_r _title font_24 ellipsis_1" wx:if="{{active == '1'}}">剩余次数：{{item.total_num - item.num}}次</view>
           <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
             <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                    class="icon"></image>
-            <span class="font_24">深圳市南山区阳光科创A座129</span>
+            <span class="font_24">{{ item.address }}</span>
           </view>
           <block wx:if="{{active == '1'}}">
             <view class="btnStyle">
-              <view class="flo_l _price bold color-red font_32">￥6800</view>
+              <view class="flo_l _price bold color-red font_32">￥{{item.price}}</view>
               <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  @tap.stop="cancelFn">立即预约
               </button>
             </view>
@@ -200,6 +200,7 @@ export default class myCourses extends wepy.page {
       let vm = this
       vm.active = val
       vm.page = 1
+      vm.list = []
       vm.getList()
       vm.$apply()
     },
@@ -207,13 +208,13 @@ export default class myCourses extends wepy.page {
       console.log(link)
       this.$gotoH5(link)
     },
-    gotoDetaile() {
-      let vm = this,
+    gotoDetaile(index) {
+      let {type} = this.courses[index],
         url = ''
-      if (vm.active == 1) {
-        url = '/pages/homePage/taemDetaile?id=1'
+      if (type == 'trial') {
+        url = `/pages/homePage/trialDetaile?id=${this.courses[index].id}`
       } else {
-        url = '/pages/homePage/networkDetaile'
+        url = `/pages/homePage/taemDetaile?id=${this.courses[index].id}`
       }
       this.$goto(url)
     },
