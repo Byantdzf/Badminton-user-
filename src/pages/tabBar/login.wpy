@@ -1,0 +1,262 @@
+<template>
+  <Loading :init.sync="init"></Loading>
+  <view class="wrapper animation-slide-top">
+    <view class="logo text-center animation-slide-top"  style="animation-delay: 0.6s;">
+      <image src="https://images.ufutx.com/202012/10/aa5e5f9d8978aea4c64d3644318466ec.jpeg" mode="aspectFill"
+             class="logoPic radius shadow bg-gray"></image>
+    </view>
+    <view class="mobile animation-slide-bottom">
+      <image src="https://images.ufutx.com/202011/12/b8e7997ac2ff19757a56a72f282abc28.png" mode="aspectFit" class="iphone flo_l"></image>
+      <input type="number" placeholder="请点击获取手机号" class="Inp font_28 text flo_l bold color-333" disabled  @input="typing('mobile')"   value="{{mobile}}" />
+    </view>
+    <view class="clearfloat"></view>
+      <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold animation-slide-bottom"  hover-class="btn_active" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" wx:if="{{!mobile}}" >获取手机号
+      </button>
+      <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold animation-slide-bottom"  hover-class="btn_active"  open-type="getUserInfo" @getuserinfo="getuserinfo()" wx:else>下一步
+      </button>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import { service } from '../../config.js'
+import http from '../../mixins/http'
+import base from '../../mixins/base'
+import user from '../../mixins/user'
+import ShareMessage from '../../mixins/ShareMessage'
+import NavBar from '../../components/NavBar'
+import Loading from '../../components/loading'
+import uploadImages from '../../components/uploadImages'
+import {wx_login} from '../../utils/fn'
+
+export default class login extends wepy.page {
+  mixins = [base, http, user, ShareMessage]
+  config = {
+    navigationBarTitleText: '注册',
+    enablePullDownRefresh: false
+  }
+
+  components = {NavBar, Loading, uploadImages}
+  data = {
+    loaded: false,
+    init: false,
+    name: '',
+    informValue: '',
+    id: '',
+    mobile: '',
+    userInfo: {},
+    look: false,
+    password: ''
+  }
+
+  computed = {}
+
+  onShareAppMessage(res) {
+    return this.$parent.onShareAppMessage(this.config.navigationBarTitleText)
+  }
+
+  async onLoad(e) {
+    this.id = e.id
+    setTimeout(() => {
+      this.init = true
+      this.$apply()
+    }, 500)
+  }
+
+  onShow() {
+    // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
+  }
+
+  onPullDownRefresh() {
+  }
+  onReachBottom() {
+  }
+  registerFn() { // 注册接口
+    let vm = this
+    console.log(vm.userInfo)
+    let {nickName, avatarUrl, gender} = vm.userInfo
+    console.log(vm.mobile)
+    // let code = wx.getStorageSync('code')
+    let data = {
+      mobile: vm.mobile,
+      openid: vm.openid,
+      nickname: nickName,
+      sex: gender == '1' ? 1 : 2,
+      avatar: avatarUrl
+    }
+    wx_login().then((code) => {
+      data.code = code
+      console.log(data)
+      vm.$post({url: `${service.host}/wechat/register`, data}, {
+        success: ({code, data}) => {
+          console.log(data)
+          wx.setStorageSync('token', data.token)
+          wx.setStorageSync('user_id', data.user.id)
+          wx.setStorageSync('type', data.user.type)
+          vm.token = data.token
+          vm.$apply()
+          vm.$gotoTab('/pages/tabBar/home')
+        }
+      })
+    })
+  }
+
+  methods = {
+    getuserinfo(type, e) {
+      let vm = this
+      vm.$showLoading('加载中')
+      console.log(e.detail)
+      if (e.detail.userInfo) {
+        vm.userInfo = e.detail.userInfo
+        vm.$apply()
+        vm.registerFn()
+        console.log(vm.userInfo)
+        // 用户按了允许授权按钮
+        wx.hideLoading()
+      } else {
+        // 用户按了拒绝按钮
+        wx.hideLoading()
+      }
+    },
+    getPhoneNumber(e) { // 获取手机号
+      let vm = this
+      console.log(e)
+      wx_login().then((code) => {
+        wx.setStorageSync('code', code)
+        if (e.detail.iv) {
+          let data = {
+            code: code,
+            iv: e.detail.iv,
+            from_openid: wx.getStorageSync('from_openid'),
+            encryptedData: e.detail.encryptedData
+          }
+          vm.$showLoading('手机号获取中...')
+          vm.$post({url: `${service.host}/wechat/phone`, data}, {
+            success: ({code, data}) => {
+              let {phoneNumber, unionid, openid} = data
+              vm.mobile = phoneNumber
+              vm.openid = openid
+              vm.$apply()
+              wx.setStorageSync('openid', openid)
+              wx.setStorageSync('mobile', phoneNumber)
+              wx.hideLoading()
+            }
+          })
+        }
+      }).catch((error) => {
+        console.log(error)
+        wx.hideLoading()
+      })
+    },
+    lookFn() {
+      this.look = !this.look
+      this.$apply()
+    },
+    previewImages(item, list) {
+      this.$previewImages(item, list)
+    },
+    typing(type, e) {
+      this[type] = e.detail.value
+      this.$apply()
+      console.log(this[type])
+    },
+    uploadPic() { // 上传组件
+      this.$invoke('uploadImages', 'chooseimage')
+    },
+    bindPickerChange(e) {
+      this.informIndex = e.detail.value
+      this.informClass = this.informText[this.informIndex]
+      this.$apply()
+    },
+    gotoFriendPage(item) {
+      let url = ''
+      if (item.type == 'single') {
+        url = '/pages/home/information?id=' + item.id
+      } else {
+        url = '/pages/home/introducer?id=' + item.id
+      }
+      wx.navigateTo({url: url})
+    },
+    save() {
+      let data = {
+          mobile: this.mobile,
+          password: this.password
+        },
+        vm = this
+      console.log(data)
+      if (!this.mobile) return vm.$showToast('请输入账号/手机号')
+      if (!this.password) return vm.$showToast('请输入密码')
+      vm.$showLoading('登陆中')
+      vm.$post({url: `${service.host}/coach/wechat/login`, data}, {
+        success: ({code, data}) => {
+          console.log(data)
+          wx.setStorageSync('token', data.token)
+          wx.setStorageSync('type', data.type)
+          let userInfo = {
+            nickName: data.name,
+            avatarUrl: data.photo,
+            id: data.id
+          }
+          wx.setStorageSync('userInfo', userInfo)
+          wx.setStorageSync('user_id', data.id)
+          setTimeout(() => {
+            vm.$gotoTab('/pages/tabBar/home')
+          }, 800)
+        }
+      })
+    }
+  }
+  events = {
+    'UpLoadImage': (value) => {
+      this.informImages.push(value)
+      this.$apply()
+    }
+  }
+}
+
+</script>
+
+<style lang="less">
+@import "../../styles/custom/reset.less";
+@import "../../styles/custom/fn.less";
+page{
+  background: #f9f2db;
+  .logoPic{
+    width: 180rpx;
+    height: 180rpx;
+    border-radius: 50%;
+    margin-top: 62rpx;
+    padding: 20rpx;
+    background: white;
+  }
+  .mobile{
+    width: 80%;
+    border-radius: 48rpx;
+    padding: 16rpx 24rpx;
+    margin: 42rpx auto;
+    margin-bottom: 28rpx;
+    background: #ffffff;
+    overflow: hidden;
+    image{
+      width: 42rpx;
+      height: 42rpx;
+    }
+    .Inp{
+      margin-left: 22rpx;
+      width: 70%;
+    }
+  }
+  .btn-box{
+    width: 80%;
+    background: #f8b51e;
+    border-radius: 48rpx;
+    padding: 16rpx 0;
+    margin: 66rpx auto;
+    margin-bottom: 28rpx;
+    letter-spacing: 8rpx;
+    //position: fixed;
+    //left: 16%;
+    //bottom: 42rpx;
+    color: black;
+  }
+}
+</style>

@@ -3,10 +3,10 @@
 ======================================================== */
 // 域名
 if (_NODE_) {
-  var host = 'http://ball.ufutx.net/api' // 测试环境
+  var host = 'https://www.efclub.top/api' // 测试环境
 } else {
   // var host = 'http://alpha.ufutx.net/api'  // 线上环境
-  var host = 'http://ball.ufutx.net/api' // 测试环境
+  var host = 'https://www.efclub.top/api' // 测试环境
   // var host = 'http://love.hankin.cn/api' // 测试环境
 }
 

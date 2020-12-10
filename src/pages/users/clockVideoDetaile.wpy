@@ -61,7 +61,7 @@
       </block>
       <block wx:else>
         <view class="text-center">
-          <image src="https://images.ufutx.com/202011/07/73597a9bf3dd8028a10a5ab43d5e65b9.jpeg" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
+          <image src="https://images.ufutx.com/202012/10/3944b8b5da87402a6a70c98a05a9b7d2.png" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
         </view>
       </block>
     </view>

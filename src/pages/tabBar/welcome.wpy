@@ -1,6 +1,6 @@
 <template>
   <view class="box {{hide?'hide':''}}">
-    <image src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1603907202178&di=aa40a811e7e35b2942809f2844dfb0c3&imgtype=0&src=http%3A%2F%2Fimg3.imgtn.bdimg.com%2Fit%2Fu%3D1870124918%2C2575391705%26fm%3D214%26gp%3D0.jpg" mode="aspectFill" class="image"></image>
+    <image src="https://images.ufutx.com/202011/27/d51d1d943a53f8e5fe7ce5620de1d3bc.jpeg" mode="aspectFill" class="image"></image>
     <view @tap="goto('/pages/users/registerV2')" class="next" wx:if="{{hideBtn}}"></view>
     <view class="wrapper" @tap="jump">
       <view class="font_24 flo_l text-center time">{{time}}s</view>
@@ -85,11 +85,12 @@
       }
       // code: res.code
       let data = {
-        mobile: '15707534403'
+        code: ''
       }
       wepy.login({
         success: (res) => {
-          that.$post({url: `${service.host}/admin/register/user`, data}, {
+          data.code = res.code
+          that.$post({url: `${service.host}/wechat/login`, data}, {
             success: ({code, data}) => {
               if (data.token) {
                 that.hide = true
@@ -114,8 +115,7 @@
                   }, 800)
                 }
               } else {
-                that.hideBtn = true
-                that.$apply()
+                that.$redirectTo('/pages/tabBar/login')
               }
               wx.hideLoading()
             }
@@ -134,13 +134,9 @@
       jump() {
         clearInterval(this.setIntervalFn)
         if (this.token) {
-          if (this.type == 'marriage') {
-            this.$goto('/pages/marriedPage/home')
-          } else {
-            this.$gotoTab('/pages/tabBar/home')
-          }
+          this.$gotoTab('/pages/tabBar/home')
         } else {
-          this.$goto('/pages/userInfo/typeSelect')
+          this.$redirectTo('/pages/tabBar/login')
         }
       },
       gotoTab(url) {

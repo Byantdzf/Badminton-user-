@@ -18,7 +18,7 @@ import {service} from '../../config.js'
 export default class bookdetail extends wepy.page {
   mixins = [base, http, user]
   config = {
-    navigationBarTitleText: '福恋',
+    navigationBarTitleText: '活动',
     enablePullDownRefresh: false
   }
   data = {

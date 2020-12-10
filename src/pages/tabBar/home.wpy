@@ -9,6 +9,22 @@
       <template is="listV2" data="{{courses}}"></template>
     </block>
   </view>
+  <view class="cu-modal {{modalName=='Modal'?'show':''}}">
+    <view class="cu-dialog">
+      <view class="cu-bar bg-white justify-end">
+        <view class="content">提示</view>
+        <view class="action" bindtap="hideModal">
+          <text class="cuIcon-close text-red"></text>
+        </view>
+      </view>
+      <view class="padding-xl text-left">
+        <span class="font_28 bold">【幻鹰小程序】 </span>需要获取您的位置,不授权将无法准确的显示附近球馆哦！
+      </view>
+      <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top" open-type="openSetting" @opensetting="openSetting_address">同意</button>
+      <view style="position: absolute;left: 0;bottom: 0;background: #FAFAFC; z-index: 999999;width: 100%;" class="text-center">
+      </view>
+    </view>
+  </view>
   <template name="swiper">
     <view class=" addressStyle">
       <picker mode="region" bindchange="bindRegionChange" value="{{region}}" custom-item="{{customItem}}">
@@ -22,8 +38,8 @@
     <swiper class="card-swiper" circular="true" autoplay="true" interval="5000" duration="500"
             bindchange="cardSwiper">
       <swiper-item wx:for="{{carousels}}" wx:key="this" class="{{cardCur==index?'cur':''}}" >
-        <view class="swiper-item">
-          <image src="{{item.pic}}" mode="aspectFill" @tap.stop="gotoLink({{item.path}})"></image>
+        <view class="swiper-item" @tap.stop="gotoLink({{item.path}})">
+          <image src="{{item.pic}}" mode="aspectFill"></image>
         </view>
       </swiper-item>
     </swiper>
@@ -88,7 +104,7 @@
       </block>
       <block wx:else>
         <view class="text-center">
-          <image src="https://images.ufutx.com/202011/07/73597a9bf3dd8028a10a5ab43d5e65b9.jpeg" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
+          <image src="https://images.ufutx.com/202012/10/3944b8b5da87402a6a70c98a05a9b7d2.png" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
         </view>
       </block>
     </view>
@@ -114,7 +130,7 @@
       </block>
       <block wx:else>
         <view class="text-center">
-          <image src="https://images.ufutx.com/202011/07/73597a9bf3dd8028a10a5ab43d5e65b9.jpeg" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
+          <image src="https://images.ufutx.com/202012/10/3944b8b5da87402a6a70c98a05a9b7d2.png" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
         </view>
       </block>
     </view>
@@ -147,6 +163,9 @@ export default class home extends wepy.page {
     region: ['广东省', '深圳市', '南山区'],
     customItem: '全部',
     carousels: [],   // 轮播
+    myLat: '',
+    myLong: '',
+    hide: true,
     searchTime: '',
     chnNumChar: {
       1: '一',
@@ -175,6 +194,9 @@ export default class home extends wepy.page {
   computed = {}
 
   async onLoad(e) {
+    this.myLong = wx.getStorageSync('myLong')
+    this.myLat = wx.getStorageSync('myLat')
+    this.$apply()
     this.getDate()
     this.getRules()
     this.upDate()
@@ -186,6 +208,7 @@ export default class home extends wepy.page {
     vm.token = wx.getStorageSync('token')
     vm.page = 1
     vm.$apply()
+    vm.getCenterLocation()
   }
   onPullDownRefresh() {
     this.page = 1
@@ -280,8 +303,8 @@ export default class home extends wepy.page {
         page: vm.page,
         type: vm.type,
         city: vm.region[1],
-        latitude: '22.519517',
-        longitude: '113.920928',
+        latitude: vm.myLat || '22.519517',
+        longitude: vm.myLong || '113.920928',
         date: '2020-10-24'
       }
     if (vm.type == 'online') { data.category_id = vm.categories[vm.active].id }
@@ -316,7 +339,60 @@ export default class home extends wepy.page {
     })
   }
 
+  getCenterLocation() {
+    let that = this
+    wx.getLocation({
+      type: 'gcj02',
+      success: function (res) {
+        that.myLong = res.longitude
+        that.myLat = res.latitude
+        that.modalName = ''
+        that.$apply()
+        if (!wx.getStorageSync('myLong')) {
+          wx.setStorageSync('myLong', res.longitude)
+          wx.setStorageSync('myLat', res.latitude)
+          setTimeout(() => {
+            return that.upDate()
+          }, 500)
+        }
+        wx.setStorageSync('myLong', res.longitude)
+        wx.setStorageSync('myLat', res.latitude)
+        that.$apply()
+      },
+      fail: function () {
+        that.showMap = false
+        that.modalName = 'Modal'
+        that.$apply()
+      }
+    })
+  }
   methods = {
+    openSetting_address(e) {
+      let that = this
+      this.$apply()
+      if (!e.detail.authSetting['scope.userLocation']) {
+        // 如果打开了地理位置，就会为true
+        wepy.getLocation({
+          altitude: true,
+          type: 'gcj02',
+          success: function (res) {
+            that.modalName == ''
+            that.$Toast_success('授权成功!')
+            that.myLat = res.latitude
+            that.myLong = res.longitude
+            wx.setStorageSync('myLong', res.longitude)
+            wx.setStorageSync('myLat', res.latitude)
+            that.modalName = ''
+            that.$apply()
+            that.upDate()
+          },
+          fail: function () {
+          },
+          complete: function () {
+          }
+        })
+      }
+    },
     gotoDetaile(index) {
       let {type} = this.courses[index],
         url = ''
@@ -331,6 +407,9 @@ export default class home extends wepy.page {
       console.log('picker发送选择改变，携带值为', e.detail.value)
       this.region = e.detail.value
       this.$apply()
+      this.courses = []
+      this.page = 1
+      this.upDate()
     },
     tabFnV2(val) {
       let vm = this
@@ -390,6 +469,14 @@ export default class home extends wepy.page {
 @import "../../styles/custom/reset.less";
 
 page {
+  .btn-box{
+    width: 32%;
+    background: #f8b51e;
+    border-radius: 6rpx;
+    padding: 8rpx;
+    margin: -12rpx auto;
+    margin-bottom: 32rpx;
+  }
   background: #f9f2db;
   .addressStyle{
     margin: 22rpx 32rpx;

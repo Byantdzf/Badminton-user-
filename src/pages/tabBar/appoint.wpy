@@ -18,9 +18,18 @@
                class="_icon"></image>
       </view>
       <view class="listItem radius shadow bg-white">
-        <view class="_item"><view class="font_42 white">{{info.booking_num}}</view><span>训练次数</span></view>
-        <view class="_item"><view class="font_42 white">{{info.booking_day_num}}</view><span>训练天数</span></view>
-        <view class="_item"><view class="font_42 white">{{info.course_duration}}</view><span>训练时长/分钟</span></view>
+        <view class="_item font_26">
+          <view class="font_42 white _num">{{info.booking_num}}</view>
+          <span class="">训练次数</span>
+        </view>
+        <view class="_item font_26 ">
+          <view class="font_42 white _num">{{info.booking_day_num}}</view>
+          <span>训练天数</span>
+        </view>
+        <view class="_item font_26 ">
+          <view class="font_42 white _num">{{info.course_duration}}</view>
+          <span>训练时长/分钟</span>
+        </view>
       </view>
     </view>
   </template>
@@ -100,6 +109,7 @@ export default class appoint extends wepy.page {
 
 page {
   background: #f9f2db;
+  ._num{margin-bottom: 12rpx;}
   ._userInfo{
     background: #f8b51e;
     overflow: hidden;

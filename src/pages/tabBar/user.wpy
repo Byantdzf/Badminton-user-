@@ -176,7 +176,7 @@ page {
         width: 150rpx;
         height: 150rpx;
         border-radius: 50%;
-        box-shadow: 1rpx 1rpx 12rpx #a1a1a1;
+        box-shadow: 1rpx 1rpx 12rpx #e0e0e0;
         margin-top: -62rpx;
         margin-left: 32rpx;
     }

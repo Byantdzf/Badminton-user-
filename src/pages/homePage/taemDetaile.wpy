@@ -196,7 +196,7 @@ export default class taemDetaile extends wepy.page {
       }
       wx.navigateTo({url: url})
     },
-    cancelFn() { this.$showToast('活动已开始！') },
+    cancelFn() { this.$showToast('课程已开始！') },
     saveFn() {
       let data = {
           content: this.informValue,

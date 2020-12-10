@@ -28,7 +28,8 @@ export default class extends wepy.app {
       'pages/tabBar/home',
       'pages/tabBar/arena',
       'pages/tabBar/appoint',
-      'pages/tabBar/user'
+      'pages/tabBar/user',
+      'pages/tabBar/login'
     ],
     'permission': {   // 地理位置获取
       'scope.userLocation': {
