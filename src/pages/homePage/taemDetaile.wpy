@@ -158,18 +158,20 @@ export default class taemDetaile extends wepy.page {
     },
     deletePic(index) {
       let vm = this
-      wx.showModal({
-        title: '提示',
-        content: '删除该照片？',
-        success(res) {
-          if (res.confirm) {
-            vm.informImages.splice(index, 1)
-            vm.$apply()
-          } else if (res.cancel) {
-            console.log('用户点击取消')
+      if (!vm.courseList.is_complete_info) {
+        wx.showModal({
+          title: '提示',
+          content: '删除该照片？',
+          success(res) {
+            if (res.confirm) {
+              vm.informImages.splice(index, 1)
+              vm.$apply()
+            } else if (res.cancel) {
+              console.log('用户点击取消')
+            }
           }
-        }
-      })
+        })
+      }
     },
     previewImages(item, list) {
       this.$previewImages(item, list)
@@ -219,27 +221,27 @@ export default class taemDetaile extends wepy.page {
       }
       // vm.$showToast('评价成功！')
       vm.$goto(`/pages/homePage/order?id=${this.id}`)
-      for (let item in data) {
-        if (!data[item]) {
-          return vm.$showToast('请输入评价内容！')
-        }
-      }
-      console.log(data)
-      vm.$post({url: `${service.host}/feedback`, data}, {
-        success: ({code, data}) => {
-          wx.showModal({
-            title: '反馈成功！',
-            content: '非常感谢您的反馈！我们将以最快速度处理您的反馈。',
-            success(res) {
-              if (res.confirm) {
-                vm.$gotoBack(1)
-              } else if (res.cancel) {
-                console.log('用户点击取消')
-              }
-            }
-          })
-        }
-      })
+      // for (let item in data) {
+      //   if (!data[item]) {
+      //     return vm.$showToast('请输入评价内容！')
+      //   }
+      // }
+      // console.log(data)
+      // vm.$post({url: `${service.host}/feedback`, data}, {
+      //   success: ({code, data}) => {
+      //     wx.showModal({
+      //       title: '反馈成功！',
+      //       content: '非常感谢您的反馈！我们将以最快速度处理您的反馈。',
+      //       success(res) {
+      //         if (res.confirm) {
+      //           vm.$gotoBack(1)
+      //         } else if (res.cancel) {
+      //           console.log('用户点击取消')
+      //         }
+      //       }
+      //     })
+      //   }
+      // })
     }
   }
   events = {

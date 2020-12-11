@@ -3,10 +3,8 @@
   <view class="wrapper">
     <template is="_detaile" data="{{active,dataList,picList,rulesList,price,payType}}"></template>
     <view class="height160"></view>
-    <view class="btnStyle text-right">
-      <button class="btn text-center font_30 btn-box flo_r "  hover-class="btn_active"  @tap="save">支付
-      </button>
-      <view class="font_32 flo_r _price color_0">总计: <span class="color-red">￥{{price}}</span></view>
+    <view class="btnStyle text-center">
+      <button class="btn text-center font_30 btn-box bold"  hover-class="btn_active"  @tap="save">立即预约</button>
     </view>
   </view>
   <template name="_detaile">
@@ -25,34 +23,15 @@
           </view>
         </radio-group>
       </view>
-      <view class="listStyle radius shadow bg-white">
-        <view class="list">
-          <span class="font_28 color_0">姓名</span>
-          <input type="text" placeholder="请输入姓名" placeholder-class="color-666" class="Inp font_28 text"  @blur="typing('name')"  value="{{name}}" cursor-spacing="50"/>
-        </view>
-        <view class="list">
-          <span class="font_28 color_0">电话</span>
-          <input type="number" placeholder="请输入电话号码" placeholder-class="color-666" class="Inp font_28 text color-666"  @blur="typing('mobile')"  value="{{name}}" cursor-spacing="50"/>
-        </view>
-        <view class="_list">
-          <view class="font_26 color_0">课程总计：{{ price }}</view>
-          <view class="font_28 color_0">总计：<span class="color-red bold">{{ price }}</span></view>
-        </view>
+      <view class="payModeStyle radius shadow bg-white">
+        <view class="_titleV flo_l">
+          <span class="font_28 color_0">预约时间</span>
+         </view>
+        <image src="https://images.ufutx.com/202010/20/267ae6ff1cba531887957f23212a39a8.png" mode="aspectFill"
+               class="_icon flo_r"></image>
+        <span class="font_26 color-666 flo_r">请选择预约时间</span>
       </view>
       <view style="padding: 22rpx;" class="text-center color_0 font_24">温馨提示：预约成功后，课程开始前24小时内不能取消</view>
-      <view class="payModeStyle radius shadow bg-white">
-        <view class="_titleV">
-          <span class="font_28 color_0">支付方式</span>
-         </view>
-        <block wx:for="{{payType}}" wx:key="this">
-          <radio-group class="block" bindchange="checkboxFnV2({{index}})">
-            <view class="cu-form-group">
-              <view class="title">{{ item.name }}</view>
-              <radio checked="{{item.active}}"></radio>
-            </view>
-          </radio-group>
-        </block>
-      </view>
     </view>
   </template>
 </template>
@@ -67,10 +46,10 @@ import NavBar from '../../components/NavBar'
 import Loading from '../../components/loading'
 import uploadImages from '../../components/uploadImages'
 
-export default class order extends wepy.page {
+export default class orderDetaile extends wepy.page {
   mixins = [base, http, user, ShareMessage]
   config = {
-    navigationBarTitleText: '立即预约'
+    navigationBarTitleText: '订单详情'
     // navigationStyle: 'custom'
   }
 
@@ -349,11 +328,17 @@ page{
       .payModeStyle{ // 支付方式
         border-radius: 22rpx;
         overflow: hidden;
+        //margin-top: 32rpx;
+        background: #f8b51e;
+        padding: 12rpx 32rpx;
+        ._icon{
+          width: 22rpx;
+          height: 22rpx;
+          vertical-align: middle;
+          margin-top: 12rpx;
+        }
         ._titleV{
-          height: 72rpx;
-          line-height: 72rpx;
-          background: #f8b51e;
-          padding: 0 18rpx;
+          //height: 72rpx;
         }
         .no-border{border: none;}
         .mode{
@@ -407,13 +392,12 @@ page{
         margin-top: 18rpx;
       }
       .btn-box{
-        width: 28%;
+        width: 72%;
         background: #f8b51e;
         border-radius: 48rpx;
         padding: 16rpx 0;
         letter-spacing: 8rpx;
-        margin-right: 32rpx;
-        margin-left: 22rpx;
+        margin: auto;
         color: black;
       }
     }

@@ -1,6 +1,6 @@
 <template>
   <view class="box {{hide?'hide':''}}">
-    <image src="https://images.ufutx.com/202011/27/d51d1d943a53f8e5fe7ce5620de1d3bc.jpeg" mode="aspectFill" class="image"></image>
+    <image src="https://images.ufutx.com/202012/11/89cf45179f04b11f40f4890748cdcf4b.jpeg" mode="aspectFill" class="image"></image>
     <view @tap="goto('/pages/users/registerV2')" class="next" wx:if="{{hideBtn}}"></view>
     <view class="wrapper" @tap="jump">
       <view class="font_24 flo_l text-center time">{{time}}s</view>

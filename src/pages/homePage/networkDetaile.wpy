@@ -63,7 +63,7 @@ import NavBar from '../../components/NavBar'
 import Loading from '../../components/loading'
 import uploadImages from '../../components/uploadImages'
 
-export default class feedback extends wepy.page {
+export default class networkDetaile extends wepy.page {
   mixins = [base, http, user, ShareMessage]
   config = {
     navigationBarTitleText: '网课详情'

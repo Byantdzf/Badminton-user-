@@ -6,9 +6,9 @@
     <view class="_bg">
       <image src="https://images.ufutx.com/202010/20/348a87abc5f0870ed4d0e6085fd032fb.png" mode="widthFix"></image>
     </view>
-    <view class="mainUser" @tap="goto('/pages/users/userInfo')">
+    <view class="mainUser  radius shadow bg-white" @tap="goto('/pages/users/userInfo')">
       <image src="{{userInfo.photo}}" mode="aspectFill" class="_photo flo_l"></image>
-      <view class="font_32 bold _naim flo_l">{{userInfo.name}}</view>
+      <view class="font_32 bold _naim flo_l white">{{userInfo.name}}</view>
       <view class="font_24  _code flo_l">
         账号：{{ userInfo.mobile}}
         <image src="https://images.ufutx.com/202010/20/267ae6ff1cba531887957f23212a39a8.png" mode="aspectFill"
@@ -49,7 +49,7 @@ import user from '../../mixins/user'
 // import ShareMessage from '../../mixins/ShareMessage'
 
 let date = new Date()
-export default class home extends wepy.page {
+export default class user extends wepy.page {
   mixins = [base, http, user]
   config = {
     navigationBarTitleText: '我的',

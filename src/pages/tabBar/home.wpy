@@ -18,7 +18,7 @@
         </view>
       </view>
       <view class="padding-xl text-left">
-        <span class="font_28 bold">【幻鹰小程序】 </span>需要获取您的位置,不授权将无法准确的显示附近球馆哦！
+        <span class="font_28 bold color-theme">【幻鹰小程序】 </span>需要获取您的位置,不授权将无法准确的显示附近球馆哦！
       </view>
       <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top" open-type="openSetting" @opensetting="openSetting_address">同意</button>
       <view style="position: absolute;left: 0;bottom: 0;background: #FAFAFC; z-index: 999999;width: 100%;" class="text-center">
@@ -182,7 +182,7 @@ export default class home extends wepy.page {
     type: 'league',
     active: 0,
     token: wx.getStorageSync('token'),
-    modalName: '',
+    modalName: 'hide',
     throttle: true, // 节流
     day: '',
     page: 1,
@@ -206,9 +206,26 @@ export default class home extends wepy.page {
     let vm = this
     vm.cardCur = 0
     vm.token = wx.getStorageSync('token')
-    vm.page = 1
     vm.$apply()
-    vm.getCenterLocation()
+    wx.getSetting({
+      success: res => {
+        // 已授权
+        if (res.authSetting['scope.userLocation']) {
+          console.log('已授权定位')
+          // that.getLocation()
+          vm.modalName = ''
+          vm.$apply()
+        } else if (res.authSetting['scope.userLocation'] === undefined) {
+          console.log('初次授权定位')
+          // 尚未授权
+          vm.getCenterLocation()
+        } else if (res.authSetting['scope.userLocation'] === false) {
+          console.log('拒绝授权定位')
+          vm.modalName = 'Modal'
+          vm.$apply()
+        }
+      }
+    })
   }
   onPullDownRefresh() {
     this.page = 1
@@ -305,8 +322,12 @@ export default class home extends wepy.page {
         city: vm.region[1],
         latitude: vm.myLat || '22.519517',
         longitude: vm.myLong || '113.920928',
-        date: '2020-10-24'
+        date: vm.day
       }
+    // if (!vm.myLat || !vm.myLon) {
+    //   vm.modalName = 'Modal'
+    //   vm.$apply()
+    // }
     if (vm.type == 'online') { data.category_id = vm.categories[vm.active].id }
     let url = `${service.host}/home`
     vm.$get({
@@ -314,6 +335,11 @@ export default class home extends wepy.page {
     }, {
       success: ({code, data}) => {
         this.carousels = data.carousels
+        // this.carousels = [
+        //   {pic: 'https://images.ufutx.com/202012/11/d2a4d36cc1e8b9d3dfb557b0b01c7402.jpeg', path: 'https://www.baidu.com'},
+        //   {pic: 'https://images.ufutx.com/202012/11/14e5cdef31285ba610932a4ebcf2c8bd.jpeg', path: 'https://www.baidu.com'},
+        //   {pic: 'https://images.ufutx.com/202012/11/9b027150741f47bc83feb4fb7855dbae.jpeg', path: 'https://www.baidu.com'}
+        // ]
         this.$apply()
         if (!data.courses.data.length) {
           return console.log('没有更多了')
@@ -346,7 +372,6 @@ export default class home extends wepy.page {
       success: function (res) {
         that.myLong = res.longitude
         that.myLat = res.latitude
-        that.modalName = ''
         that.$apply()
         if (!wx.getStorageSync('myLong')) {
           wx.setStorageSync('myLong', res.longitude)
@@ -358,9 +383,10 @@ export default class home extends wepy.page {
         wx.setStorageSync('myLong', res.longitude)
         wx.setStorageSync('myLat', res.latitude)
         that.$apply()
+        console.log(that.modalName, 'that.modalName')
       },
       fail: function () {
-        that.showMap = false
+        that.$showToast('获取失败')
         that.modalName = 'Modal'
         that.$apply()
       }
@@ -370,27 +396,31 @@ export default class home extends wepy.page {
     openSetting_address(e) {
       let that = this
       this.$apply()
+      let res = e.detail
+      console.log(e.detail.authSetting, 'e.detail.authSetting')
+      // if (res.authSetting['scope.userLocation']) {
+      //   console.log('已授权定位')
+      //   that.getLocation()
+      // } else if (res.authSetting['scope.userLocation'] === undefined) {
+      //   console.log('初次授权定位') // 尚未授权
+      //   that.getLocation()
+      // } else if (res.authSetting['scope.userLocation'] === false) {
+      //   console.log('拒绝授权定位')
+      //   util.WXModel('无法获取当前位置，请手动开启授权', true, () => {
+      //     wx.openSetting({
+      //       success: function (data) {
+      //         if (data.authSetting['scope.userLocation']) {
+      //           console.log('打开设置授权定位')
+      //           that.getLocation()
+      //         }
+      //       }
+      //     })
+      //   }, () => {
+      //     util.WXToast('请手动输入当前位置')
+      //   })
+      // }
       if (!e.detail.authSetting['scope.userLocation']) {
-        // 如果打开了地理位置，就会为true
-        wepy.getLocation({
-          altitude: true,
-          type: 'gcj02',
-          success: function (res) {
-            that.modalName == ''
-            that.$Toast_success('授权成功!')
-            that.myLat = res.latitude
-            that.myLong = res.longitude
-            wx.setStorageSync('myLong', res.longitude)
-            wx.setStorageSync('myLat', res.latitude)
-            that.modalName = ''
-            that.$apply()
-            that.upDate()
-          },
-          fail: function () {
-          },
-          complete: function () {
-          }
-        })
+        this.getCenterLocation()
       }
     },
     gotoDetaile(index) {
@@ -432,12 +462,12 @@ export default class home extends wepy.page {
       this.$gotoH5(link)
     },
     hideModal() {
-      this.modalName = ''
+      this.modalName = 'hide'
       this.$apply()
     },
     gotoDetail(id) {
       if (!this.token) {
-        this.modalName = 'Modal'
+        // this.modalName = 'Modal'
         this.$apply()
         return
       }
@@ -449,7 +479,7 @@ export default class home extends wepy.page {
       // console.log(this.cardCur, 'this.cardCur')
     },
     goto(url) {
-      this.modalName = ''
+      // this.modalName = ''
       this.$apply()
       console.log(url)
       this.$goto(url)
@@ -457,7 +487,7 @@ export default class home extends wepy.page {
   }
   events = {
     'modalValue': (value) => { // 搜索返回值
-      this.modalName = value
+      // this.modalName = value
       this.$apply()
     }
   }

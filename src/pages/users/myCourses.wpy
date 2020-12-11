@@ -12,8 +12,8 @@
     <view style="height: 80rpx;"></view>
     <block wx:if="{{list.length > 0}}">
       <view class="listBox">
-        <view class="listItem radius shadow bg-white" wx:for="{{list}}" wx:key="this" @tap="gotoDetaile('2')">
-          <image src="{{item.photo}}" mode="aspectFill"
+        <view class="listItem radius shadow bg-white" wx:for="{{list}}" wx:key="this" @tap="gotoDetaile({{index}})">
+          <image src="{{item.pic}}" mode="aspectFill"
                  class="image flo_l"></image>
           <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
           <view class="flo_r _title font_24 ellipsis_1" wx:if="{{active == '1'}}">剩余次数：{{item.total_num - item.num}}次</view>
@@ -152,7 +152,7 @@ export default class myCourses extends wepy.page {
       success: ({code, data}) => {
         vm.loading = false
         if (!data.data.length) {
-          return vm.$showToast('没有更多了')
+          return console.log('没有更多了')
         }
         if (vm.page == 1) {
           vm.list = data.data
@@ -181,7 +181,7 @@ export default class myCourses extends wepy.page {
       let vm = this
       wx.showModal({
         title: '提示',
-        content: '是否确定取消预约？',
+        content: '是否确定预约？',
         success: function (res) {
           if (res.confirm) {
             vm.$Toast_error('已取消')
@@ -209,12 +209,12 @@ export default class myCourses extends wepy.page {
       this.$gotoH5(link)
     },
     gotoDetaile(index) {
-      let {type} = this.courses[index],
-        url = ''
-      if (type == 'trial') {
-        url = `/pages/homePage/trialDetaile?id=${this.courses[index].id}`
+      let url = '',
+        type = `${this.active == 1 ? 'league' : 'online'}`
+      if (type == 'league') {
+        url = `/pages/homePage/orderDetaile?id=${this.list[index].id}`
       } else {
-        url = `/pages/homePage/taemDetaile?id=${this.courses[index].id}`
+        url = `/pages/homePage/networkDetaile?id=${this.list[index].id}`
       }
       this.$goto(url)
     },
@@ -269,7 +269,7 @@ page {
     ._title{
       color: black;
       margin: 12rpx 14rpx;
-      max-width: 48%;
+      max-width: 36%;
     }
     ._address{
       width: 62%;

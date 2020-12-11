@@ -55,7 +55,7 @@ import user from '../../mixins/user'
 // import ShareMessage from '../../mixins/ShareMessage'
 
 let date = new Date()
-export default class home extends wepy.page {
+export default class arena extends wepy.page {
   mixins = [base, http, user]
   config = {
     navigationBarTitleText: '球场',
@@ -143,6 +143,9 @@ export default class home extends wepy.page {
     bindRegionChange (e) {
       console.log('picker发送选择改变，携带值为', e.detail.value)
       this.region = e.detail.value
+      this.page = 1
+      this.list = []
+      this.upDate()
       this.$apply()
     },
     goto(url) {
