@@ -9,7 +9,7 @@
   </view>
   <template name="_detaile">
     <view class="listBox">
-      <view class="listItem radius shadow bg-white" wx:for="{{rulesList}}" wx:key="this">
+      <view class="listItem radius shadow bg-white">
         <radio-group class="block" bindchange="checkboxFn({{index}})">
           <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
                  class="image flo_l"></image>
@@ -112,7 +112,7 @@ export default class OrderSubscribe extends wepy.page {
 
   upDate() { // 获取基本数据
     let vm = this
-    let url = `${service.host}/courses/${vm.id}/rules`
+    let url = `${service.host}/user/orders/${vm.id}`
     vm.$get({
       url: url
     }, {
