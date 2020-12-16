@@ -212,7 +212,7 @@ export default class myCourses extends wepy.page {
       let url = '',
         type = `${this.active == 1 ? 'league' : 'online'}`
       if (type == 'league') {
-        url = `/pages/homePage/orderDetaile?id=${this.list[index].id}`
+        url = `/pages/homePage/orderDetaile?id=${this.list[index].order_id}`
       } else {
         url = `/pages/homePage/networkDetaile?id=${this.list[index].id}`
       }

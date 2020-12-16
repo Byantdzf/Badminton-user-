@@ -49,7 +49,7 @@ import user from '../../mixins/user'
 // import ShareMessage from '../../mixins/ShareMessage'
 
 let date = new Date()
-export default class user extends wepy.page {
+export default class User extends wepy.page {
   mixins = [base, http, user]
   config = {
     navigationBarTitleText: '我的',
