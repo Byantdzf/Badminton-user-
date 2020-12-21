@@ -10,26 +10,20 @@
     </view>
     <view class="listBox">
       <block wx:if="{{list.length>0}}">
-        <view class="listItem radius shadow bg-white" wx:for="{{4}}" wx:key="this" @tap="gotoDetaile('2')">
-          <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
+        <view class="listItem radius shadow bg-white" wx:for="{{list}}" wx:key="this" @tap="gotoDetaile({{item.course_id}})">
+          <image src="{{item.pic}}" mode="aspectFill"
                  class="image flo_l"></image>
-          <view class="flo_l _title bold font_30 ellipsis_1">基础课程</view>
+          <view class="flo_l _title bold font_30 ellipsis_1">{{item.course_name}}</view>
           <view class="flo_l  ellipsis_1 _address">
             <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"
                    class="icon"></image>
-            <span class="font_24">2020年09月26日 18:00-19:30</span>
+            <span class="font_24">{{item.updated_at}}</span>
           </view>
           <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
             <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                    class="icon"></image>
-            <span class="font_24">深圳市南山区阳光科创A座129</span>
+            <span class="font_24">{{item.address}}</span>
           </view>
-          <block wx:if="{{active == '1'}}">
-            <view class="btnStyle">
-              <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  @tap.stop="cancelFn">取消预约
-              </button>
-            </view>
-          </block>
         </view>
       </block>
       <block wx:else>
@@ -106,6 +100,9 @@ export default class home extends wepy.page {
   }
 
   onShow() {
+    this.page = 1
+    this.list = []
+    this.$apply()
     this.getList()
   }
   onPullDownRefresh() {
@@ -125,7 +122,7 @@ export default class home extends wepy.page {
         status: `${vm.active == 1 ? '1' : '2'}`
       }
     vm.loading = true
-    let url = `${service.host}/user/courses`
+    let url = `${service.host}/user/booking/logs`
     vm.$showLoading('加载中...')
     vm.$get({
       url: url, data
@@ -192,13 +189,11 @@ export default class home extends wepy.page {
       console.log(link)
       this.$gotoH5(link)
     },
-    gotoDetaile() {
+    gotoDetaile(id) {
       let vm = this,
         url = ''
       if (vm.active == 1) {
-        url = '/pages/users/clockVideoDetaile'
-      } else {
-        url = '/pages/users/drillVideoDetaile'
+        url = `/pages/homePage/taemDetaile?id=${id}`
       }
       this.$goto(url)
     },

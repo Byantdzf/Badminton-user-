@@ -1,7 +1,7 @@
 <template>
   <Loading :init.sync="init"></Loading>
   <view class="wrapper">
-    <template is="_detaile" data="{{active,dataList,picList,rulesList,price,payType,time,date,startDate}}"></template>
+    <template is="_detaile" data="{{active,dataList,picList,rulesList,price,payType,time,date,startDate,dateIndex,dateList}}"></template>
     <view class="height160"></view>
     <view class="btnStyle text-center">
       <button class="btn text-center font_30 btn-box bold"  hover-class="btn_active"  @tap="save">确认预约</button>
@@ -11,24 +11,25 @@
     <view class="listBox">
       <view class="listItem radius shadow bg-white">
         <radio-group class="block" bindchange="checkboxFn({{index}})">
-          <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill"
+          <image src="{{rulesList.course.pic}}" mode="aspectFill"
                  class="image flo_l"></image>
-          <view class="flo_l _title bold font_30 ellipsis_1">{{item.name}}</view>
-          <view class="flo_l  ellipsis_1 _address">
-            <view class="font_24 white">{{item.num}}次卡</view>
-            <view class="font_36 color-red bold">￥{{item.price}}</view>
+          <view class="flo_l _title bold font_30 ellipsis_1">{{rulesList.course.name}}</view>
+          <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
+            <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
+                   class="icon"></image>
+            <span class="font_24">{{ rulesList.course.province}}{{ rulesList.course.city}}{{ rulesList.course.dist}}{{ rulesList.course.address}}</span>
           </view>
+          <view class="flo_l _price bold red font_32">￥{{rulesList.real_price || '0'}}</view>
         </radio-group>
       </view>
       <view class="payModeStyle radius shadow bg-white margin-top">
         <view class="_titleV flo_l">
           <span class="font_28 color_0">预约时间</span>
          </view>
-        <picker mode="time" value="{{time}}" start="08:00" end="22:00" bindchange="TimeChange">
-          <view class="_time flo_r text-center font_26">{{time}}</view>
-        </picker>
-        <picker mode="date" start="{{startDate}}"  bindchange="DateChange">
-          <view class="_date flo_r text-center font_26">{{date || '请选择日期'}}</view>
+        <picker  range="{{dateList}}"  bindchange="dateChange" range-key="start_time">
+          <image src="https://images.ufutx.com/202010/20/267ae6ff1cba531887957f23212a39a8.png" mode="aspectFill"
+                 class="_icon flo_r"></image>
+          <span class="flo_r">{{ dateIndex?dateList[dateIndex].start_time:'请选择预约时间' }}</span>
         </picker>
       </view>
       <view style="padding: 22rpx;" class="text-center color_0 font_24">温馨提示：预约成功后，课程开始前24小时内不能取消</view>
@@ -70,12 +71,9 @@ export default class OrderSubscribe extends wepy.page {
     trade_no: '',
     pay_type: 'wechat',
     startDate: '',
-    payType: [
-      {name: '微信支付', active: 1, type: 'wechat'},
-      {name: '现金支付', active: 0, type: 'cash'}
-    ],
-    // 赞
-    star: 3
+    index: '',
+    dateIndex: 0,
+    dateList: []
   }
 
   computed = {}
@@ -118,14 +116,22 @@ export default class OrderSubscribe extends wepy.page {
     }, {
       success: ({code, data}) => {
         this.rulesList = data
-        for (let item of this.rulesList) {
-          item.active = 0
-        }
-        this.orderId = data[0].id
-        this.price = data[0].price
-        this.rulesList[0].active = 1
         this.$apply()
         console.log(this.rulesList)
+        let urlV2 = `${service.host}/courses/${data.course_id}/schedules`
+        vm.$get({
+          url: urlV2
+        }, {
+          success: ({code, data}) => {
+            console.log(data.data)
+            vm.dateList = data.data
+            vm.$apply()
+          },
+          fail: ({code, data}) => {
+          },
+          complete: () => {
+          }
+        })
       },
       fail: ({code, data}) => {
       },
@@ -136,13 +142,11 @@ export default class OrderSubscribe extends wepy.page {
   }
 
   methods = {
-    DateChange(e) {
-      this.date = e.detail.value
+    dateChange(e) { // 性别
+      this.dateIndex = e.detail.value
+      this.index = e.detail.value
       this.$apply()
-    },
-    TimeChange(e) {
-      this.time = e.detail.value
-      this.$apply()
+      console.log(this.dateIndex)
     },
     checkboxFn(index) {
       console.log(index)
@@ -223,61 +227,16 @@ export default class OrderSubscribe extends wepy.page {
       wx.navigateTo({url: url})
     },
     save() {
-      let data = {
-          date: this.date,
-          time: this.time
-        },
-        vm = this
-      if (!this.date) return vm.$showToast('请选择预约时间！')
-      console.log(data)
-      vm.$post({url: `${service.host}/pay/league/courses/rules/${vm.orderId}`, data}, {
+      let vm = this
+      console.log(this.index)
+      if (!this.index) return vm.$showToast('请选择预约时间！')
+      let id = this.dateList[this.index].id
+      vm.$post({url: `${service.host}/booking/course/schedules/${id}`}, {
         success: ({code, data}) => {
-          vm.trade_no = data.trade_no
-          vm.$apply()
-          if (data.wx_pay.length == 0) {
-            vm.$post({url: `${service.host}/mark/order/pay/${vm.trade_no}`}, {
-              success: ({code, data}) => {
-                vm.$Toast_success('支付成功')
-                setTimeout(() => {
-                  vm.$redirectTo('/pages/users/myCourses')
-                }, 800)
-              },
-              fail: ({code, data}) => {
-              },
-              complete: () => {
-              }
-            })
-          } else {
-            let wxconfig = data.wx_pay.config
-            wx.requestPayment({
-              timeStamp: wxconfig.timestamp, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
-              nonceStr: wxconfig.nonceStr, // 支付签名随机串，不长于 32 位
-              package: wxconfig.package, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
-              signType: wxconfig.signType, // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
-              paySign: wxconfig.paySign, // 支付签名
-              success: function (res) {
-                vm.$post({url: `${service.host}/mark/order/pay/${vm.trade_no}`}, {
-                  success: ({code, data}) => {
-                    vm.$Toast_success('支付成功')
-                    setTimeout(() => {
-                      vm.$redirectTo('/pages/users/myCourses')
-                    }, 800)
-                  },
-                  fail: ({code, data}) => {
-                  },
-                  complete: () => {
-                  }
-                })
-              },
-              fail: function (res) {
-                wx.showToast({
-                  title: '已取消支付',
-                  icon: 'none',
-                  duration: 2000
-                })
-              }
-            })
-          }
+          vm.$Toast_success('预约成功')
+          setTimeout(() => {
+            vm.$gotoBack(2)
+          }, 800)
         }
       })
     }

@@ -25,8 +25,13 @@
           <block wx:if="{{active == '1'}}">
             <view class="btnStyle">
               <view class="flo_l _price bold color-red font_32">￥{{item.price}}</view>
-              <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  @tap.stop="cancelFn">立即预约
-              </button>
+              <block wx:if="{{item.is_booking == '1'}}">
+                <view class="font_28 flo_r color-333 bold" style="margin: 22rpx 32rpx;">已预约</view>
+              </block>
+              <block wx:else>
+                <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  @tap.stop="cancelFn">立即预约
+                </button>
+              </block>
             </view>
           </block>
           <block wx:else>

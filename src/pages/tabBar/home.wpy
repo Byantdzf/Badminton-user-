@@ -174,7 +174,7 @@ export default class home extends wepy.page {
       4: '四',
       5: '五',
       6: '六',
-      7: '七'
+      7: '日'
     },
     id: '',
     cardCur: 0,

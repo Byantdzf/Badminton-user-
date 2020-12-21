@@ -18,16 +18,17 @@
                class="_icon"></image>
       </view>
       <view class="listItem radius shadow bg-white">
-        <view class="_item font_26">
-          <view class="font_42 white _num">{{info.booking_num}}</view>
+        <view class="_bg"></view>
+        <view class="_item font_26 bold">
+          <view class="font_52 white _num">{{info.booking_num}}</view>
           <span class="">训练次数</span>
         </view>
-        <view class="_item font_26 ">
-          <view class="font_42 white _num">{{info.booking_day_num}}</view>
+        <view class="_item font_26 bold">
+          <view class="font_52 white _num">{{info.booking_day_num}}</view>
           <span>训练天数</span>
         </view>
-        <view class="_item font_26 ">
-          <view class="font_42 white _num">{{info.course_duration}}</view>
+        <view class="_item font_26 bold">
+          <view class="font_52 white _num">{{info.course_duration}}</view>
           <span>训练时长/分钟</span>
         </view>
       </view>
@@ -109,7 +110,7 @@ export default class appoint extends wepy.page {
 
 page {
   background: #f9f2db;
-  ._num{margin-bottom: 12rpx;}
+  ._num{margin-bottom: 6rpx;}
   ._userInfo{
     background: #f8b51e;
     overflow: hidden;
@@ -149,12 +150,27 @@ page {
       height: 200rpx;
       background: #f8b51e;
       margin-bottom: 24rpx;
+      background-image: url("https://images.ufutx.com/202012/21/4ee41c9ca9fc86d007cff7d12fe3c542.jpeg");
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      ._bg{
+        width: 100%;
+        height: 200rpx;
+        background: rgba(248,181,31,0.7);
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
       ._item{
         color: black;
         width: 33.3%;
         float: left;
         text-align: center;
         margin-top: 48rpx;
+        z-index: 99;
+        position: relative;
       }
 
     }
