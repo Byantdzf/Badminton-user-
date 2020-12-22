@@ -11,37 +11,48 @@
     </view>
     <view style="height: 80rpx;"></view>
     <block wx:if="{{list.length > 0}}">
-      <view class="listBox">
-        <view class="listItem radius shadow bg-white" wx:for="{{list}}" wx:key="this" @tap="gotoDetaile({{index}})">
-          <image src="{{item.pic}}" mode="aspectFill"
-                 class="image flo_l"></image>
-          <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
-          <view class="flo_r _title font_24 ellipsis_1" wx:if="{{active == '1'}}">剩余次数：{{item.total_num - item.num}}次</view>
-          <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
-            <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
-                   class="icon"></image>
-            <span class="font_24">{{ item.address }}</span>
-          </view>
-          <block wx:if="{{active == '1'}}">
+      <block wx:if="{{active == '1'}}">
+        <view class="listBox">
+          <view class="listItem radius shadow bg-white" wx:for="{{list}}" wx:key="this" @tap="gotoDetaile({{index}})">
+            <image src="{{item.pic}}" mode="aspectFill"
+                   class="image flo_l"></image>
+            <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
+            <view class="flo_r _title font_24 ellipsis_1" wx:if="{{active == '1'}}">剩余次数：{{item.total_num - item.num}}次</view>
+            <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
+              <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
+                     class="icon"></image>
+              <span class="font_24">{{ item.address }}</span>
+            </view>
             <view class="btnStyle">
               <view class="flo_l _price bold color-red font_32">￥{{item.price}}</view>
               <block wx:if="{{item.is_booking == '1'}}">
                 <view class="font_28 flo_r color-333 bold" style="margin: 22rpx 32rpx;">已预约</view>
               </block>
               <block wx:else>
-                <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  @tap.stop="cancelFn">立即预约
+                <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active">立即预约
                 </button>
               </block>
             </view>
-          </block>
-          <block wx:else>
+          </view>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="listBox">
+          <view class="listItem radius shadow bg-white" wx:for="{{list}}" wx:key="this" @tap="gotoDetaile({{index}})">
+            <image src="{{item.course.pic}}" mode="aspectFill"
+                   class="image flo_l"></image>
+            <view class="flo_l _title bold font_30 ellipsis_1" style="max-width: 52%">{{ item.course.name }}</view>
+<!--            <view class="flo_r _title font_24 ellipsis_1">观看次数次数：{{item.course.view_num}}次</view>-->
+            <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
+              观看次数次数：{{item.course.view_num}}次
+            </view>
             <view class="btnStyle">
-              <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  @tap.stop="cancelFn">继续观看
+              <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  >继续观看
               </button>
             </view>
-          </block>
+          </view>
         </view>
-      </view>
+      </block>
     </block>
     <block wx:else>
       <view class="text-center">
@@ -219,7 +230,7 @@ export default class myCourses extends wepy.page {
       if (type == 'league') {
         url = `/pages/homePage/orderDetaile?id=${this.list[index].order_id}`
       } else {
-        url = `/pages/homePage/networkDetaile?id=${this.list[index].id}`
+        url = `/pages/homePage/networkDetaile?id=${this.list[index].course.id}`
       }
       this.$goto(url)
     },

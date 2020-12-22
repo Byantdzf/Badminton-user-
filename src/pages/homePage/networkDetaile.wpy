@@ -19,6 +19,7 @@
               show-play-btn="{{true}}"
               controls
               objectFit='cover'
+              bindplay="bindplay"
               picture-in-picture-mode="{{['push', 'pop']}}"
               bindenterpictureinpicture='bindVideoEnterPictureInPicture'
               bindleavepictureinpicture='bindVideoLeavePictureInPicture'
@@ -133,6 +134,15 @@ export default class networkDetaile extends wepy.page {
     })
   }
   methods = {
+    bindplay(e) {
+      console.log(e, this.id)
+      let vm = this
+      vm.$post({url: `${service.host}/courses/${vm.id}/veiw`}, {
+        success: ({code, data}) => {
+          console.log('记录成功')
+        }
+      })
+    },
     tabFn(val) {
       let vm = this
       vm.$showLoading('加载中...')
