@@ -52,13 +52,11 @@
       <view class="_bc20"></view>
       <view class="section list" style="border: none;">
         <view class="picker">
-          <span class="font_28 color_0">我的教练</span>
-          <view class="flo_r" wx:if="{{userInfo.profile.coach_id}}">
-            <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill" class="_photo flo_l"></image>
-            <span class="font_28 text">{{ userInfo.profile.coach_name || '暂无'}}</span>
-          </view>
-          <view wx:else class="flo_r">
-            <span class="font_28 text">{{ userInfo.profile.coach_name || '暂无'}}</span>
+          <span class="font_28 color_0">我的附属合同</span>
+          <view class="flo_r">
+<!--            <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill" class="_photo flo_l"></image>-->
+                        <span class="font_28 text color-theme text-shadow text-black" @tap="showPic('https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3180087369,3620960084&fm=26&gp=0.jpg')">点击查看</span>
+            <!--            <span class="font_28 text">{{ userInfo.profile.coach_name || '未上传'}}</span>-->
           </view>
         </view>
       </view>
@@ -66,8 +64,8 @@
     <view class="mainBtn">
       <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="goto('/pages/users/unmarri')">编辑
       </button>
-      <button wx:if="{{userInfo.profile.coach_id}}" class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"    @tap="goto('/pages/users/appraise')">评价教练
-      </button>
+<!--      <button wx:if="{{userInfo.profile.coach_id}}" class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"    @tap="goto('/pages/users/appraise')">评价教练-->
+<!--      </button>-->
     </view>
   </view>
 </template>
@@ -132,6 +130,9 @@ export default class Unmarried extends wepy.page {
   }
 
   methods = {
+    showPic(imge) {
+      this.$previewImage(imge)
+    },
     goto(url) {
       this.$goto(url)
     },

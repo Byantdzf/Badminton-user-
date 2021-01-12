@@ -53,10 +53,10 @@
       <view class="font_30 inline-block {{type == 'online'? 'tabBox bold font_32':''}}" @tap.stop="tabFn('online')">网课</view>
       <block wx:if="{{type == 'league'}}">
         <view class="dayStyle">
-          <view><view class="datItem inline-block color-666 font_24 text-center {{item.active?'activeText bold':''}}" wx:for="{{cycleList}}" wx:key="this">{{item.dateTime}}</view></view>
-          <view class="text-center"><view class="datItem inline-block color-666 font_24  {{item.active?'activeBox bold radius shadow bg-white':''}}" wx:for="{{cycleList}}" wx:key="this">{{item.week}}</view></view>
+          <view><view class="datItem inline-block color-666 font_24 text-center {{item.active?'activeText bold':''}}" wx:for="{{cycleList}}" wx:key="this" @tap="clickData({{index}})">{{item.dateTime}}</view></view>
+          <view class="text-center"><view class="datItem inline-block color-666 font_24  {{item.active?'activeBox bold radius shadow bg-white':''}}" @tap="clickData({{index}})" wx:for="{{cycleList}}" wx:key="this">{{item.week}}</view></view>
         </view>
-        <view class="text-center color-theme arenaStyle">------  <span style="color: black">球场名称</span> ------</view>
+        <view class="text-center color-theme arenaStyle">------  <span style="color: black">预约课程</span> ------</view>
       </block>
       <block wx:else>
         <view class="arenaStyle text-center">
@@ -483,6 +483,19 @@ export default class home extends wepy.page {
       this.$apply()
       console.log(url)
       this.$goto(url)
+    },
+    clickData(index) {
+      console.log(index)
+      for (let item of this.cycleList) {
+        console.log(item)
+        item.active = false
+      }
+      this.cycleList[index].active = true
+      this.day = this.cycleList[index].dateTime
+      this.page = 1
+      this.$apply()
+      this.upDate()
+      console.log(this.cycleList[index].dateTime)
     }
   }
   events = {
