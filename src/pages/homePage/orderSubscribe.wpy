@@ -1,25 +1,30 @@
 <template>
   <Loading :init.sync="init"></Loading>
   <view class="wrapper">
-    <template is="_detaile" data="{{active,dataList,picList,rulesList,price,payType,time,date,startDate,dateIndex,dateList}}"></template>
+    <template is="_detaile" data="{{active,dataList,picList,rulesList,courseList,price,payType,time,date,startDate,dateIndex,dateList}}"></template>
     <view class="height160"></view>
     <view class="btnStyle text-center">
-      <button class="btn text-center font_30 btn-box bold"  hover-class="btn_active"  @tap="save">确认预约</button>
+      <button class="btn text-center font_30 btn-box bold radius shadow bg-blue"  hover-class="btn_active"  @tap="save">确认预约</button>
     </view>
   </view>
   <template name="_detaile">
     <view class="listBox">
       <view class="listItem radius shadow bg-white">
         <radio-group class="block" bindchange="checkboxFn({{index}})">
-          <image src="{{rulesList.course.pic}}" mode="aspectFill"
+          <image src="{{courseList.pic}}" mode="aspectFill"
                  class="image flo_l"></image>
-          <view class="flo_l _title bold font_30 ellipsis_1">{{rulesList.course.name}}</view>
+          <view class="flo_l _title bold font_30 ellipsis_1">{{courseList.name}}</view>
           <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
             <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                    class="icon"></image>
-            <span class="font_24">{{ rulesList.course.province}}{{ rulesList.course.city}}{{ rulesList.course.dist}}{{ rulesList.course.address}}</span>
+            <span class="font_24">{{ courseList.province}}{{ courseList.city}}{{ courseList.dist}}{{ courseList.address}}</span>
           </view>
-          <view class="flo_l _price bold red font_32">￥{{rulesList.real_price || '0'}}</view>
+          <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
+            <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
+                   class="icon"></image>
+            <span class="font_24">{{ courseList.schedule.booking_count || 0 }} / {{ courseList.schedule.num || 0 }}</span>
+          </view>
+<!--          <view class="flo_l _price bold red font_32">￥{{courseList.real_price || '0'}}</view>-->
         </radio-group>
       </view>
       <view class="payModeStyle radius shadow bg-white margin-top">
@@ -60,6 +65,7 @@ export default class OrderSubscribe extends wepy.page {
     init: false,
     name: '',
     rulesList: [],
+    courseList: [],
     informValue: '',
     mobile: '',
     date: '', // 日期
@@ -110,28 +116,15 @@ export default class OrderSubscribe extends wepy.page {
 
   upDate() { // 获取基本数据
     let vm = this
-    let url = `${service.host}/user/orders/${vm.id}`
+    let url = `${service.host}/course/schedules/${vm.id}`
     vm.$get({
       url: url
     }, {
       success: ({code, data}) => {
-        this.rulesList = data
+        this.dateList = data.schedules
+        this.courseList = data
         this.$apply()
-        console.log(this.rulesList)
-        let urlV2 = `${service.host}/courses/${data.course_id}/schedules`
-        vm.$get({
-          url: urlV2
-        }, {
-          success: ({code, data}) => {
-            console.log(data.data)
-            vm.dateList = data.data
-            vm.$apply()
-          },
-          fail: ({code, data}) => {
-          },
-          complete: () => {
-          }
-        })
+        console.log(this.courseList)
       },
       fail: ({code, data}) => {
       },
@@ -366,6 +359,19 @@ page{
           height: 200rpx;
           border-radius: 22rpx;
         }
+        ._member{
+          width: 100%;
+          overflow: hidden;
+          //margin: -10rpx 14rpx 0 14rpx;
+          color: black;
+          .icon{
+            width: 24rpx;
+            height: 24rpx;
+            vertical-align: middle;
+            margin-bottom: 6rpx;
+            margin-right: 4rpx;
+          }
+        }
       }
     }
     /*隐藏滚动条*/
@@ -384,12 +390,16 @@ page{
         margin-top: 18rpx;
       }
       .btn-box{
-        width: 72%;
+        width: 68%;
         background: #f8b51e;
         border-radius: 48rpx;
         padding: 16rpx 0;
+        margin: 42rpx auto;
+        margin-bottom: 28rpx;
         letter-spacing: 8rpx;
-        margin: auto;
+        position: fixed;
+        left: 16%;
+        bottom: 42rpx;
         color: black;
       }
     }

@@ -28,7 +28,7 @@
     </view>
     <view class="mainList" @tap="goto('/pages/users/feedback')">
       <view class="_item">
-        <image src="https://images.ufutx.com/202010/20/5df979a9449765329f3b0740389c6534.png" mode="aspectFill"
+        <image src="https://images.ufutx.com/202101/13/dfe7b3f236f83b7c87e25574f8dc80d5.png" mode="aspectFill"
                class="_icon flo_l"></image>
         <view class="flo_l _title">
           意见反馈
@@ -62,14 +62,14 @@ export default class User extends wepy.page {
     city: '深圳',
     userInfo: {},
     items: [
-      { icon: 'https://images.ufutx.com/202010/20/793a67bc0b7169f392c9f3de415b2e5d.png',
+      { icon: 'https://images.ufutx.com/202101/13/27d400714be25fb21afea8fed8b747fa.png',
         title: '个人资料',
         page: '/pages/users/userInfo'
       },
-      { icon: 'https://images.ufutx.com/202010/20/2c856a5e449a733b1973bfd19da6bf54.png',
+      { icon: 'https://images.ufutx.com/202101/13/feefed0a2aff1e1028d1c9648bcf8fac.png',
         title: '我的课程',
         page: '/pages/users/myCourses'
-      }, { icon: 'https://images.ufutx.com/202010/20/44ac3981680f5b8acbe6faade08a2358.png',
+      }, { icon: 'https://images.ufutx.com/202101/13/aba3d2b29ab8cd59c0a04df879c820c9.png',
         title: '运动轨迹',
         page: '/pages/users/myExercise'
       }
@@ -132,6 +132,7 @@ page {
   }
   .mainList{
     background: #f8b51e;
+    background: #f8b51e;
     margin: 0 32rpx;
     min-height: 100rpx;
     border-radius: 22rpx;
@@ -166,6 +167,7 @@ page {
     }
   }
   .mainUser{
+    //background: #f8b51e;
     background: #f8b51e;
     margin: 0 32rpx;
     height: 100rpx;

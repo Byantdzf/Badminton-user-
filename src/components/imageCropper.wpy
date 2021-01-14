@@ -30,9 +30,8 @@
   import wepy from 'wepy'
   import http from '../mixins/http'
   import base from '../mixins/base'
-  import address from '../mixins/address'
   export default class imageCropper extends wepy.component {
-    mixins = [base, http, address]
+    mixins = [base, http]
     props = {
     }
     data = {

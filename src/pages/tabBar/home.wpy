@@ -264,7 +264,9 @@ export default class home extends wepy.page {
       day = '0' + day
     }
     dateStr = '' + uom.getFullYear() + mon + day
+    console.log(dateStr, 'dateStr = \'\' + uom.getFullYear() + mon + day')
     let dateObj = {
+      date: `${uom.getFullYear()}-${mon}-${day}`,
       dateTime: `${mon}.${day}`,
       week: `周${this.chnNumChar[dayNum]}`,
       active: this.searchTime == dateStr ? true : false
@@ -491,7 +493,7 @@ export default class home extends wepy.page {
         item.active = false
       }
       this.cycleList[index].active = true
-      this.day = this.cycleList[index].dateTime
+      this.day = this.cycleList[index].date
       this.page = 1
       this.$apply()
       this.upDate()

@@ -3,7 +3,7 @@
   <Loading :init.sync="init"></Loading>
   <view class="wrapper">
     <view class="_input">
-      <input type="text" placeholder="请输入标题" @blur="typing('informValue')">
+      <input type="text" placeholder="请输入标题" @blur="typing('informValue')" />
     </view>
     <view class="themes">
 

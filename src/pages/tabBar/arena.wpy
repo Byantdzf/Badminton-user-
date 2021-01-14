@@ -253,7 +253,8 @@ page {
       overflow: hidden;
       height: 390rpx;
       background: #f8b51e;
-      margin-bottom: 24rpx;
+      //background: #f8b51e;
+      margin-bottom: 32rpx;
       .image{
         width: 100%;
         height: 282rpx;

@@ -311,7 +311,7 @@
       this._canvas_width = this.width
       this.$apply()
       this._initCanvas()
-      console.log('img Src,',this.imgSrc)
+      console.log('img Src,', this.imgSrc)
       this.imgSrc && (this.imgSrc = this.imgSrc)
       // 根据开发者设置的图片目标尺寸计算实际尺寸
       this._initImageSize()

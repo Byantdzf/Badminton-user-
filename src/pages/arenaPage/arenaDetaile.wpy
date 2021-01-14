@@ -1,9 +1,13 @@
 <template>
-  <Loading :init.sync="init"></Loading>
+<!--  <Loading :init.sync="init"></Loading>-->
+<!--  <cuCustom  bgImage="https://images.ufutx.com/202101/14/b98686e1c0266ed2c25362da34e0d749.jpeg"  isBack="{{true}}">-->
+<!--    <view slot="backText">返回</view>-->
+<!--    <view slot="content">门店详情</view>-->
+<!--  </cuCustom>-->
   <view class="wrapper">
     <template is="video" data="{{arenaData}}"></template>
     <template is="title" data="{{arenaData}}"></template>
-    <template is="_detaile" data="{{active,picList,arenaData,courses,coaches}}"></template>
+    <template is="_detaile" data="{{active,picList,arenaData,courses,coaches, tickets}}"></template>
 <!--    <template is="appraise" data="{{starMap,star}}"></template>-->
     <view class="height160"></view>
   </view>
@@ -27,14 +31,16 @@
   <template name="_detaile">
     <view class="_detaileStyle">
       <view class="arenaStyle">
-        <span class="_text font_30   {{active == '1'?'bold color_0':'color-666'}}" @tap="tabFn('1')">球馆详情</span>
+        <span class="_text font_28   {{active == '1'?'bold color_0 font_32':'color-666'}}" @tap="tabFn('1')">门店介绍</span>
         <span class='color-666 font_24'>|</span>
-        <span class="_text font_30  {{active == '2'?'bold color_0':'color-666'}}" @tap="tabFn('2')">课程</span>
+        <span class="_text font_28  {{active == '2'?'bold color_0 font_32':'color-666'}}" @tap="tabFn('2')">课程</span>
         <span class='color-666 font_24'>|</span>
-        <span class="_text font_30  {{active == '3'?'bold color_0':'color-666'}}" @tap="tabFn('3')">教练</span>
+        <span class="_text font_28  {{active == '3'?'bold color_0 font_32':'color-666'}}" @tap="tabFn('3')">预约券</span>
+        <span class='color-666 font_24'>|</span>
+        <span class="_text font_28  {{active == '4'?'bold color_0 font_32':'color-666'}}" @tap="tabFn('4')">教练</span>
       </view>
       <block wx:if="{{active == '1'}}">
-        <view style="margin-top: 12rpx;">
+        <view style="margin-top: 12rpx;" class="listBoxV2">
           <rich-text nodes="{{arenaData.detail}}"></rich-text>
         </view>
 <!--        <view style="margin: 0 20rpx;">-->
@@ -48,34 +54,63 @@
       </block>
       <block wx:if="{{active == '2'}}">
         <view class="listBox">
-          <view class="listItem radius shadow bg-white" wx:for="{{courses}}" wx:key="this" @tap="gotoDetaile({{item.type}},{{item.id}})">
-            <image src="{{ item.pic }}" mode="aspectFill"
-                   class="image flo_l"></image>
-            <view class="flo_l _titleV bold font_30 ellipsis_1">{{ item.name }}</view>
-            <view class="flo_l font_24 ellipsis_1 _member">
-              <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
-                     class="icon"></image>
-              <span class="color_0 font_24"><span class="white"> {{item.booking_count}} </span>/ {{item.total_count}}</span>
+          <block wx:if="{{courses.length > 0}}">
+            <view class="listItem radius shadow bg-white" wx:for="{{courses}}" wx:key="this" @tap="gotoDetaile({{item.type}},{{item.id}})">
+              <image src="{{ item.pic }}" mode="aspectFill"
+                     class="image flo_l"></image>
+              <view class="flo_l _titleV bold font_30 ellipsis_1">{{ item.name }}</view>
+              <view class="flo_l font_24 ellipsis_1 _member">
+                <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
+                       class="icon"></image>
+                <span class="color_0 font_24"><span class=""> {{item.booking_count}} </span>/ {{item.total_count}}</span>
+              </view>
+              <view class="btnStyle">
+                <button class="btn text-center font_26 btn-box bold flo_r color-theme"  hover-class="btn_active" >立即预约
+                </button>
+              </view>
             </view>
-            <view class="flo_l font_28 ellipsis_1 _price">
-              <image src="https://images.ufutx.com/202010/19/138118c117bf8d24abeef9cf16968b96.png" mode="widthFix"
-                     class="icon"></image>
-              <span class="color-red font_32 bold">{{item.price}}</span>
+          </block>
+          <block wx:else>
+            <view class="text-center">
+              <image src="https://images.ufutx.com/202012/10/3944b8b5da87402a6a70c98a05a9b7d2.png" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
             </view>
-            <view class="btnStyle">
-              <button class="btn text-center font_26 btn-box bold flo_r color-theme"  hover-class="btn_active" >立即购买
-              </button>
-            </view>
-          </view>
+          </block>
         </view>
       </block>
       <block wx:if="{{active == '3'}}">
+        <view class=" listBoxV2 wrapperV2">
+          <block wx:if="{{tickets.length > 0}}">
+            <view class="_bg text-center" wx:for="{{tickets}}" wx:key="this">
+              <view class="bold _priceText inline-block">
+                <view class="flo_l bold text-shadow text-yellow" style="margin-right: 12rpx;color: #dabb50;">￥<span class="text ">{{item.price}}</span></view>
+                <view class="flo_l font_28 bold text-left  color-theme" style="margin-top: 18rpx;width: 44%">{{item.name}}</view>
+                <view class="flo_l font_22 color-theme bold text-left" style="width: 44%">{{item.valid_days}}天有效</view>
+                <view class="btn-boxV2 inline-block font_26" @tap="payFn({{item.name}},{{item.id}})">立即购买</view>
+              </view>
+            </view>
+          </block>
+          <block wx:else>
+            <view class="text-center">
+              <image src="https://images.ufutx.com/202012/10/3944b8b5da87402a6a70c98a05a9b7d2.png" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
+            </view>
+          </block>
+        </view>
+      </block>
+      <block wx:if="{{active == '4'}}">
         <view class="listBoxV2">
-          <view class="listItem radius shadow bg-white" wx:for="{{coaches}}" wx:key="this">
-            <image src="{{item.photo}}" mode="aspectFill"
-                   class="image flo_l"></image>
-            <view class="flo_l bold font_30 ellipsis_1 color_0">{{item.name}}</view>
-          </view>
+          <block wx:if="{{coaches.length > 0}}">
+            <view class="listItem radius shadow bg-white" wx:for="{{coaches}}" wx:key="this">
+              <image src="{{item.photo}}" mode="aspectFill"
+                     class="image flo_l"></image>
+              <view class="flo_l bold font_30 ellipsis_1 color_0" style="width: 52vw;margin-top: 20rpx;">{{item.name}}</view>
+              <view class="flo_l  font_26 ellipsis_1 color_0" style="width: 52vw">{{ item.intro }}</view>
+            </view>
+          </block>
+          <block wx:else>
+            <view class="text-center">
+              <image src="https://images.ufutx.com/202012/10/3944b8b5da87402a6a70c98a05a9b7d2.png" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
+            </view>
+          </block>
         </view>
       </block>
     </view>
@@ -91,15 +126,16 @@ import ShareMessage from '../../mixins/ShareMessage'
 import NavBar from '../../components/NavBar'
 import Loading from '../../components/loading'
 import uploadImages from '../../components/uploadImages'
+import cuCustom from '../../components/cu-custom'
 
 export default class arenaDetaile extends wepy.page {
   mixins = [base, http, user, ShareMessage]
   config = {
-    navigationBarTitleText: '球场详情'
+    navigationBarTitleText: '门店详情'
     // navigationStyle: 'custom'
   }
 
-  components = {NavBar, Loading, uploadImages}
+  components = {NavBar, Loading, uploadImages, cuCustom}
   data = {
     loaded: false,
     init: false,
@@ -116,6 +152,7 @@ export default class arenaDetaile extends wepy.page {
     informValue: '',
     id: '',
     active: 1,
+    tickets: [],
     // 赞
     star: 3
   }
@@ -128,6 +165,10 @@ export default class arenaDetaile extends wepy.page {
 
   async onLoad(e) {
     this.id = e.id
+    if (e.active) {
+      this.active = e.active
+      this.$apply()
+    }
     setTimeout(() => {
       this.init = true
       this.$apply()
@@ -136,6 +177,8 @@ export default class arenaDetaile extends wepy.page {
 
   onShow() {
     this.upDate()
+    this.getTickets()
+    this.getCoaches()
     // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
   }
 
@@ -154,7 +197,6 @@ export default class arenaDetaile extends wepy.page {
       success: ({code, data}) => {
         vm.arenaData = data
         vm.courses = data.courses
-        vm.coaches = data.coaches
         vm.$apply()
         console.log(vm.coaches)
       },
@@ -165,8 +207,121 @@ export default class arenaDetaile extends wepy.page {
       }
     })
   }
+  getTickets() {
+    let vm = this
+    let url = `${service.host}/stores/${this.id}/course/tickets`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        console.log(data)
+        vm.tickets = data.course_tickets
+        vm.$apply()
+        if (vm.tickets.length > 3) {
+          for (let item of vm.tickets) {
+            item.price = item.price.split('.')[0]
+            console.log(item.price)
+          }
+        }
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+      }
+    })
+  }
+
+  getCoaches() {
+    let vm = this
+    let url = `${service.host}/stores/${this.id}/coaches`
+    vm.$get({
+      url: url
+    }, {
+      success: ({code, data}) => {
+        console.log(data)
+        vm.coaches = data.coaches
+        vm.$apply()
+        // for (let item of vm.tickets) {
+        //   item.price = item.price.split('.')[0]
+        //   console.log(item.price)
+        // }
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+      }
+    })
+  }// 购买券
+  pay(id) {
+    let data = {
+        pay_type: 'wechat'
+      },
+      vm = this
+    vm.$post({url: `${service.host}/pay/courses/tickets/${id}`, data}, {
+      success: ({code, data}) => {
+        vm.trade_no = data.trade_no
+        vm.$apply()
+        if (data.wx_pay.length == 0) {
+          vm.$post({url: `${service.host}/mark/order/pay/${vm.trade_no}`}, {
+            success: ({code, data}) => {
+              vm.$Toast_success('购买成功，赶紧去预约课程吧')
+              vm.active = 2
+              vm.$apply()
+            },
+            fail: ({code, data}) => {
+            },
+            complete: () => {
+            }
+          })
+        } else {
+          let wxconfig = data.wx_pay.config
+          wx.requestPayment({
+            timeStamp: wxconfig.timestamp, // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
+            nonceStr: wxconfig.nonceStr, // 支付签名随机串，不长于 32 位
+            package: wxconfig.package, // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=***）
+            signType: wxconfig.signType, // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
+            paySign: wxconfig.paySign, // 支付签名
+            success: function (res) {
+              vm.$post({url: `${service.host}/mark/order/pay/${vm.trade_no}`}, {
+                success: ({code, data}) => {
+                  vm.$Toast_success('购买成功，赶紧去预约课程吧')
+                  vm.active = 2
+                  vm.$apply()
+                },
+                fail: ({code, data}) => {
+                },
+                complete: () => {
+                }
+              })
+            },
+            fail: function (res) {
+              wx.showToast({
+                title: '已取消支付',
+                icon: 'none',
+                duration: 2000
+              })
+            }
+          })
+        }
+      }
+    })
+  }
 
   methods = {
+    payFn(name, id) {
+      let vm = this
+      wx.showModal({
+        title: '提示',
+        content: `是否确认购买 [${name}]?`,
+        success(res) {
+          if (res.confirm) {
+            vm.pay(id)
+          } else if (res.cancel) {
+            console.log('用户点击取消')
+          }
+        }
+      })
+    },
     gotoDetaile(type, id) {
       let vm = this,
         url = ''
@@ -240,28 +395,6 @@ export default class arenaDetaile extends wepy.page {
         vm = this
       vm.$showToast('评价成功！')
       vm.$gotoBack(1)
-      return
-      for (let item in data) {
-        if (!data[item]) {
-          return vm.$showToast('请输入评价内容！')
-        }
-      }
-      console.log(data)
-      vm.$post({url: `${service.host}/feedback`, data}, {
-        success: ({code, data}) => {
-          wx.showModal({
-            title: '反馈成功！',
-            content: '非常感谢您的反馈！我们将以最快速度处理您的反馈。',
-            success(res) {
-              if (res.confirm) {
-                vm.$gotoBack(1)
-              } else if (res.cancel) {
-                console.log('用户点击取消')
-              }
-            }
-          })
-        }
-      })
     }
   }
   events = {
@@ -310,14 +443,18 @@ page{
   }
   .listBox{
     margin: 12rpx 22rpx;
+    position: relative;
     .btnStyle{
       .btn-box{
         width: 29%;
         background: black;
         padding: 8rpx 0;
         border-radius: 62rpx;
-        margin-top: -68rpx;
+        //margin-top: -68rpx;
         margin-right: 12rpx;
+        position: absolute;
+        right: 12rpx;
+        bottom: 22rpx;
       }
     }
     ._titleV{
@@ -341,7 +478,7 @@ page{
     ._member{
       width: 62%;
       overflow: hidden;
-      margin: 32rpx 14rpx 0 14rpx;
+      margin: 2rpx 14rpx 0 14rpx;
       color: black;
       .icon{
         width: 20rpx;
@@ -357,6 +494,7 @@ page{
       border-radius: 22rpx;
       overflow: hidden;
       height: 200rpx;
+      //background: #f8b51e;
       background: #f8b51e;
       margin-bottom: 28rpx;
       .image{
@@ -368,8 +506,29 @@ page{
   }
   .listBoxV2{
     margin: 12rpx 22rpx;
-    .mark{
-
+    ._bg {
+      background-image: url("https://images.ufutx.com/202101/14/808131373c94c55da43ec91b70b123f1.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      width: 88vw;
+      height: 220rpx;
+      margin: 22rpx auto;
+      ._priceText{
+        width: 72%;
+        margin-top: 46rpx;
+        color: #dabb50;
+        position: relative;
+        .text{font-size: 80rpx;}
+        .btn-boxV2{
+          width: 166rpx;
+          background: black;
+          padding: 4rpx 18rpx;
+          border-radius: 32rpx;
+          position: absolute;
+          right: -50rpx;
+          bottom: 0;
+        }
+      }
     }
     .btnStyle{
       .btn-box{
@@ -377,7 +536,7 @@ page{
         background: black;
         padding: 8rpx 0;
         border-radius: 62rpx;
-        margin-top: -68rpx;
+        //margin-top: -68rpx;
         margin-right: 16rpx;
       }
     }
@@ -423,7 +582,7 @@ page{
       border-radius: 22rpx;
       overflow: hidden;
       height: 120rpx;
-      line-height: 120rpx;
+      line-height: 42rpx;
       background: #f8b51e;
       margin-bottom: 28rpx;
       .image{
@@ -444,6 +603,7 @@ page{
     ._title{
       margin-top: -12rpx;
       padding: 16rpx 32rpx;
+      background: #f8ca62;
       background: #f8b51e;
       ._time{
         overflow: hidden;
@@ -523,4 +683,9 @@ page{
     }
   }
 }
+/* 这是优惠券样式 */
+.wrapperV2 {
+
+}
+
 </style>

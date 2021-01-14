@@ -1,4 +1,5 @@
 <template>
+
   <view class="">
     <template is="mainUser" data="{{info}}"></template>
     <template is="list" data="{{list,active}}"></template>
@@ -7,7 +8,7 @@
   <view class="_userInfo radius shadow bg-white">
     <view class="_item bold"><view class="font_52 white">{{info.train_day_num}}</view><span>累计天数</span></view>
     <view class="_item"><image src="{{info.photo}}" mode="aspectFill" class="photo "></image></view>
-    <view class="_item bold"><view class="font_52 white">{{info.train_num}}</view><span>累计训练/次</span></view>
+    <view class="_item bold"><view class="font_52 white">{{info.train_num}}</view><span>累计预约/次</span></view>
   </view>
 </template>
   <template name="list">
@@ -249,6 +250,7 @@ page {
       border-radius: 22rpx;
       overflow: hidden;
       height: 200rpx;
+      background: #f8b51e;
       background: #f8b51e;
       margin-bottom: 24rpx;
       .image{

@@ -3,7 +3,7 @@
   <Loading :init.sync="init"></Loading>
   <view class="wrapper">
     <view class="_input">
-      <input type="text" placeholder="请输入标题" @input="typing('title')">
+      <input type="text" placeholder="请输入标题" @input="typing('title')" />
     </view>
     <view class="themes">
       <textarea class="textarea font_28 color-666 text-left" maxlength="240"  placeholder="请详细写下您的建议和感想吧！" @input="typing('informValue')" @blur="typing('informValue')"  adjust-position="true"  value="{{informValue}}" />

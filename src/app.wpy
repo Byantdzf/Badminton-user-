@@ -7,7 +7,6 @@ import UpdateManager from './mixins/UpdateManager'
 var ga = require('./ga.js')
 var GoogleAnalytics = ga.GoogleAnalytics
 var HitBuilders = ga.HitBuilders
-const socket = require('./utils/sockte')
 
 export default class extends wepy.app {
   //   lifecycle: {
@@ -82,7 +81,7 @@ export default class extends wepy.app {
       }
     ],
     window: {
-      navigationBarTitleText: '福恋',
+      navigationBarTitleText: '幻鹰羽毛球',
       navigationBarTextStyle: 'black',
       navigationBarBackgroundColor: '#f8b51e',
       backgroundColor: '#eaeaea',
@@ -120,9 +119,7 @@ export default class extends wepy.app {
       request: 10000,
       downloadFile: 10000
     },
-    debug: true,
-    'navigateToMiniProgramAppIdList': [ // 小程序跳转小程序的appid
-    ]
+    debug: true
   }
 
   globalData = {

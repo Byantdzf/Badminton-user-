@@ -17,7 +17,7 @@
             <image src="{{item.pic}}" mode="aspectFill"
                    class="image flo_l"></image>
             <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
-            <view class="flo_r _title font_24 ellipsis_1" wx:if="{{active == '1'}}">剩余次数：{{item.total_num - item.num}}次</view>
+<!--            <view class="flo_r _title font_24 ellipsis_1" wx:if="{{active == '1'}}">剩余次数：{{item.total_num - item.num}}次</view>-->
             <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
               <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                      class="icon"></image>
@@ -44,7 +44,7 @@
             <view class="flo_l _title bold font_30 ellipsis_1" style="max-width: 52%">{{ item.course.name }}</view>
 <!--            <view class="flo_r _title font_24 ellipsis_1">观看次数次数：{{item.course.view_num}}次</view>-->
             <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
-              观看次数次数：{{item.course.view_num}}次
+              观看次数：{{item.course.view_num}}次
             </view>
             <view class="btnStyle">
               <button class="btn text-center font_26 btn-box radius shadow bg-black margin-top send bold flo_r color-theme"  hover-class="btn_active"  >继续观看
@@ -228,7 +228,7 @@ export default class myCourses extends wepy.page {
       let url = '',
         type = `${this.active == 1 ? 'league' : 'online'}`
       if (type == 'league') {
-        url = `/pages/homePage/orderDetaile?id=${this.list[index].order_id}`
+        url = `/pages/homePage/taemDetaile?id=${this.list[index].course_id}`
       } else {
         url = `/pages/homePage/networkDetaile?id=${this.list[index].course.id}`
       }

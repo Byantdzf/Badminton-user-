@@ -42,10 +42,9 @@
   //  import { service } from '../config.js'
   import http from '../mixins/http'
   import base from '../mixins/base'
-  import address from '../mixins/address'
   //  import ShareMessage from '../mixins/ShareMessage'
   export default class cuCustom extends wepy.component {
-    mixins = [base, http, address]
+    mixins = [base, http]
     props = {
       bgColor: {
         type: String,

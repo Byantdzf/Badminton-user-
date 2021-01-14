@@ -7,10 +7,11 @@
 <!--    <template is="appraise" data="{{starMap,star}}"></template>-->
     <view class="height160"></view>
 <!--    has_course-->
-    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold" style="background: #fce1a2;" hover-class="btn_active"  @tap="cancelFn" wx:if="{{courseList.status == '已开始'}}">
-      已开始
-    </button>
-    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="saveFn" wx:else>
+<!--    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold" style="background: #fce1a2;" hover-class="btn_active"  @tap="cancelFn" wx:if="{{courseList.status == '已开始'}}">-->
+<!--      已开始-->
+<!--    </button>-->
+    <view class="hint white text-center font_26">还可预约 {{courseList.ticket_count}} 次</view>
+    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="saveFn" >
       立即预约
     </button>
   </view>
@@ -21,10 +22,9 @@
   </template>
   <template name="title">
     <view class="_title">
-      <view class="_name font_32 bold">{{courseList.name}}
-        <view class="_name font_36 bold flo_r color-red">￥{{courseList.price}}</view>
+      <view class="_name font_32 bold">{{courseList.name}} <span class="font_26">【门店 - 南山店】</span>
       </view>
-      <view class="_time ellipsis_1">
+      <view class="_time">
         <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                class="icon"></image>
         <span class="font_26">{{courseList.address}}</span>
@@ -32,26 +32,46 @@
       <view class="font_24 ellipsis_1 _member">
         <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
                class="icon"></image>
-        <span class="color_0 font_26"><span class="white">{{ courseList.schedule.booking_count || 0 }} </span>/ {{ courseList.schedule.num || 0 }}</span>
-        <view class="_name font_32 bold flo_r">{{courseList.distance}}m</view>
+        <span class="color_0 font_26"> {{ courseList.schedule.booking_count || 0 }} / {{ courseList.schedule.num || 0 }}</span>
+<!--        <view class="_name font_32 bold flo_r">{{courseList.distance}}m</view>-->
       </view>
     </view>
   </template>
   <template name="_detaile">
     <view class="_detaileStyle">
       <view class="arenaStyle">
-        <span class="_text font_30 bold color_0">课程详情</span>
+        <span class="_text font_30   {{active == '1'?'bold color_0':'color-666'}}" @tap="tabFn('1')">课程介绍</span>
+<!--        <span class='color-666 font_24'>|</span>-->
+<!--        <span class="_text font_30  {{active == '2'?'bold color_0':'color-666'}}" @tap="tabFn('2')">课表</span>-->
       </view>
+      <block wx:if="{{active == '1'}}">
+        <!--        <view style="margin: 0 20rpx;">-->
+        <!--          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">-->
+        <!--            <block wx:for="{{picList}}" wx:key="this">-->
+        <!--              <image src="{{item}}" mode="aspectFill" class="pic radius shadow bg-white"></image>-->
+        <!--            </block>-->
+        <!--          </scroll-view>-->
+        <!--          <view style="margin-top: 12rpx;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>-->
+        <!--        </view>-->
         <view style="margin: 0 20rpx;">
-<!--          <scroll-view class="scroll-view_H" scroll-x="true" style="width: 100%">-->
-<!--            <block wx:for="{{picList}}" wx:key="this">-->
-<!--              <image src="{{item}}" mode="aspectFill" class="pic radius shadow bg-white"></image>-->
-<!--            </block>-->
-<!--          </scroll-view>-->
-          <view style="margin-top: 12rpx;">
-            <rich-text nodes="{{courseList.detail}}"></rich-text>
-          </view>
+          <rich-text nodes="{{courseList.detail}}"></rich-text>
         </view>
+      </block>
+<!--      <block wx:else>-->
+<!--        <view class="tabBoxStyle text-center">-->
+<!--          <view class="_tr inline-block bold">课时</view>-->
+<!--          <view class="_trV inline-block bold">时间</view>-->
+<!--&lt;!&ndash;          <block>&ndash;&gt;-->
+<!--&lt;!&ndash;            <view class="_tr _td inline-block color-333 noBorder">{{schedule.name}}</view>&ndash;&gt;-->
+<!--&lt;!&ndash;            <view class="_trV _tdV inline-block color-666 noBorder">{{schedule.created_at}}</view>&ndash;&gt;-->
+<!--&lt;!&ndash;          </block>&ndash;&gt;-->
+<!--                    <block wx:for="{{4}}" wx:key="this">-->
+<!--                      <view class="_tr _td inline-block color-333 {{index == 3?'noBorder':''}}">第一节</view>-->
+<!--                      <view class="_trV _tdV inline-block color-666 {{index == 3?'noBorder':''}}">2020.09.26 15:00-18:00</view>-->
+<!--                    </block>-->
+
+<!--        </view>-->
+<!--      </block>-->
     </view>
 
   </template>
@@ -70,7 +90,7 @@ import uploadImages from '../../components/uploadImages'
 export default class taemDetaile extends wepy.page {
   mixins = [base, http, user, ShareMessage]
   config = {
-    navigationBarTitleText: '团课详情',
+    navigationBarTitleText: '课程详情',
     enablePullDownRefresh: true
     // navigationStyle: 'custom'
   }
@@ -208,7 +228,7 @@ export default class taemDetaile extends wepy.page {
       if (this.courseList.is_complete_info == 0) {
         wx.showModal({
           title: '提示！',
-          content: '购买前，请先完善个人信息',
+          content: '预约前，请先完善个人信息',
           success(res) {
             if (res.confirm) {
               vm.$goto('/pages/users/unmarri')
@@ -219,29 +239,21 @@ export default class taemDetaile extends wepy.page {
         })
         return
       }
-      // vm.$showToast('评价成功！')
-      vm.$goto(`/pages/homePage/order?id=${this.id}`)
-      // for (let item in data) {
-      //   if (!data[item]) {
-      //     return vm.$showToast('请输入评价内容！')
-      //   }
-      // }
-      // console.log(data)
-      // vm.$post({url: `${service.host}/feedback`, data}, {
-      //   success: ({code, data}) => {
-      //     wx.showModal({
-      //       title: '反馈成功！',
-      //       content: '非常感谢您的反馈！我们将以最快速度处理您的反馈。',
-      //       success(res) {
-      //         if (res.confirm) {
-      //           vm.$gotoBack(1)
-      //         } else if (res.cancel) {
-      //           console.log('用户点击取消')
-      //         }
-      //       }
-      //     })
-      //   }
-      // })
+      if (vm.courseList.ticket_count < 1) {
+        wx.showModal({
+          title: '提示！',
+          content: '请先购买该门店的预约券！',
+          success(res) {
+            if (res.confirm) {
+              vm.$redirectTo(`/pages/arenaPage/arenaDetaile?id=${vm.courseList.store_id}&active=3`)
+            } else if (res.cancel) {
+              console.log('用户点击取消')
+            }
+          }
+        })
+        return
+      }
+      vm.$goto(`/pages/homePage/orderSubscribe?id=${this.id}`)
     }
   }
   events = {
@@ -265,6 +277,19 @@ page{
     height: 0;
     color: transparent;
   }
+  .hint{
+    background-image: url("https://images.ufutx.com/202101/14/5c05981348f9ac159786c43db63bf51a.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 240rpx;
+    height: 100rpx;
+    line-height: 60rpx;
+    z-index: 9;
+    position: fixed;
+    right: 6%;
+    bottom: 90rpx;
+
+  }
   .btn-box{
     width: 68%;
     background: #f8b51e;
@@ -272,6 +297,7 @@ page{
     padding: 16rpx 0;
     margin: 42rpx auto;
     margin-bottom: 28rpx;
+    z-index: 8;
     letter-spacing: 8rpx;
     position: fixed;
     left: 16%;
@@ -304,14 +330,22 @@ page{
   .wrapper{
     .videoStyle{
       width: 100vw;
+      z-index: 9;
       .image{
         width: 100%;
       }
     }
     ._title{
-      margin-top: -12rpx;
       padding: 16rpx 32rpx;
       background: #f8b51e;
+      background: #f8b51e;
+      //background: #f3f3f3;
+      width: 92vw;
+      margin: auto;
+      margin-top: -42rpx;
+     position: relative;
+      border-radius: 22rpx;
+      box-shadow: 1rpx 1rpx 10rpx #e3e0e0;
       ._time{
         overflow: hidden;
         color: black;
@@ -401,6 +435,30 @@ page{
       width: 220rpx;
       background: #D92553;
     }
+  }
+}
+.tabBoxStyle{
+  margin: 22rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  ._tr{
+    width: 35%;
+    background: #f8b51e;
+    padding: 6rpx 0;
+    border-right: 1rpx solid #000;
+  }
+  ._trV,_tdV{
+    width: 65%;
+    background: #f8b51e;
+    padding: 6rpx 0;
+  }
+  ._td, ._tdV{
+    background: #f8cd6a;
+    border-bottom: 1rpx solid #2d2d2d;
+    padding: 16rpx 0;
+  }
+  .noBorder{
+    border-bottom: none;
   }
 }
 </style>
