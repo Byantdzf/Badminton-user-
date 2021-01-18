@@ -31,12 +31,26 @@
         <view class="_titleV flo_l">
           <span class="font_28 color_0">预约时间</span>
          </view>
-        <picker  range="{{dateList}}"  bindchange="dateChange" range-key="start_time">
+        <picker  range="{{dateList}}"  bindchange="dateChange" range-key="name">
           <image src="https://images.ufutx.com/202010/20/267ae6ff1cba531887957f23212a39a8.png" mode="aspectFill"
                  class="_icon flo_r"></image>
-          <span class="flo_r">{{ dateIndex?dateList[dateIndex].start_time:'请选择预约时间' }}</span>
+          <span class="flo_r">{{ dateIndex?dateList[dateIndex].name:'请选择预约时间' }}</span>
         </picker>
       </view>
+      <block wx:if="{{dateIndex}}">
+        <view class="payModeStyle radius shadow bg-white margin-top">
+          <view class="_titleV flo_l">
+            <span class="font_28 color_0">开始时间</span>
+          </view>
+          <span class="flo_r">{{ dateIndex?dateList[dateIndex].start_time:'请选择预约时间' }}</span>
+        </view>
+        <view class="payModeStyle radius shadow bg-white margin-top">
+          <view class="_titleV flo_l">
+            <span class="font_28 color_0">结束时间</span>
+          </view>
+          <span class="flo_r">{{ dateIndex?dateList[dateIndex].end_time:'请选择预约时间' }}</span>
+        </view>
+      </block>
       <view style="padding: 22rpx;" class="text-center color_0 font_24">温馨提示：预约成功后，课程开始前24小时内不能取消</view>
     </view>
   </template>
@@ -116,7 +130,7 @@ export default class OrderSubscribe extends wepy.page {
 
   upDate() { // 获取基本数据
     let vm = this
-    let url = `${service.host}/course/schedules/${vm.id}`
+    let url = `${service.host}/league/courses/${vm.id}`
     vm.$get({
       url: url
     }, {

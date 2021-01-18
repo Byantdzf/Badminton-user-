@@ -289,7 +289,7 @@ export default class arenaDetaile extends wepy.page {
             success: function (res) {
               vm.$post({url: `${service.host}/mark/order/pay/${vm.trade_no}`}, {
                 success: ({code, data}) => {
-                  vm.$Toast_success('购买成功，赶紧去预约课程吧')
+                  vm.$alert('提示', '购买成功，赶紧去预约课程吧')
                   vm.active = 2
                   vm.$apply()
                 },

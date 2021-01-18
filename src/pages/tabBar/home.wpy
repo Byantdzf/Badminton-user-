@@ -83,11 +83,11 @@
                    class="icon"></image>
             <span class="font_24">{{ item.store.city }} {{item.store.dist}} {{item.store.address}}</span>
           </view>
-          <view class="flo_l font_24 ellipsis_1 _price">
-            <image src="https://images.ufutx.com/202010/19/138118c117bf8d24abeef9cf16968b96.png" mode="widthFix"
-                   class="icon"></image>
-            <span class="color-red font_26">{{ item.price }}</span>
-          </view>
+<!--          <view class="flo_l font_24 ellipsis_1 _price">-->
+<!--            <image src="https://images.ufutx.com/202010/19/138118c117bf8d24abeef9cf16968b96.png" mode="widthFix"-->
+<!--                   class="icon"></image>-->
+<!--            <span class="color-red font_26">{{ item.price }}</span>-->
+<!--          </view>-->
           <view class="flo_l font_24 ellipsis_1 _member">
             <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
                    class="icon"></image>
@@ -98,8 +98,8 @@
                    class="icon"></image>
             <span class="white font_24">{{item.time}}</span>
           </view>
-          <view class="_btn text-center" wx:if="{{item.status == '已开始'}}">已开始</view>
-          <view class="_btn _btnA text-center color-theme" wx:else>预约</view>
+<!--          <view class="_btn text-center" wx:if="{{item.status == '已开始'}}">已开始</view>-->
+          <view class="_btn _btnA text-center color-theme" >立即预约</view>
         </view>
       </block>
       <block wx:else>
