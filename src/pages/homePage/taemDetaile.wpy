@@ -7,13 +7,18 @@
 <!--    <template is="appraise" data="{{starMap,star}}"></template>-->
     <view class="height160"></view>
 <!--    has_course-->
-<!--    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold" style="background: #fce1a2;" hover-class="btn_active"  @tap="cancelFn" wx:if="{{courseList.status == '已开始'}}">-->
-<!--      已开始-->
-<!--    </button>-->
-    <view class="hint white text-center font_26">还可预约 {{courseList.ticket_count}} 次</view>
-    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="saveFn" >
-      立即预约
-    </button>
+    <block wx:if="{{courseList.schedules.length>0}}">
+      <view class="hint white text-center font_26">还可预约 {{courseList.ticket_count || 0}} 次</view>
+      <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="saveFn" >
+        立即预约
+      </button>
+    </block>
+    <block wx:else>
+      <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold" style="background: #fce1a2;" hover-class="btn_active"  >
+        暂无可预约课时
+      </button>
+    </block>
+
   </view>
   <template name="video">
     <view class="videoStyle">
@@ -140,7 +145,7 @@ export default class taemDetaile extends wepy.page {
 
   upDate() { // 获取基本数据
     let vm = this
-    let url = `${service.host}/course/schedules/${vm.id}`
+    let url = `${service.host}/league/courses/${vm.id}`
     vm.$get({
       url: url
     }, {

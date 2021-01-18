@@ -59,11 +59,12 @@
               <image src="{{ item.pic }}" mode="aspectFill"
                      class="image flo_l"></image>
               <view class="flo_l _titleV bold font_30 ellipsis_1">{{ item.name }}</view>
-              <view class="flo_l font_24 ellipsis_1 _member">
-                <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
-                       class="icon"></image>
-                <span class="color_0 font_24"><span class=""> {{item.booking_count}} </span>/ {{item.total_count}}</span>
-              </view>
+              <view class="flo_l _titleV font_24 ellipsis_1">预约人数: {{ item.booking_count }} / {{item.total_count}}</view>
+<!--              <view class="flo_l font_24 ellipsis_1 _member">-->
+<!--                <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"-->
+<!--                       class="icon"></image>-->
+<!--                <span class="color_0 font_24"><span class=""> {{item.booking_count}} </span>/ {{item.total_count}}</span>-->
+<!--              </view>-->
               <view class="btnStyle">
                 <button class="btn text-center font_26 btn-box bold flo_r color-theme"  hover-class="btn_active" >立即预约
                 </button>
@@ -80,12 +81,17 @@
       <block wx:if="{{active == '3'}}">
         <view class=" listBoxV2 wrapperV2">
           <block wx:if="{{tickets.length > 0}}">
-            <view class="_bg text-center" wx:for="{{tickets}}" wx:key="this">
+            <view class="_bg text-center" wx:for="{{tickets}}" wx:key="this" @tap="payFn({{item.name}},{{item.id}})">
               <view class="bold _priceText inline-block">
-                <view class="flo_l bold text-shadow text-yellow" style="margin-right: 12rpx;color: #dabb50;">￥<span class="text ">{{item.price}}</span></view>
-                <view class="flo_l font_28 bold text-left  color-theme" style="margin-top: 18rpx;width: 44%">{{item.name}}</view>
-                <view class="flo_l font_22 color-theme bold text-left" style="width: 44%">{{item.valid_days}}天有效</view>
-                <view class="btn-boxV2 inline-block font_26" @tap="payFn({{item.name}},{{item.id}})">立即购买</view>
+                <view class="font_28 flo_l _text">{{item.name}}</view>
+                <view class="flo_l bold text-shadow text-white white font_30 _priceV2" >
+                  ￥<span class="text ">{{item.price}}</span>
+                  <span class="text "></span>
+                </view>
+                <view class="clearfloat"></view>
+                <view class="font_24 flo_l _text" style="margin-top: -22rpx;padding-left: 180rpx;">期限：{{item.valid_days}}天有效</view>
+                <view class="btn-boxV2 inline-block font_26 white _textP font_36 bold">副券</view>
+                <view class="btn-boxV2 inline-block font_26" >立即购买</view>
               </view>
             </view>
           </block>
@@ -507,27 +513,29 @@ page{
   .listBoxV2{
     margin: 12rpx 22rpx;
     ._bg {
-      background-image: url("https://images.ufutx.com/202101/14/808131373c94c55da43ec91b70b123f1.png");
+      background-image: url("https://images.ufutx.com/202101/18/fb459f47e9be17b8ce93b055785f0f78.png");
       background-size: contain;
       background-repeat: no-repeat;
-      width: 88vw;
+      width: 80vw;
       height: 220rpx;
       margin: 22rpx auto;
       ._priceText{
-        width: 72%;
-        margin-top: 46rpx;
-        color: #dabb50;
+        width: 88%;
+        margin-top: 22rpx;
+        color: #FFFFFF;
         position: relative;
+        ._text{margin-top: 1rpx}
+        ._priceV2{margin-top: 12rpx;margin-left: -22rpx;}
         .text{font-size: 80rpx;}
         .btn-boxV2{
-          width: 166rpx;
-          background: black;
-          padding: 4rpx 18rpx;
-          border-radius: 32rpx;
+          background: white;
+          padding: 2rpx 14rpx;
           position: absolute;
-          right: -50rpx;
-          bottom: 0;
+          right: -2rpx;
+          bottom: 10rpx;
+          color: #666666;
         }
+        ._textP{bottom: 88rpx;background: none;color: white;right: -2rpx;letter-spacing: 12rpx;}
       }
     }
     .btnStyle{
