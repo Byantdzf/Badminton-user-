@@ -27,7 +27,7 @@
   </template>
   <template name="title">
     <view class="_title">
-      <view class="_name font_32 bold">{{courseList.name}} <span class="font_26">【门店 - 南山店】</span>
+      <view class="_name font_32 bold">{{courseList.name}} <span class="font_26">【{{courseList.store.name}}】</span>
       </view>
       <view class="_time">
         <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"

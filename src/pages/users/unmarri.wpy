@@ -43,18 +43,18 @@
           <input type="text" placeholder="请输入次数" class="Inp font_28 text"  @blur="typing('sport_num')"  value="{{sport_num}}" cursor-spacing="50"/>
         </view>
       </view>
-      <view class="section list" style="border: none;">
+      <view class="section list" >
         <view class="picker">
           <span class="font_28 color_0">预期收获</span>
           <input type="text" placeholder="请输入预期收获" class="Inp font_28 text"  @blur="typing('expect')"  value="{{expect}}" cursor-spacing="50"/>
         </view>
       </view>
-<!--      <view class="section list" style="border: none;">-->
-<!--        <view class="picker">-->
-<!--          <span class="font_28 color_0">正在培训课程</span>-->
-<!--          <input type="text" placeholder="请输入培训名称" class="Inp font_28 text"  @blur="typing('course_name')"  value="{{course_name}}" cursor-spacing="50"/>-->
-<!--        </view>-->
-<!--      </view>-->
+      <view class="section list" style="border: none;">
+        <view class="picker">
+          <span class="font_28 color_0">正在培训课程</span>
+          <input type="text" placeholder="请输入培训名称" class="Inp font_28 text"  @blur="typing('course_name')"  value="{{course_name}}" cursor-spacing="50"/>
+        </view>
+      </view>
 <!--      <view class="height160"></view>-->
     </view>
     <view class="mainBtn">

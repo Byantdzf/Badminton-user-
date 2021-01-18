@@ -59,7 +59,7 @@
               <image src="{{ item.pic }}" mode="aspectFill"
                      class="image flo_l"></image>
               <view class="flo_l _titleV bold font_30 ellipsis_1">{{ item.name }}</view>
-              <view class="flo_l _titleV font_24 ellipsis_1">预约人数: {{ item.booking_count }} / {{item.total_count}}</view>
+              <view class="flo_l _titleV font_24 ellipsis_1">预约人数: {{ item.valid_bookings_count }} / {{item.valid_bookings_count}}</view>
 <!--              <view class="flo_l font_24 ellipsis_1 _member">-->
 <!--                <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"-->
 <!--                       class="icon"></image>-->
@@ -83,15 +83,14 @@
           <block wx:if="{{tickets.length > 0}}">
             <view class="_bg text-center" wx:for="{{tickets}}" wx:key="this" @tap="payFn({{item.name}},{{item.id}})">
               <view class="bold _priceText inline-block">
-                <view class="font_28 flo_l _text">{{item.name}}</view>
-                <view class="flo_l bold text-shadow text-white white font_30 _priceV2" >
+                <view class="font_28  _text text-left">{{item.name}}</view>
+                <view class=" bold text-shadow text-left text-white white font_30 _priceV2" >
                   ￥<span class="text ">{{item.price}}</span>
                   <span class="text "></span>
                 </view>
-                <view class="clearfloat"></view>
-                <view class="font_24 flo_l _text" style="margin-top: -22rpx;padding-left: 180rpx;">期限：{{item.valid_days}}天有效</view>
+                <view class="font_24 textV2" >期限：{{item.valid_days}}天有效</view>
                 <view class="btn-boxV2 inline-block font_26 white _textP font_36 bold">副券</view>
-                <view class="btn-boxV2 inline-block font_26" >立即购买</view>
+                <view class="btn-boxV2 inline-block font_24" >立即购买</view>
               </view>
             </view>
           </block>
@@ -157,7 +156,7 @@ export default class arenaDetaile extends wepy.page {
     arenaData: {},
     informValue: '',
     id: '',
-    active: 1,
+    active: 3,
     tickets: [],
     // 赞
     star: 3
@@ -519,23 +518,35 @@ page{
       width: 80vw;
       height: 220rpx;
       margin: 22rpx auto;
+      position: relative;
       ._priceText{
         width: 88%;
         margin-top: 22rpx;
         color: #FFFFFF;
-        position: relative;
-        ._text{margin-top: 1rpx}
-        ._priceV2{margin-top: 12rpx;margin-left: -22rpx;}
+
+        ._text{
+          width: 50%;
+        }
+        .textV2{
+          position: absolute;
+          right: 210rpx;
+          bottom: 40rpx;
+        }
+        ._priceV2{
+          margin-left: 28rpx;
+          width: 46%;
+          margin-top: -30rpx;
+        }
         .text{font-size: 80rpx;}
         .btn-boxV2{
           background: white;
           padding: 2rpx 14rpx;
           position: absolute;
-          right: -2rpx;
-          bottom: 10rpx;
-          color: #666666;
+          right: 30rpx;
+          top: 120rpx;
+          color: black;
         }
-        ._textP{bottom: 88rpx;background: none;color: white;right: -2rpx;letter-spacing: 12rpx;}
+        ._textP{top:44rpx;background: none;color: white;right: 20rpx;letter-spacing: 12rpx;}
       }
     }
     .btnStyle{
