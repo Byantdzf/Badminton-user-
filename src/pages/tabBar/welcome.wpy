@@ -122,22 +122,9 @@ export default class welcome extends wepy.page {
               wx.setStorageSync('type', data.user.type)
               that.type = data.user.type
               that.$apply()
-              if (that.type == 'marriage') {
-                this.$goto('/pages/marriedPage/home')
-              } else {
-                that.$gotoTab('/pages/tabBar/home')
-              }
-              // if (this.time == 0) {
-              //   setTimeout(() => {
-              //     if (that.type == 'marriage') {
-              //       this.$goto('/pages/marriedPage/home')
-              //     } else {
-              //       that.$gotoTab('/pages/tabBar/home')
-              //     }
-              //   }, 800)
-              // }
+              that.$gotoTab('/pages/tabBar/home')
             } else {
-              this.$redirectTo('/pages/userInfo/typeSelect')
+              this.$redirectTo('/pages/tabBar/login')
               that.hideBtn = true
               that.$apply()
             }
