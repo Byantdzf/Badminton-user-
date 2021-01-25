@@ -116,15 +116,6 @@
           <image src="{{item.pic}}" mode="aspectFill"
                  class="image flo_l"></image>
           <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
-          <!--        <view class="flo_l  ellipsis_1 _address">-->
-          <!--          <span class="font_24">简介：撒旦就卡了多久啦手机打开拉萨简单快乐了就打暑假快乐到家啊考虑到</span>-->
-          <!--        </view>-->
-          <!--        <view class="flo_l font_24 ellipsis_1 _time" style="margin-top: 22rpx;">-->
-          <!--          <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"-->
-          <!--                 class="icon"></image>-->
-          <!--          <span class="white font_24">18:00 - 22:00</span>-->
-          <!--        </view>-->
-          <!--        <view class="_btn text-center" wx:if="{{item == 0}}">已开始</view>-->
           <view class="_btn _btnA text-center color-theme">立即观看</view>
         </view>
       </block>
@@ -337,12 +328,8 @@ export default class home extends wepy.page {
     }, {
       success: ({code, data}) => {
         this.carousels = data.carousels
-        // this.carousels = [
-        //   {pic: 'https://images.ufutx.com/202012/11/d2a4d36cc1e8b9d3dfb557b0b01c7402.jpeg', path: 'https://www.baidu.com'},
-        //   {pic: 'https://images.ufutx.com/202012/11/14e5cdef31285ba610932a4ebcf2c8bd.jpeg', path: 'https://www.baidu.com'},
-        //   {pic: 'https://images.ufutx.com/202012/11/9b027150741f47bc83feb4fb7855dbae.jpeg', path: 'https://www.baidu.com'}
-        // ]
         this.$apply()
+        console.log(vm.courses, 'asaaa')
         if (!data.courses.data.length) {
           return console.log('没有更多了')
         }
@@ -357,7 +344,6 @@ export default class home extends wepy.page {
         }
         vm.page += 1
         vm.$apply()
-        console.log(vm.courses, 'asaaa')
       },
       fail: ({code, data}) => {
       },
@@ -438,9 +424,9 @@ export default class home extends wepy.page {
     bindRegionChange (e) {
       console.log('picker发送选择改变，携带值为', e.detail.value)
       this.region = e.detail.value
-      this.$apply()
       this.courses = []
       this.page = 1
+      this.$apply()
       this.upDate()
     },
     tabFnV2(val) {
@@ -457,6 +443,7 @@ export default class home extends wepy.page {
       vm.page = 1
       vm.type = val
       vm.$apply()
+      console.log(vm.courses, 'vm.courses ')
       vm.upDate()
     },
     gotoLink(link) {
@@ -487,11 +474,13 @@ export default class home extends wepy.page {
       this.$goto(url)
     },
     clickData(index) {
-      console.log(index)
+      this.courses = []
       for (let item of this.cycleList) {
         console.log(item)
         item.active = false
       }
+      console.log(index)
+      this.courses = []
       this.cycleList[index].active = true
       this.day = this.cycleList[index].date
       this.page = 1
