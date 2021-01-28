@@ -133,11 +133,24 @@ export default class feedback extends wepy.page {
     save() {
       let data = {
           content: this.informValue,
-          photos: this.informImages
+          rate: this.star
         },
         vm = this
-      vm.$showToast('评价成功！')
-      vm.$gotoBack(1)
+      vm.$post({
+        url: `${service.host}/evaluate/video/logs/${vm.id}`, data
+      }, {
+        success: ({code, data}) => {
+          vm.$showToast('提交成功')
+          setTimeout(() => {
+            vm.$gotoBack(1)
+          }, 800)
+        },
+        fail: ({code, data}) => {
+        },
+        complete: () => {
+          wx.hideLoading()
+        }
+      })
     }
   }
   events = {

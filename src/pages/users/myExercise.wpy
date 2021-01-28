@@ -225,7 +225,7 @@ export default class home extends wepy.page {
       if (vm.active == 1) {
         url = `/pages/users/clockVideoDetaile?id=${id}`
       } else {
-        url = '/pages/users/drillVideoDetaile'
+        url = `/pages/users/drillVideoDetaile?id=${id}`
       }
       this.$goto(url)
     },

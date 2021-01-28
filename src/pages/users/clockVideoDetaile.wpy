@@ -42,20 +42,20 @@
       <block wx:if="{{comments.length>0}}">
         <view class="_item" wx:for="{{comments}}" wx:key="this">
           <view class="_photo flo_l">
-            <image src="https://images.ufutx.com/202010/28/392ce20af613a5bb8d69091c050dfa56.jpeg" mode="aspectFill" class="image"></image>
+            <image src="{{item.user_photo}}" mode="aspectFill" class="image"></image>
           </view>
           <view class="_content flo_l">
             <view class="name bold color_0 font_32">
-              Mamba~
-              <view class="color-666 font_26 flo_r" style="margin-top: 12rpx;">2020-10-12 16:00</view>
+              {{item.user_name}}
+              <view class="color-666 font_26 flo_r" style="margin-top: 12rpx;"> {{item.updated_at}}</view>
             </view>
             <view class="starStyle">
-              <block wx:for="{{5}}" wx:key="this">
-                <image src="https://images.ufutx.com/202010/28/59f941406f910c7f615f77ca4303dbe0.png" mode="aspectFill" wx:if="{{item > star-1}}"></image>
+              <block wx:for="{{5}}" wx:key="this" wx:for-item="itemV2">
+                <image src="https://images.ufutx.com/202010/28/59f941406f910c7f615f77ca4303dbe0.png" mode="aspectFill" wx:if="{{itemV2 > item.rate-1}}"></image>
                 <image src="https://images.ufutx.com/202010/28/ec7ebf5c490e0c71883fcfc8f6829856.png" mode="aspectFill" wx:else></image>
               </block>
             </view>
-            <view>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>
+            <view> {{item.comment}}</view>
           </view>
         </view>
       </block>
@@ -92,6 +92,9 @@ export default class feedback extends wepy.page {
     name: '',
     informIndex: 0,
     informValue: '',
+    noMore: false,
+    loading: true,
+    page: 1,
     id: '',
     log: {},
     comments: [], // 评论
@@ -119,20 +122,43 @@ export default class feedback extends wepy.page {
   }
 
   onPullDownRefresh() {
+    this.page = 1
+    this.upDate()
   }
   onReachBottom() {
+    setTimeout(() => {
+      this.upDate()
+    }, 200)
   }
 
   upDate() {
-    let vm = this
+    let vm = this,
+      data = {
+        page: vm.page
+      }
     let url = `${service.host}/video/logs/${this.id}`
     vm.$get({
-      url: url
+      url: url, data
     }, {
       success: ({code, data}) => {
         vm.log = data.log
-        vm.comments = data.comments
+        data = data.comments
+        if (!data.data.length) {
+          return console.log('没有更多了')
+        }
+        if (vm.page == 1) {
+          vm.comments = data.data
+          vm.$apply()
+        } else {
+          data.data.map(function (item, index) {
+            vm.comments.push(item)
+            vm.$apply()
+          })
+        }
+        vm.noMore = true
+        vm.page += 1
         vm.$apply()
+        console.log(vm.comments, 'asaaa')
       },
       fail: ({code, data}) => {
       },

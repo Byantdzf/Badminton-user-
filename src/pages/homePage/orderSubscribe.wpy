@@ -19,13 +19,23 @@
                    class="icon"></image>
             <span class="font_24">{{ courseList.province}}{{ courseList.city}}{{ courseList.dist}}{{ courseList.address}}</span>
           </view>
-          <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
-            <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
-                   class="icon"></image>
-            <span class="font_24">{{ courseList.schedule.booking_count || 0 }} / {{ courseList.schedule.num || 0 }}</span>
-          </view>
+<!--          <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">-->
+<!--            <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"-->
+<!--                   class="icon"></image>-->
+<!--            <span class="font_24">{{ courseList.schedule.booking_count || 0 }} / {{ courseList.schedule.num || 0 }}</span>-->
+<!--          </view>-->
 <!--          <view class="flo_l _price bold red font_32">￥{{courseList.real_price || '0'}}</view>-->
         </radio-group>
+      </view>
+      <view class="listStyle radius shadow bg-white">
+        <view class="list">
+          <span class="font_28 color_0">姓名</span>
+          <input type="text" placeholder="请输入姓名" placeholder-class="color-666" class="Inp font_28 text"  @blur="typing('name')"  value="{{name}}" cursor-spacing="50"/>
+        </view>
+        <view class="list" style="border-bottom: none">
+          <span class="font_28 color_0">电话</span>
+          <input type="number" placeholder="请输入电话号码" placeholder-class="color-666" class="Inp font_28 text color-666"  @blur="typing('mobile')"  value="{{name}}" cursor-spacing="50"/>
+        </view>
       </view>
       <view class="payModeStyle radius shadow bg-white margin-top">
         <view class="_titleV flo_l">
@@ -234,11 +244,17 @@ export default class OrderSubscribe extends wepy.page {
       wx.navigateTo({url: url})
     },
     save() {
-      let vm = this
+      let vm = this,
+        data = {
+          booking_mobile: this.mobile,
+          booking_name: this.name
+        }
       console.log(this.index)
+      if (!this.name) return vm.$showToast('请填写姓名！')
+      if (!this.mobile) return vm.$showToast('请填写联系号码！')
       if (!this.index) return vm.$showToast('请选择预约时间！')
       let id = this.dateList[this.index].id
-      vm.$post({url: `${service.host}/booking/course/schedules/${id}`}, {
+      vm.$post({url: `${service.host}/booking/course/schedules/${id}`, data}, {
         success: ({code, data}) => {
           vm.$Toast_success('预约成功')
           setTimeout(() => {

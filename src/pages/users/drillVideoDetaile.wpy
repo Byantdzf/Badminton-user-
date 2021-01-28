@@ -1,61 +1,69 @@
 <template>
   <Loading :init.sync="init"></Loading>
   <view class="wrapper">
-    <template is="video"></template>
-    <template is="title"></template>
-    <template is="appraise" data="{{starMap,star}}"></template>
+    <template is="video" data="{{log}}"></template>
+    <template is="title" data="{{log}}"></template>
+    <template is="appraise" data="{{starMap,star,comments}}"></template>
     <!--    <template is="starChoose" data="{{starMap,star}}"></template> 评论-->
     <view class="height160"></view>
-    <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="goto('/pages/users/appraise')">评论教练
-    </button>
+        <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold"  hover-class="btn_active"  @tap="goto('/pages/users/appraise?id={{log.id}}')">评论教练
+        </button>
   </view>
+  <!--  http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400-->
   <template name="video">
     <view class="videoStyle">
       <video
-              id="myVideo"
-              src="http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400"
-              binderror="videoErrorCallback"
-              show-center-play-btn='{{false}}'
-              show-play-btn="{{true}}"
-              controls
-              objectFit='cover'
-              picture-in-picture-mode="{{['push', 'pop']}}"
-              bindenterpictureinpicture='bindVideoEnterPictureInPicture'
-              bindleavepictureinpicture='bindVideoLeavePictureInPicture'
+        id="myVideo"
+        src="{{log.play_url}}"
+        binderror="videoErrorCallback"
+        show-center-play-btn='{{false}}'
+        show-play-btn="{{true}}"
+        controls
+        objectFit='cover'
+        picture-in-picture-mode="{{['push', 'pop']}}"
+        bindenterpictureinpicture='bindVideoEnterPictureInPicture'
+        bindleavepictureinpicture='bindVideoLeavePictureInPicture'
       ></video>
-<!--      <image src="https://images.ufutx.com/202010/28/392ce20af613a5bb8d69091c050dfa56.jpeg" mode="widthFix" class="image"></image>-->
+      <!--      <image src="https://images.ufutx.com/202010/28/392ce20af613a5bb8d69091c050dfa56.jpeg" mode="widthFix" class="image"></image>-->
     </view>
   </template>
   <template name="title">
     <view class="_title">
-      <view class="_name font_32 bold">基础课程</view>
+      <view class="_name font_32 bold">{{ log.name }}</view>
       <view class="_time">
         <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"
                class="icon"></image>
-        2020年09月21日 18：00-19：30</view>
+        {{ log.created_at }}</view>
     </view>
   </template>
   <template name="appraise">
     <view class="appraiseStyle">
-      <span class="color_0">教练评价</span>
-      <view class="_item" wx:for="{{3}}" wx:key="this">
-        <view class="_photo flo_l">
-          <image src="https://images.ufutx.com/202010/28/392ce20af613a5bb8d69091c050dfa56.jpeg" mode="aspectFill" class="image"></image>
-        </view>
-        <view class="_content flo_l">
-          <view class="name bold color_0 font_32">
-            Mamba~
-            <view class="color-666 font_26 flo_r" style="margin-top: 12rpx;">2020-10-12 16:00</view>
+      <view class="color_0 " style="margin: 12rpx 0;">学员评价</view>
+      <block wx:if="{{comments.length>0}}">
+        <view class="_item" wx:for="{{comments}}" wx:key="this">
+          <view class="_photo flo_l">
+            <image src="{{item.user_photo}}" mode="aspectFill" class="image"></image>
           </view>
-          <view class="starStyle">
-            <block wx:for="{{5}}" wx:key="this">
-              <image src="https://images.ufutx.com/202010/28/59f941406f910c7f615f77ca4303dbe0.png" mode="aspectFill" wx:if="{{item > star-1}}"></image>
-              <image src="https://images.ufutx.com/202010/28/ec7ebf5c490e0c71883fcfc8f6829856.png" mode="aspectFill" wx:else></image>
-            </block>
+          <view class="_content flo_l">
+            <view class="name bold color_0 font_32">
+              {{item.user_name}}
+              <view class="color-666 font_26 flo_r" style="margin-top: 12rpx;"> {{item.updated_at}}</view>
+            </view>
+            <view class="starStyle">
+              <block wx:for="{{5}}" wx:key="this" wx:for-item="itemV2">
+                <image src="https://images.ufutx.com/202010/28/59f941406f910c7f615f77ca4303dbe0.png" mode="aspectFill" wx:if="{{itemV2 > item.rate-1}}"></image>
+                <image src="https://images.ufutx.com/202010/28/ec7ebf5c490e0c71883fcfc8f6829856.png" mode="aspectFill" wx:else></image>
+              </block>
+            </view>
+            <view> {{item.comment}}</view>
           </view>
-          <view>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet. Proin gravida dolor sit amet lacus accumsan et viverra justo commodo. Proin sodales pulvinar sic tempor. Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci, sed rhoncus pronin sapien nunc accuan eget.</view>
         </view>
-      </view>
+      </block>
+      <block wx:else>
+        <view class="text-center">
+          <image src="https://images.ufutx.com/202012/10/3944b8b5da87402a6a70c98a05a9b7d2.png" mode="aspectFit" style="width: 380rpx;margin-top: 32rpx;"></image>
+        </view>
+      </block>
     </view>
   </template>
 </template>
@@ -82,10 +90,14 @@ export default class feedback extends wepy.page {
     loaded: false,
     init: false,
     name: '',
-    informText: ['骚扰、广告', '形象照、资料虚假或假冒', '辱骂、攻击等', '色情、暴力等', '诈骗钱财', '其他'],
     informIndex: 0,
     informValue: '',
     id: '',
+    noMore: false,
+    loading: true,
+    page: 1,
+    log: {},
+    comments: [], // 评论
     // 赞
     star: 3
   }
@@ -105,14 +117,56 @@ export default class feedback extends wepy.page {
   }
 
   onShow() {
+    this.upDate()
     // this.$parent.getTracker(this.$root.$name, this.config.navigationBarTitleText)
   }
 
   onPullDownRefresh() {
+    this.page = 1
+    this.upDate()
   }
   onReachBottom() {
+    setTimeout(() => {
+      this.upDate()
+    }, 200)
   }
 
+  upDate() {
+    let vm = this,
+      data = {
+        page: vm.page
+      }
+    let url = `${service.host}/video/logs/${this.id}`
+    vm.$get({
+      url: url, data
+    }, {
+      success: ({code, data}) => {
+        vm.log = data.log
+        data = data.comments
+        if (!data.data.length) {
+          return console.log('没有更多了')
+        }
+        if (vm.page == 1) {
+          vm.comments = data.data
+          vm.$apply()
+        } else {
+          data.data.map(function (item, index) {
+            vm.comments.push(item)
+            vm.$apply()
+          })
+        }
+        vm.noMore = true
+        vm.page += 1
+        vm.$apply()
+        console.log(vm.comments, 'asaaa')
+      },
+      fail: ({code, data}) => {
+      },
+      complete: () => {
+        wx.hideLoading()
+      }
+    })
+  }
   methods = {
     goto(url) {
       let vm = this

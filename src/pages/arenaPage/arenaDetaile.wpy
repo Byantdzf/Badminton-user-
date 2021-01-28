@@ -156,7 +156,7 @@ export default class arenaDetaile extends wepy.page {
     arenaData: {},
     informValue: '',
     id: '',
-    active: 3,
+    active: 1,
     tickets: [],
     // 赞
     star: 3
