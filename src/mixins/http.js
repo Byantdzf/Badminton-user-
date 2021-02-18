@@ -165,7 +165,7 @@ export default class httpMixin extends wepy.mixin {
                   //   this.upDate()
                   // }
                   if (!data.token) {
-                    wx.navigateTo({url: '/pages/tabBar/login?from_openid=' + wx.getStorageSync('from_openid')})
+                    wx.redirectTo({url: '/pages/tabBar/login?from_openid=' + wx.getStorageSync('from_openid')})
                   } else {
                     if (route.includes('tabBar')) {
                       route = route.split('?')[0]

@@ -6,9 +6,9 @@
   </view>
   <template name="mainUser">
   <view class="_userInfo radius shadow bg-white">
-    <view class="_item bold"><view class="font_52 white">{{info.train_day_num}}</view><span>累计天数</span></view>
-    <view class="_item"><image src="{{info.photo}}" mode="aspectFill" class="photo "></image></view>
-    <view class="_item bold"><view class="font_52 white">{{info.train_num}}</view><span>累计预约/次</span></view>
+    <view class="_item bold"><view class="font_52 white">{{info.train_day_num || '0'}}</view><span>累计天数</span></view>
+    <view class="_item"><image src="{{info.photo || 'https://images.ufutx.com/202102/18/46a2675463e72f6bc8cadb33fea0d9fb.jpeg'}}" mode="aspectFill" class="photo "></image></view>
+    <view class="_item bold"><view class="font_52 white">{{info.train_num || '0'}}</view><span>累计预约/次</span></view>
   </view>
 </template>
   <template name="list">
@@ -64,6 +64,7 @@ export default class appoint extends wepy.page {
     info: {},
     city: '深圳',
     list: [],
+    token: '',
     active: 1,
     day: '10', // 累计天数
     num: '7',  // 累积训练次数
@@ -76,11 +77,27 @@ export default class appoint extends wepy.page {
   }
 
   onShow() {
-    this.upDate()
-    this.page = 1
-    this.list = []
-    this.$apply()
-    this.getList()
+    this.token = wx.getStorageSync('token')
+    if (this.token) {
+      this.upDate()
+      this.page = 1
+      this.list = []
+      this.$apply()
+      this.getList()
+    } else {
+      wx.showModal({
+        title: '提示',
+        content: '请点击先登录账号哦！',
+        success(res) {
+          if (res.confirm) {
+            wx.redirectTo({url: '/pages/tabBar/login?from_openid=' + wx.getStorageSync('from_openid')})
+          } else if (res.cancel) {
+            console.log('用户点击取消')
+          }
+        }
+      })
+    }
+
     // vm.$parent.getTracker(vm.$root.$name, vm.config.navigationBarTitleText)
   }
 

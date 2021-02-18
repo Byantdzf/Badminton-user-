@@ -7,10 +7,10 @@
       <image src="https://images.ufutx.com/202010/20/348a87abc5f0870ed4d0e6085fd032fb.png" mode="widthFix"></image>
     </view>
     <view class="mainUser  radius shadow bg-white" @tap="goto('/pages/users/userInfo')">
-      <image src="{{userInfo.photo}}" mode="aspectFill" class="_photo flo_l"></image>
-      <view class="font_32 bold _naim flo_l white">{{userInfo.name}}</view>
+      <image src="{{userInfo.photo || 'https://images.ufutx.com/202102/18/46a2675463e72f6bc8cadb33fea0d9fb.jpeg'}}" mode="aspectFill" class="_photo flo_l"></image>
+      <view class="font_32 bold _naim flo_l white">{{userInfo.name || '点击登录'}}</view>
       <view class="font_24  _code flo_l">
-        账号：{{ userInfo.mobile}}
+        账号：{{ userInfo.mobile || '---'}}
         <image src="https://images.ufutx.com/202010/20/267ae6ff1cba531887957f23212a39a8.png" mode="aspectFill"
                class="_icon flo_r"></image>
       </view>
@@ -61,6 +61,7 @@ export default class User extends wepy.page {
     list: [],
     city: '深圳',
     userInfo: {},
+    token: '',
     items: [
       { icon: 'https://images.ufutx.com/202101/13/27d400714be25fb21afea8fed8b747fa.png',
         title: '个人资料',
@@ -80,10 +81,14 @@ export default class User extends wepy.page {
   computed = {}
 
   async onLoad(e) {
+
   }
 
   onShow() {
-    this.upDate()
+    this.token = wx.getStorageSync('token')
+    if (this.token) {
+      this.upDate()
+    }
     // vm.$parent.getTracker(vm.$root.$name, vm.config.navigationBarTitleText)
   }
 
@@ -111,7 +116,21 @@ export default class User extends wepy.page {
   methods = {
     goto(url) {
       console.log(url)
-      this.$goto(url)
+      if (!this.token) {
+        wx.showModal({
+          title: '提示',
+          content: '请点击先登录账号哦！',
+          success(res) {
+            if (res.confirm) {
+              wx.redirectTo({url: '/pages/tabBar/login?from_openid=' + wx.getStorageSync('from_openid')})
+            } else if (res.cancel) {
+              console.log('用户点击取消')
+            }
+          }
+        })
+      } else {
+        this.$goto(url)
+      }
     }
   }
   events = {

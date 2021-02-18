@@ -53,8 +53,8 @@
       <view class="font_30 inline-block {{type == 'online'? 'tabBox bold font_32':''}}" @tap.stop="tabFn('online')">网课</view>
       <block wx:if="{{type == 'league'}}">
         <view class="dayStyle">
-          <view><view class="datItem inline-block color-666 font_24 text-center {{item.active?'activeText bold':''}}" wx:for="{{cycleList}}" wx:key="this" @tap="clickData({{index}})">{{item.dateTime}}</view></view>
-          <view class="text-center"><view class="datItem inline-block color-666 font_24  {{item.active?'activeBox bold radius shadow bg-white':''}}" @tap="clickData({{index}})" wx:for="{{cycleList}}" wx:key="this">{{item.week}}</view></view>
+          <view><view class="datItem inline-block color-666 font_24 text-center {{item.active?'activeText bold':''}}" wx:for="{{cycleList}}" wx:key="this" @tap="clickData({{index}})">{{item.month}}.{{item.date}}</view></view>
+          <view class="text-center"><view class="datItem inline-block color-666 font_24  {{item.active?'activeBox bold radius shadow bg-white':''}}" @tap="clickData({{index}})" wx:for="{{cycleList}}" wx:key="this">{{item.day}}</view></view>
         </view>
         <view class="text-center color-theme arenaStyle">------  <span style="color: black">预约课程</span> ------</view>
       </block>
@@ -188,18 +188,16 @@ export default class home extends wepy.page {
     this.myLong = wx.getStorageSync('myLong')
     this.myLat = wx.getStorageSync('myLat')
     this.$apply()
-    this.getDate()
+    // this.getDate()
     var that = this
     var arr = []
     for (let i = 0; i < 7; i++) {
       arr.push(this.dealTimeV2(i))
     }
-    arr[0].date = '今天'     // 格式化当前日期为 '今天'
-    arr[0].day = ''
-    // this.cycleList = arr            // 赋值给data
-    // this.$apply()
-    // console.log(this.cycleList)
-    console.log(arr)
+    arr[0].active = true
+    this.cycleList = arr            // 赋值给data
+    this.$apply()
+    console.log(this.cycleList)
     this.getRules()
     this.upDate()
   }
@@ -241,66 +239,66 @@ export default class home extends wepy.page {
   timeFormat(param) {
     return param < 10 ? '0' + param : param
   }
-
-  dealTime(dayNum, dat) {
-    // 处理时间的方法
-    if (dayNum == '0') {
-      dayNum = 7
-    }
-    var uom = new Date(), dateStr = '', fday = ''
-    fday = dat.substring(6, 8)
-    uom.setYear(dat.substring(0, 4))
-    uom.setMonth(parseInt(dat.substring(4, 6)) - 1)
-    uom.setDate(fday)
-    if (uom.getDay() == 0) {
-      uom.setDate(uom.getDate() - (7 - dayNum))
-    } else {
-      uom.setDate(uom.getDate() - (uom.getDay() - dayNum))
-    }
-    var mon = (uom.getMonth() + 1) + ''
-    if (mon.length != 2) {
-      mon = '0' + mon
-    }
-    var day = uom.getDate() + ''
-    if (day.length != 2) {
-      day = '0' + day
-    }
-    dateStr = '' + uom.getFullYear() + mon + day
-    console.log(dateStr, 'dateStr = \'\' + uom.getFullYear() + mon + day')
-    let dateObj = {
-      date: `${uom.getFullYear()}-${mon}-${day}`,
-      dateTime: `${mon}.${day}`,
-      week: `周${this.chnNumChar[dayNum]}`,
-      active: this.searchTime == dateStr ? true : false
-    }
-    console.log(dateObj, 'asssearchTime', this.searchTime, dateStr)
-    this.cycleList.push(dateObj)
-    return dateStr
-  }
-
-  getDate() {
-    var now = new Date()
-    var year = now.getFullYear()       // 年
-    var month = now.getMonth() + 1     // 月
-    var day = now.getDate()            // 日
-    var clock = year + '-'
-    if (month < 10) { clock += '0' }
-    clock += month + '-'
-    if (day < 10) { clock += '0' }
-    clock += day
-    console.log(clock.split('-').join(''), 'clock')
-    let date = {}
-    this.day = clock
-    this.searchTime = clock.split('-').join('')
-    date.mon = '周一 - ' + (this.dealTime(1, this.searchTime))
-    date.tue = '周二 - ' + (this.dealTime(2, this.searchTime))
-    date.wed = '周三 - ' + (this.dealTime(3, this.searchTime))
-    date.thu = '周四 - ' + (this.dealTime(4, this.searchTime))
-    date.fri = '周五 - ' + (this.dealTime(5, this.searchTime))
-    date.sat = '周六 - ' + (this.dealTime(6, this.searchTime))
-    date.sun = '周日 - ' + (this.dealTime(0, this.searchTime))
-    console.log(date)
-  }
+  //
+  // dealTime(dayNum, dat) {
+  //   // 处理时间的方法
+  //   if (dayNum == '0') {
+  //     dayNum = 7
+  //   }
+  //   var uom = new Date(), dateStr = '', fday = ''
+  //   fday = dat.substring(6, 8)
+  //   uom.setYear(dat.substring(0, 4))
+  //   uom.setMonth(parseInt(dat.substring(4, 6)) - 1)
+  //   uom.setDate(fday)
+  //   if (uom.getDay() == 0) {
+  //     uom.setDate(uom.getDate() - (7 - dayNum))
+  //   } else {
+  //     uom.setDate(uom.getDate() - (uom.getDay() - dayNum))
+  //   }
+  //   var mon = (uom.getMonth() + 1) + ''
+  //   if (mon.length != 2) {
+  //     mon = '0' + mon
+  //   }
+  //   var day = uom.getDate() + ''
+  //   if (day.length != 2) {
+  //     day = '0' + day
+  //   }
+  //   dateStr = '' + uom.getFullYear() + mon + day
+  //   console.log(dateStr, 'dateStr = \'\' + uom.getFullYear() + mon + day')
+  //   let dateObj = {
+  //     date: `${uom.getFullYear()}-${mon}-${day}`,
+  //     dateTime: `${mon}.${day}`,
+  //     week: `周${this.chnNumChar[dayNum]}`,
+  //     active: this.searchTime == dateStr ? true : false
+  //   }
+  //   console.log(dateObj, 'asssearchTime', this.searchTime, dateStr)
+  //   this.cycleList.push(dateObj)
+  //   return dateStr
+  // }
+  //
+  // getDate() {
+  //   var now = new Date()
+  //   var year = now.getFullYear()       // 年
+  //   var month = now.getMonth() + 1     // 月
+  //   var day = now.getDate()            // 日
+  //   var clock = year + '-'
+  //   if (month < 10) { clock += '0' }
+  //   clock += month + '-'
+  //   if (day < 10) { clock += '0' }
+  //   clock += day
+  //   console.log(clock.split('-').join(''), 'clock')
+  //   let date = {}
+  //   this.day = clock
+  //   this.searchTime = clock.split('-').join('')
+  //   date.mon = '周一 - ' + (this.dealTime(1, this.searchTime))
+  //   date.tue = '周二 - ' + (this.dealTime(2, this.searchTime))
+  //   date.wed = '周三 - ' + (this.dealTime(3, this.searchTime))
+  //   date.thu = '周四 - ' + (this.dealTime(4, this.searchTime))
+  //   date.fri = '周五 - ' + (this.dealTime(5, this.searchTime))
+  //   date.sat = '周六 - ' + (this.dealTime(6, this.searchTime))
+  //   date.sun = '周日 - ' + (this.dealTime(0, this.searchTime))
+  //   console.log(date)
+  // }
   // 处理未来七天的函数
   dealTimeV2 (num) {     // num：未来天数
     var time = new Date()     // 获取当前时间日期
@@ -311,9 +309,9 @@ export default class home extends wepy.page {
       month = '0' + month
     }
     var day = time.getDay()   //  获取星期
-    // if (date.length != 2) {
-    //   date = '0' + date
-    // }
+    if (date.toString().length != 2) {
+      date = '0' + date
+    }
     switch (day) {             //  格式化
       case 0: day = '周日'
         break
@@ -332,10 +330,11 @@ export default class home extends wepy.page {
     }
     var obj = {
       dayV2: `${year}-${month}-${date}`,
-      date: date,
+      date: date.toString(),
       day: day,
       month: month,
-      year: year
+      active: false,
+      year: year.toString()
     }
     return obj      // 返回对象
   }
@@ -365,7 +364,7 @@ export default class home extends wepy.page {
         city: vm.region[1],
         latitude: vm.myLat || '22.519517',
         longitude: vm.myLong || '113.920928',
-        date: vm.day
+        date: vm.day ? vm.day : vm.cycleList[0].dayV2
       }
     // if (!vm.myLat || !vm.myLon) {
     //   vm.modalName = 'Modal'
@@ -532,7 +531,7 @@ export default class home extends wepy.page {
       console.log(index)
       this.courses = []
       this.cycleList[index].active = true
-      this.day = this.cycleList[index].date
+      this.day = this.cycleList[index].dayV2
       this.page = 1
       this.$apply()
       this.upDate()

@@ -24,7 +24,7 @@
               <span class="font_24">{{ item.address }}</span>
             </view>
             <view class="btnStyle">
-              <view class="flo_l _price bold color-red font_32">￥{{item.price}}</view>
+<!--              <view class="flo_l _price bold color-red font_32">￥{{item.price}}</view>-->
               <block wx:if="{{item.is_booking == '1'}}">
                 <view class="font_28 flo_r color-333 bold" style="margin: 22rpx 32rpx;">已预约</view>
               </block>

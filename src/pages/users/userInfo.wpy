@@ -55,8 +55,8 @@
           <span class="font_28 color_0">我的附属合同</span>
           <view class="flo_r">
 <!--            <image src="https://ossweb-img.qq.com/images/lol/web201310/skin/big84000.jpg" mode="aspectFill" class="_photo flo_l"></image>-->
-            <block wx:if="{{userInfo.profilecontract}}">
-              <span class="font_28 text color-theme text-shadow text-black" @tap="showPic('https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3180087369,3620960084&fm=26&gp=0.jpg')">点击查看</span>
+            <block wx:if="{{userInfo.contract}}">
+              <span class="font_28 text color-theme text-shadow text-black" @tap="showPic({{userInfo.contract}})">点击查看</span>
             </block>
             <block wx:else>
               <span class="font_28 text">未上传</span>

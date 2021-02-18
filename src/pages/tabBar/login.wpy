@@ -5,15 +5,16 @@
       <image src="https://images.ufutx.com/202012/10/aa5e5f9d8978aea4c64d3644318466ec.jpeg" mode="aspectFill"
              class="logoPic radius shadow bg-gray"></image>
     </view>
-    <view class="mobile animation-slide-bottom">
+    <view class="mobile animation-slide-bottom" wx:if="{{mobile}}">
       <image src="https://images.ufutx.com/202011/12/b8e7997ac2ff19757a56a72f282abc28.png" mode="aspectFit" class="iphone flo_l"></image>
-      <input type="number" placeholder="请点击获取手机号" class="Inp font_28 text flo_l bold color-333" disabled  @input="typing('mobile')"   value="{{mobile}}" />
+      <input type="number" placeholder="请点击获取手机号" class="Inp font_28 text flo_l bold color-333" disabled  @input="typing('mobile')"   value="{{mobile}}"  />
     </view>
     <view class="clearfloat"></view>
-      <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold animation-slide-bottom"  hover-class="btn_active" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" wx:if="{{!mobile}}" >获取手机号
+      <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold animation-slide-bottom"  hover-class="btn_active" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" wx:if="{{!mobile}}" >点击获取手机号
       </button>
       <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold animation-slide-bottom"  hover-class="btn_active"  open-type="getUserInfo" @getuserinfo="getuserinfo()" wx:else>下一步
       </button>
+    <view class="font_26 color-666 text-center" @tap="gotoTap()">随便看看</view>
   </view>
 </template>
 <script>
@@ -101,6 +102,9 @@ export default class login extends wepy.page {
   }
 
   methods = {
+    gotoTap() {
+      this.$gotoTab('/pages/tabBar/home')
+    },
     getuserinfo(type, e) {
       let vm = this
       vm.$showLoading('加载中')
