@@ -59,7 +59,7 @@
               <image src="{{ item.pic }}" mode="aspectFill"
                      class="image flo_l"></image>
               <view class="flo_l _titleV bold font_30 ellipsis_1">{{ item.name }}</view>
-              <view class="flo_l _titleV font_24 ellipsis_1">预约人数: {{ item.valid_bookings_count }} / {{item.valid_bookings_count}}</view>
+              <view class="flo_l _titleV font_24 ellipsis_1">预约人数: {{ item.valid_bookings_count }} / {{item.total_bookings_num}}</view>
 <!--              <view class="flo_l font_24 ellipsis_1 _member">-->
 <!--                <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"-->
 <!--                       class="icon"></image>-->

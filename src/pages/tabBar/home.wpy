@@ -50,7 +50,7 @@
   <template name="cycle">
     <view class="cycleStyle">
       <view class="font_30 inline-block tabStyle {{type == 'league'? 'tabBox bold font_32':''}}" @tap.stop="tabFn('league')">团课</view>
-      <view class="font_30 inline-block {{type == 'online'? 'tabBox bold font_32':''}}" @tap.stop="tabFn('online')">网课</view>
+<!--      <view class="font_30 inline-block {{type == 'online'? 'tabBox bold font_32':''}}" @tap.stop="tabFn('online')">网课</view>-->
       <block wx:if="{{type == 'league'}}">
         <view class="dayStyle">
           <view><view class="datItem inline-block color-666 font_24 text-center {{item.active?'activeText bold':''}}" wx:for="{{cycleList}}" wx:key="this" @tap="clickData({{index}})">{{item.month}}.{{item.date}}</view></view>

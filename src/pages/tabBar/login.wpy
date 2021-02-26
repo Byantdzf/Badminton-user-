@@ -14,7 +14,7 @@
       </button>
       <button class="btn text-center font_30 btn-box radius shadow bg-blue margin-top send bold animation-slide-bottom"  hover-class="btn_active"  open-type="getUserInfo" @getuserinfo="getuserinfo()" wx:else>下一步
       </button>
-    <view class="font_26 color-666 text-center" @tap="gotoTap()">随便看看</view>
+    <view class="font_26 color-666 text-center" @tap="gotoTap()">先不登录</view>
   </view>
 </template>
 <script>
