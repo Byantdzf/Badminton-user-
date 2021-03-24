@@ -19,12 +19,12 @@
   <template name="title">
     <view class="_title">
       <view class="_name font_32 bold">{{ arenaData.name }}
-        <view class="_name font_32 bold flo_r">{{arenaData.distance}}m</view>
+        <view class="_name font_32 bold flo_r">{{arenaData.distance}}</view>
       </view>
-      <view class="_time">
+      <view class="_time" @tap="getlocation">
         <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                class="icon"></image>
-        <span class="font_26">{{arenaData.city}} {{arenaData.dist}} {{arenaData.address}}</span>
+        <span class="font_26" >{{arenaData.address}}</span>
       </view>
     </view>
   </template>
@@ -85,7 +85,7 @@
               <view class="bold _priceText inline-block">
                 <view class="font_28  _text text-left">{{item.name}}</view>
                 <view class=" bold text-shadow text-left text-white white font_30 _priceV2" >
-                  ￥<span class="text ">{{item.price}}</span>
+                  ￥<span class="text  text-shadow text-white">{{item.price}}</span>
                   <span class="text "></span>
                 </view>
                 <view class="font_24 textV2" >期限：{{item.valid_days}}天有效</view>
@@ -157,6 +157,8 @@ export default class arenaDetaile extends wepy.page {
     informValue: '',
     id: '',
     active: 1,
+    myLat: '',
+    myLong: '',
     tickets: [],
     // 赞
     star: 3
@@ -178,6 +180,9 @@ export default class arenaDetaile extends wepy.page {
       this.init = true
       this.$apply()
     }, 500)
+    this.myLong = wx.getStorageSync('myLong')
+    this.myLat = wx.getStorageSync('myLat')
+    this.$apply()
   }
 
   onShow() {
@@ -193,11 +198,15 @@ export default class arenaDetaile extends wepy.page {
   onReachBottom() {
   }
   upDate() {
-    let vm = this
+    let vm = this,
+      data = {
+        latitude: vm.myLat || '22.519517',
+        longitude: vm.myLong || '113.920928'
+      }
     vm.$showLoading('加载中...')
     let url = `${service.host}/stores/${this.id}`
     vm.$get({
-      url: url
+      url: url, data
     }, {
       success: ({code, data}) => {
         vm.arenaData = data
@@ -313,6 +322,17 @@ export default class arenaDetaile extends wepy.page {
   }
 
   methods = {
+    getlocation() {
+      let that = this,
+        latitude = Number(that.arenaData.latitude),
+        longitude = Number(that.arenaData.longitude)
+      console.log(latitude, longitude)
+      wx.openLocation({
+        latitude,
+        longitude,
+        scale: 18
+      })
+    },
     payFn(name, id) {
       let vm = this
       wx.showModal({
@@ -533,11 +553,11 @@ page{
           bottom: 40rpx;
         }
         ._priceV2{
-          margin-left: 28rpx;
+          margin-left: -18rpx;
           width: 46%;
-          margin-top: -30rpx;
+          margin-top: -6rpx;
         }
-        .text{font-size: 80rpx;}
+        .text{font-size: 50rpx;}
         .btn-boxV2{
           background: white;
           padding: 2rpx 14rpx;

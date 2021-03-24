@@ -32,12 +32,12 @@
       <view class="_time">
         <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                class="icon"></image>
-        <span class="font_26">{{courseList.address}}</span>
+        <span class="font_26" @tap="getlocation">{{courseList.address}}</span>
       </view>
       <view class="font_24 ellipsis_1 _member">
         <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
                class="icon"></image>
-        <span class="color_0 font_26"> {{ courseList.schedule.booking_count || 0 }} / {{ courseList.schedule.num || 0 }}</span>
+        <span class="color_0 font_26"> {{ courseList.booking_count || 0 }} / {{ courseList.schedule.num || 0 }}</span>
 <!--        <view class="_name font_32 bold flo_r">{{courseList.distance}}m</view>-->
       </view>
     </view>
@@ -163,6 +163,16 @@ export default class taemDetaile extends wepy.page {
   }
 
   methods = {
+    getlocation() {
+      let that = this,
+        latitude = Number(that.courseList.latitude),
+        longitude = Number(that.courseList.longitude)
+      wx.openLocation({
+        latitude,
+        longitude,
+        scale: 18
+      })
+    },
     tabFn(val) {
       let vm = this
       vm.$showLoading('加载中...')

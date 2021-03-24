@@ -91,7 +91,7 @@
           <view class="flo_l font_24 ellipsis_1 _member">
             <image src="https://images.ufutx.com/202010/19/bdcf9d7087ad50f37e7520d6d8259d2d.png" mode="widthFix"
                    class="icon"></image>
-            <span class="color_0 font_24"><span class="white">{{ item.schedule.booking_count || 0 }} </span>/ {{ item.schedule.num || 0 }}</span>
+            <span class="color_0 font_24">{{ item.booking_count || 0 }} / {{ item.schedule.num || 0 }}</span>
           </view>
           <view class="flo_l font_24 ellipsis_1 _time">
             <image src="https://images.ufutx.com/202010/19/3e1a94bb6228e9f61b4b50825f61f7ec.png" mode="widthFix"
