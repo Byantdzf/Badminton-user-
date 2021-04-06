@@ -28,6 +28,9 @@
                    class="icon"></image>
             <span class="font_24">{{item.updated_at}}</span>
           </view>
+          <view class="flo_l _address" style="line-height: 30rpx;margin-top: -4rpx;margin-bottom: 4rpx;">
+            <span class="font_24"><span class="bold">上课时间：</span>{{item.start_time}} ~ {{item.end_time}}</span>
+          </view>
           <view class="flo_l  ellipsis_1 _address" style="margin-top: -10rpx;">
             <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                    class="icon"></image>

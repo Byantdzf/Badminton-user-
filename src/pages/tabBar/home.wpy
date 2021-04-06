@@ -77,7 +77,7 @@
           <image src="{{item.pic}}" mode="aspectFill"
                  class="image flo_l"></image>
           <view class="flo_l _title bold font_30 ellipsis_1">{{ item.name }}</view>
-          <view class="flo_r _distance font_28 ellipsis_1 text-right">{{item.distance}}m</view>
+          <view class="flo_r _distance font_28 ellipsis_1 text-right">{{item.distance}}</view>
           <view class="flo_l  ellipsis_1 _address">
             <image src="https://images.ufutx.com/202010/19/f998aa1bb8a68f48d6119476fdc78ea1.png" mode="widthFix"
                    class="icon"></image>
