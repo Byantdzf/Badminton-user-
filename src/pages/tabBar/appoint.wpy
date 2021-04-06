@@ -8,7 +8,7 @@
   <view class="_userInfo radius shadow bg-white">
     <view class="_item bold"><view class="font_52 white">{{info.train_day_num || '0'}}</view><span>累计天数</span></view>
     <view class="_item"><image src="{{info.photo || 'https://images.ufutx.com/202102/18/46a2675463e72f6bc8cadb33fea0d9fb.jpeg'}}" mode="aspectFill" class="photo "></image></view>
-    <view class="_item bold"><view class="font_52 white">{{info.train_num || '0'}}</view><span>累计预约/次</span></view>
+    <view class="_item bold"><view class="font_52 white">{{info.booking_num || '0'}}</view><span>累计预约/次</span></view>
   </view>
 </template>
   <template name="list">
